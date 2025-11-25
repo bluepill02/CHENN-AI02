@@ -39,7 +39,7 @@ export function MainApp() {
       <ExternalDataProvider>
         <div className="w-full max-w-md mx-auto bg-gradient-to-br from-orange-50 via-yellow-25 to-orange-25 min-h-screen flex flex-col relative overflow-hidden">
           {/* Main content area */}
-          <div
+          <main
             className="flex-1 overflow-y-auto relative z-10"
             onScroll={(e) => {
               const target = e.currentTarget as HTMLDivElement;
@@ -66,7 +66,7 @@ export function MainApp() {
             }}
           >
             {renderScreen()}
-          </div>
+          </main>
 
           {/* Live Data Widget - Floating */}
           <div className="live-widget-wrapper fixed bottom-20 right-4 z-30 transition-all duration-300 ease-in-out w-auto">

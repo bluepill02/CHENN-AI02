@@ -347,7 +347,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
       {/* Community posts */}
       <div className="px-6 space-y-4 pb-20">
         {loading ? (
-          <div className="flex justify-center py-10">
+          <div className="flex justify-center py-10" data-testid="loading-spinner">
             <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
           </div>
         ) : filteredPosts.length === 0 ? (
@@ -356,7 +356,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
           </div>
         ) : (
           filteredPosts.map((post) => (
-            <Card key={post.id} className="p-4 bg-[#FFFFF0] backdrop-blur-md border-2 border-[#E1AD01]/60 shadow-lg shadow-orange-200/80 rounded-xl">
+            <Card key={post.id} data-testid="community-post" className="p-4 bg-[#FFFFF0] backdrop-blur-md border-2 border-[#E1AD01]/60 shadow-lg shadow-orange-200/80 rounded-xl">
               {/* Post header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-start gap-3 flex-1 min-w-0">

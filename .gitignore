@@ -18,6 +18,7 @@ keys
 # Test files
 test-*.mjs
 test-*.ts
+test-results/
 
 # Build output
 dist/

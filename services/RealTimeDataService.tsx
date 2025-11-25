@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Post, PostService } from './PostService';
+import { AiService } from './AiService';
 
 export interface LivePost {
   id: string;
@@ -53,57 +55,6 @@ const RealTimeDataContext = createContext<RealTimeDataContextType | undefined>(u
 interface RealTimeDataProviderProps {
   children: ReactNode;
 }
-
-// Simulated Chennai locations
-const chennaiLocations = [
-  { area: 'T. Nagar', areaEn: 'T. Nagar', pincode: '600017' },
-  { area: 'மயிலாப்பூர்', areaEn: 'Mylapore', pincode: '600004' },
-  { area: 'அடையார்', areaEn: 'Adyar', pincode: '600020' },
-  { area: 'அண்ணா நகர்', areaEn: 'Anna Nagar', pincode: '600040' },
-  { area: 'வேளச்சேரி', areaEn: 'Velachery', pincode: '600042' }
-];
-
-// Sample community content for simulation
-const sampleContents = {
-  ta: [
-    'நம்ம area-ல கிட்ட traffic jam ஆச்சு, alternate route use பண்ணுங்க',
-    'புதிய coffee shop திறந்திருக்கிறது, filter coffee semma taste!',
-    'நாளை temple-ல special பூஜை, எல்லோரும் வாங்க',
-    'Auto-ல share போக வேண்டியவர்கள் இருக்கீங்களா?',
-    'Street light-கள் கெட்டு போச்சு, corporation-க்கு complaint பண்ணலாம்',
-    'Metro station-ல lift வேலை செய்யலை, stairs use பண்ணுங்க'
-  ],
-  en: [
-    'Heavy traffic near our area, please use alternate routes',
-    'New coffee shop opened, their filter coffee is amazing!',
-    'Special prayers at temple tomorrow, everyone welcome',
-    'Anyone need auto share? Going towards OMR',
-    'Street lights not working, should we file corporation complaint?',
-    'Metro station lift is down, please use stairs'
-  ]
-};
-
-const sampleAlerts: Partial<LiveAlert>[] = [
-  {
-    title: 'போக்குவரத்து நெரிசல்',
-    titleEn: 'Heavy Traffic Alert',
-    message: 'GST Road-ல heavy traffic. Mount Road வழியா போங்க.',
-    messageEn: 'Heavy traffic on GST Road. Please use Mount Road route.',
-    severity: 'medium',
-    source: 'Traffic Control',
-    affectedAreas: ['GST Road', 'Guindy', 'St. Thomas Mount']
-  },
-  {
-    title: 'நீர் விநியோக இடையூறு',
-    titleEn: 'Water Supply Disruption',
-    message: 'T.Nagar பகுதியில் நாளை காலை 6-10 AM நீர் விநியோகம் இல்லை.',
-    messageEn: 'Water supply will be disrupted in T.Nagar area tomorrow 6-10 AM.',
-    severity: 'high',
-    source: 'Chennai Water Board',
-    affectedAreas: ['T. Nagar', 'West Mambalam']
-  }
-];
-
 export function RealTimeDataProvider({ children }: RealTimeDataProviderProps) {
   const [posts, setPosts] = useState<LivePost[]>([]);
   const [alerts, setAlerts] = useState<LiveAlert[]>([]);
@@ -111,143 +62,115 @@ export function RealTimeDataProvider({ children }: RealTimeDataProviderProps) {
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected' | 'error'>('connected');
   const [lastUpdate, setLastUpdate] = useState<Date | null>(new Date());
 
-  // Simulate real-time connection
-  useEffect(() => {
-    const connectionInterval = setInterval(() => {
-      // Simulate occasional connection issues
-      const shouldDisconnect = Math.random() < 0.05; // 5% chance
-      
-      if (shouldDisconnect && isConnected) {
-        setIsConnected(false);
-        setConnectionStatus('disconnected');
-        
-        // Reconnect after 2-5 seconds
-        setTimeout(() => {
-          setIsConnected(true);
-          setConnectionStatus('connected');
-          setLastUpdate(new Date());
-        }, 2000 + Math.random() * 3000);
-      }
-    }, 10000); // Check every 10 seconds
-
-    return () => clearInterval(connectionInterval);
-  }, [isConnected]);
-
-  // Simulate receiving new posts
-  useEffect(() => {
-    const postInterval = setInterval(() => {
-      if (isConnected && Math.random() < 0.3) { // 30% chance every interval
-        simulateRandomPost();
-      }
-    }, 15000 + Math.random() * 15000); // Every 15-30 seconds
-
-    return () => clearInterval(postInterval);
-  }, [isConnected]);
-
-  // Simulate alerts occasionally
-  useEffect(() => {
-    const alertInterval = setInterval(() => {
-      if (isConnected && Math.random() < 0.1) { // 10% chance
-        simulateRandomAlert();
-      }
-    }, 60000); // Every minute
-
-    return () => clearInterval(alertInterval);
-  }, [isConnected]);
-
-  const simulateRandomPost = () => {
-    const location = chennaiLocations[Math.floor(Math.random() * chennaiLocations.length)];
-    const isTamil = Math.random() < 0.7; // 70% chance of Tamil content
-    const content = isTamil 
-      ? sampleContents.ta[Math.floor(Math.random() * sampleContents.ta.length)]
-      : sampleContents.en[Math.floor(Math.random() * sampleContents.en.length)];
-
-    const categories = [
-      { ta: 'உதவி', en: 'help' },
-      { ta: 'நிகழ்ச்சி', en: 'event' },
-      { ta: 'சாப்பாடு', en: 'food' },
-      { ta: 'எச்சரிக்கை', en: 'alert' }
-    ];
-    
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    
-    const names = ['Priya', 'Rajesh', 'Divya', 'Venkat', 'Lakshmi', 'Suresh', 'Meera', 'Kumar'];
-    const name = names[Math.floor(Math.random() * names.length)];
-
-    simulateNewPost({
-      content,
-      category: category.ta,
-      categoryEn: category.en,
-      user: {
-        name,
-        isVerified: Math.random() < 0.6,
-        trustScore: Math.floor(Math.random() * 50) + 50
-      },
-      location
-    });
+  const fetchCommunityPosts = async () => {
+    setConnectionStatus('connecting');
+    try {
+      const dbPosts = await PostService.getPosts();
+      const livePosts: LivePost[] = dbPosts.map((p: Post) => ({
+        id: p.id,
+        content: p.content,
+        category: p.category || 'Update',
+        categoryEn: p.category || 'Update',
+        timestamp: new Date(p.created_at),
+        user: {
+          name: p.profiles?.full_name || 'Community Member',
+          isVerified: true,
+          trustScore: 80,
+        },
+        location: {
+          area: p.area || 'Chennai',
+          areaEn: p.area || 'Chennai',
+          pincode: '',
+        },
+        likes: p.likes,
+        comments: p.comments_count,
+        isRead: false,
+      }));
+      setPosts(livePosts);
+      setLastUpdate(new Date());
+      setConnectionStatus('connected');
+    } catch (error) {
+      console.error('Failed to fetch community posts:', error);
+      setConnectionStatus('error');
+    }
   };
 
-  const simulateRandomAlert = () => {
-    const alertTemplate = sampleAlerts[Math.floor(Math.random() * sampleAlerts.length)];
-    addAlert(alertTemplate);
+  const fetchRealTimeAlerts = async () => {
+    try {
+      const area = localStorage.getItem('user_area') || 'Chennai';
+
+      const result = await AiService.chat(`
+        Search the web for CRITICAL and URGENT alerts for residents in ${area}, Chennai RIGHT NOW.
+        Examples: severe weather warnings, major road closures, public safety announcements, health alerts.
+        If there are no critical alerts, return a JSON object with an empty "alerts" array.
+
+        Return as JSON with this exact structure: { "alerts": [{ "id": "unique_id", "title": "...", "message": "...", "severity": "high" | "critical", "source": "Official Source" }] }
+      `);
+
+      if (result.content) {
+        try {
+          const parsed = JSON.parse(result.content);
+          if (parsed.alerts && parsed.alerts.length > 0) {
+            const newAlerts = parsed.alerts.map((a: Partial<LiveAlert>, index: number) => ({
+              id: a.id || `alert_${Date.now()}_${index}`,
+              title: a.title || 'Urgent Alert',
+              titleEn: a.titleEn || a.title || 'Urgent Alert',
+              message: a.message || 'No details available.',
+              messageEn: a.messageEn || a.message || 'No details available.',
+              severity: a.severity || 'high',
+              timestamp: new Date(),
+              source: a.source || 'Official Source',
+              affectedAreas: [area],
+              isActive: true,
+            }));
+            setAlerts(newAlerts);
+          }
+        } catch (error) {
+          console.error('Failed to parse real-time alerts JSON:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch real-time alerts:', error);
+    }
   };
+
+  // Fetch data on initial load and then periodically
+  useEffect(() => {
+    fetchCommunityPosts();
+    fetchRealTimeAlerts();
+
+    // Refresh posts every 2 minutes
+    const postInterval = setInterval(fetchCommunityPosts, 2 * 60 * 1000);
+    // Refresh alerts every 15 minutes
+    const alertInterval = setInterval(fetchRealTimeAlerts, 15 * 60 * 1000);
+
+    return () => {
+      clearInterval(postInterval);
+      clearInterval(alertInterval);
+    };
+  }, []);
 
   const simulateNewPost = (postData: Partial<LivePost>) => {
-    const newPost: LivePost = {
-      id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      content: postData.content || 'New community update!',
-      category: postData.category || 'நிகழ்ச்சி',
-      categoryEn: postData.categoryEn || 'event',
-      timestamp: new Date(),
-      user: {
-        name: postData.user?.name || 'Community Member',
-        isVerified: postData.user?.isVerified || false,
-        trustScore: postData.user?.trustScore || 75
-      },
-      location: postData.location || {
-        area: 'மயிலாப்பூர்',
-        areaEn: 'Mylapore',
-        pincode: '600004'
-      },
-      likes: Math.floor(Math.random() * 20),
-      comments: Math.floor(Math.random() * 10),
-      isUrgent: postData.isUrgent || false,
-      isRead: false
-    };
-
-    setPosts(prevPosts => [newPost, ...prevPosts.slice(0, 49)]); // Keep last 50 posts
-    setLastUpdate(new Date());
+    // This function is now only for optimistic UI updates if needed in the future
+    // For now, it's a no-op
   };
 
   const markPostAsRead = (postId: string) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
         post.id === postId ? { ...post, isRead: true } : post
       )
     );
   };
 
   const addAlert = (alertData: Partial<LiveAlert>) => {
-    const newAlert: LiveAlert = {
-      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: alertData.title || 'சமூக எச்சரிக்கை',
-      titleEn: alertData.titleEn || 'Community Alert',
-      message: alertData.message || 'Important community notification',
-      messageEn: alertData.messageEn || 'Important community notification',
-      severity: alertData.severity || 'medium',
-      timestamp: new Date(),
-      source: alertData.source || 'Community System',
-      affectedAreas: alertData.affectedAreas || [],
-      isActive: true
-    };
-
-    setAlerts(prevAlerts => [newAlert, ...prevAlerts.slice(0, 9)]); // Keep last 10 alerts
-    setLastUpdate(new Date());
+    // This function is now only for optimistic UI updates if needed in the future
+    // For now, it's a no-op
   };
 
   const dismissAlert = (alertId: string) => {
-    setAlerts(prevAlerts => 
-      prevAlerts.map(alert => 
+    setAlerts(prevAlerts =>
+      prevAlerts.map(alert =>
         alert.id === alertId ? { ...alert, isActive: false } : alert
       ).filter(alert => alert.isActive)
     );
