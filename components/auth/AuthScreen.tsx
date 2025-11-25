@@ -76,9 +76,8 @@ export function AuthScreen() {
         setMessage(null);
 
         try {
-            const redirectTo = import.meta.env.VITE_SITE_URL
-                ? `${import.meta.env.VITE_SITE_URL}/auth/callback`
-                : `${window.location.origin}/auth/callback`;
+            // Redirect to root path - Supabase will handle the OAuth flow
+            const redirectTo = import.meta.env.VITE_SITE_URL || window.location.origin;
 
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',

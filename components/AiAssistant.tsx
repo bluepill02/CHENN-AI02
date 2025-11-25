@@ -53,6 +53,7 @@ export function AiAssistant() {
         <Button
           className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center border-2 border-white"
           size="icon"
+          aria-label="Open AI Assistant"
         >
           <Sparkles className="w-6 h-6 text-white animate-pulse" />
         </Button>
@@ -81,8 +82,8 @@ export function AiAssistant() {
                 )}
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user'
-                      ? 'bg-orange-500 text-white rounded-br-none'
-                      : 'bg-white border border-orange-100 text-gray-800 rounded-bl-none shadow-sm'
+                    ? 'bg-orange-500 text-white rounded-br-none'
+                    : 'bg-white border border-orange-100 text-gray-800 rounded-bl-none shadow-sm'
                     }`}
                 >
                   {msg.content}
@@ -125,6 +126,7 @@ export function AiAssistant() {
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
               className="bg-orange-500 hover:bg-orange-600 text-white"
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </Button>

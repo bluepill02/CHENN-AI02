@@ -9,7 +9,7 @@ import { Textarea } from './ui/textarea';
 import { ChennaiPride } from './ChennaiPride';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
-import { Heart, MessageCircle, Share2, MapPin, Star, Shield, Navigation, Loader2, Sparkles } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MapPin, Star, Shield, Navigation, Loader2, Sparkles, Zap } from 'lucide-react';
 import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
 import { useLocation, getLocationSpecificContent } from '../services/LocationService';
 import { useExternalData } from '../services/ExternalDataService';
@@ -21,9 +21,10 @@ import { toast } from 'sonner';
 
 interface CommunityFeedProps {
   userLocation?: any;
+  onShowLiveUpdates?: () => void;
 }
 
-export function CommunityFeed({ userLocation }: CommunityFeedProps) {
+export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeedProps) {
   const [showChennaiPride, setShowChennaiPride] = useState(false);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -276,12 +277,12 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             <span className="text-xs text-[11px]">Food Hunt</span>
           </Button>
           <Button
-            variant={activeFilter === 'cultural_event' ? 'default' : 'outline'}
-            className={`flex-col h-auto py-3 border-orange-200 hover:bg-orange-50 ${activeFilter === 'cultural_event' ? 'bg-orange-100 text-orange-700' : ''}`}
-            onClick={() => setActiveFilter(activeFilter === 'cultural_event' ? null : 'cultural_event')}
+            variant="outline"
+            className="flex-col h-auto py-3 border-orange-200 hover:bg-orange-50"
+            onClick={onShowLiveUpdates}
           >
-            <IllustratedIcon src={ChennaiIcons.temple} alt="Temple" size="sm" className="mb-1" />
-            <span className="text-xs">Temple Info</span>
+            <Zap className="w-5 h-5 mb-1" />
+            <span className="text-xs">Live Updates</span>
           </Button>
           <Button
             variant={showChennaiPride ? 'default' : 'outline'}

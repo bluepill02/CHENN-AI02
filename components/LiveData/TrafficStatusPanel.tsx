@@ -1,4 +1,6 @@
-import { Car, Clock, MapPin } from 'lucide-react';
+import { Car, Clock, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LiveDataService } from '../../services/LiveDataService';
 
 interface TrafficData {
   location: string;
@@ -13,54 +15,35 @@ interface TrafficStatusPanelProps {
   className?: string;
 }
 
-// Location-specific traffic data based on pincode
-const getLocationSpecificTraffic = (userLocation: any): TrafficData[] => {
-  if (!userLocation?.pincode) {
-    return [
-      {
-        location: 'Anna Salai',
-        status: 'heavy',
-        estimatedDelay: '15-20 mins',
-        lastUpdated: new Date(Date.now() - 5 * 60 * 1000)
-      },
-      {
-        location: 'Mount Road', 
-        status: 'moderate',
-        estimatedDelay: '5-10 mins',
-        lastUpdated: new Date(Date.now() - 8 * 60 * 1000)
-      }
-    ];
-  }
-
-  const area = userLocation.area || 'Chennai';
-  const nearbyLandmarks = userLocation.localContent?.nearbyLandmarks || [];
-  
-  // Generate location-specific traffic based on pincode area
-  const locationTraffic: TrafficData[] = [];
-  
-  // Add main area traffic
-  locationTraffic.push({
-    location: area,
-    status: Math.random() > 0.6 ? 'heavy' : Math.random() > 0.3 ? 'moderate' : 'light',
-    estimatedDelay: area.includes('T. Nagar') ? '20-25 mins' : area.includes('Mylapore') ? '8-12 mins' : '10-15 mins',
-    lastUpdated: new Date(Date.now() - Math.random() * 10 * 60 * 1000)
-  });
-
-  // Add nearby landmarks traffic
-  nearbyLandmarks.slice(0, 2).forEach(landmark => {
-    locationTraffic.push({
-      location: landmark,
-      status: Math.random() > 0.7 ? 'heavy' : Math.random() > 0.4 ? 'moderate' : 'light',
-      estimatedDelay: landmark.includes('Stadium') ? '15-20 mins' : landmark.includes('Temple') ? '5-8 mins' : '6-12 mins',
-      lastUpdated: new Date(Date.now() - Math.random() * 15 * 60 * 1000)
-    });
-  });
-
-  return locationTraffic;
-};
-
 export function TrafficStatusPanel({ trafficData = [], userLocation, className = '' }: TrafficStatusPanelProps) {
-  const displayData = trafficData.length > 0 ? trafficData : getLocationSpecificTraffic(userLocation);
+  const [displayData, setDisplayData] = useState<TrafficData[]>(trafficData);
+  const [loading, setLoading] = useState(trafficData.length === 0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (trafficData.length > 0) {
+      setDisplayData(trafficData);
+      return;
+    }
+
+    const fetchTraffic = async () => {
+      const area = userLocation?.area || 'Chennai';
+      setLoading(true);
+      setError(null);
+
+      try {
+        const realTraffic = await LiveDataService.getTraffic(area);
+        setDisplayData(realTraffic);
+      } catch (err) {
+        console.error('Failed to fetch traffic:', err);
+        setError('Unable to load traffic data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTraffic();
+  }, [userLocation?.area, trafficData]);
 
   const getStatusColor = (status: TrafficData['status']) => {
     switch (status) {
@@ -83,6 +66,36 @@ export function TrafficStatusPanel({ trafficData = [], userLocation, className =
         return 'Light Traffic';
     }
   };
+
+  if (loading) {
+    return (
+      <div className={`space-y-3 ${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Car className="w-5 h-5 text-blue-600" />
+          Traffic Status
+        </h3>
+        <div className="p-4 rounded-lg border bg-gray-50 border-gray-200 shadow-sm flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-orange-500 animate-spin mr-2" />
+          <span className="text-gray-600">Loading traffic...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || displayData.length === 0) {
+    return (
+      <div className={`space-y-3 ${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Car className="w-5 h-5 text-blue-600" />
+          Traffic Status
+        </h3>
+        <div className="p-4 rounded-lg border bg-red-50 border-red-200 shadow-sm flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <span className="text-red-700 text-sm">{error || 'Traffic data unavailable'}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`space-y-3 ${className}`}>

@@ -1,4 +1,6 @@
-import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LiveDataService } from '../../services/LiveDataService';
 
 interface Alert {
   id: string;
@@ -15,72 +17,36 @@ interface LiveAlertsPanelProps {
   className?: string;
 }
 
-// Location-specific alerts based on pincode
-const getLocationSpecificAlerts = (userLocation: any): Alert[] => {
-  const area = userLocation?.area || 'Chennai';
-  const pincode = userLocation?.pincode;
-  const nearbyLandmarks = userLocation?.localContent?.nearbyLandmarks || [];
-  
-  const locationAlerts: Alert[] = [];
-  
-  // Generate area-specific alerts
-  if (area.includes('T. Nagar')) {
-    locationAlerts.push({
-      id: '1',
-      type: 'warning',
-      title: 'Heavy Traffic Expected',
-      message: `Shopping rush on Ranganathan Street - expect 20+ min delays`,
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      location: 'T. Nagar Shopping District'
-    });
-  } else if (area.includes('Mylapore')) {
-    locationAlerts.push({
-      id: '1',
-      type: 'info',
-      title: 'Temple Festival',
-      message: `Special prayers at Kapaleeshwarar Temple - limited parking`,
-      timestamp: new Date(Date.now() - 45 * 60 * 1000),
-      location: 'Mylapore Temple Area'
-    });
-  } else if (area.includes('Anna Salai')) {
-    locationAlerts.push({
-      id: '1',
-      type: 'warning',
-      title: 'Metro Construction',
-      message: `Phase 2 construction near LIC - expect traffic diversions`,
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      location: 'Anna Salai Metro Route'
-    });
-  }
-  
-  // Add service alerts for the area
-  locationAlerts.push({
-    id: '2',
-    type: 'success',
-    title: 'Water Supply Update',
-    message: `Regular supply restored in ${area} area - ${pincode || 'your pincode'}`,
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    location: area
-  });
-  
-  // Add landmark-specific alerts if available
-  if (nearbyLandmarks.length > 0) {
-    const landmark = nearbyLandmarks[0];
-    locationAlerts.push({
-      id: '3',
-      type: 'info',
-      title: 'Local Update',
-      message: `${landmark} area - increased security patrol during evening hours`,
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      location: landmark
-    });
-  }
-  
-  return locationAlerts.slice(0, 3); // Limit to 3 alerts
-};
-
 export function LiveAlertsPanel({ alerts = [], userLocation, className = '' }: LiveAlertsPanelProps) {
-  const displayAlerts = alerts.length > 0 ? alerts : getLocationSpecificAlerts(userLocation);
+  const [displayAlerts, setDisplayAlerts] = useState<Alert[]>(alerts);
+  const [loading, setLoading] = useState(alerts.length === 0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (alerts.length > 0) {
+      setDisplayAlerts(alerts);
+      setLoading(false);
+      return;
+    }
+
+    const fetchAlerts = async () => {
+      const area = userLocation?.area || 'Chennai';
+      setLoading(true);
+      setError(null);
+
+      try {
+        const realAlerts = await LiveDataService.getAlerts(area);
+        setDisplayAlerts(realAlerts);
+      } catch (err) {
+        console.error('Failed to fetch alerts:', err);
+        setError('Unable to load alerts');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+  }, [userLocation?.area, alerts]);
 
   const getAlertIcon = (type: Alert['type']) => {
     switch (type) {
@@ -103,6 +69,30 @@ export function LiveAlertsPanel({ alerts = [], userLocation, className = '' }: L
         return 'bg-green-50 border-green-200';
     }
   };
+
+  if (loading) {
+    return (
+      <div className={`space-y-3 ${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Live Alerts</h3>
+        <div className="p-4 rounded-lg border bg-gray-50 border-gray-200 shadow-sm flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-orange-500 animate-spin mr-2" />
+          <span className="text-gray-600">Loading alerts...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || displayAlerts.length === 0) {
+    return (
+      <div className={`space-y-3 ${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Live Alerts</h3>
+        <div className="p-4 rounded-lg border bg-blue-50 border-blue-200 shadow-sm flex items-center gap-2">
+          <Info className="w-5 h-5 text-blue-500" />
+          <span className="text-blue-700 text-sm">{error || 'No alerts at this time'}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`space-y-3 ${className}`}>

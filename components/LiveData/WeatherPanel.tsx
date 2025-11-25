@@ -1,4 +1,6 @@
-import { Cloud, CloudRain, Droplets, Sun, Wind } from 'lucide-react';
+import { Cloud, CloudRain, Droplets, Sun, Wind, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LiveDataService } from '../../services/LiveDataService';
 
 interface WeatherData {
   temperature: number;
@@ -7,6 +9,7 @@ interface WeatherData {
   windSpeed: number;
   location: string;
   lastUpdated: Date;
+  aqi?: number;
 }
 
 interface WeatherPanelProps {
@@ -15,37 +18,55 @@ interface WeatherPanelProps {
   className?: string;
 }
 
-// Location-specific weather data based on pincode
-const getLocationSpecificWeather = (userLocation: any): WeatherData => {
-  const area = userLocation?.area || 'Chennai';
-  const baseTemp = 30 + Math.random() * 6; // 30-36°C range for Chennai
-  
-  // Adjust weather based on location characteristics
-  let temperature = baseTemp;
-  let condition: WeatherData['condition'] = 'sunny';
-  let humidity = 70 + Math.random() * 15; // 70-85% for Chennai
-  
-  if (area.includes('Beach') || area.includes('Marina')) {
-    humidity += 5; // More humid near coast
-    temperature -= 1; // Slightly cooler
-    condition = Math.random() > 0.7 ? 'cloudy' : 'sunny';
-  } else if (area.includes('T. Nagar') || area.includes('Anna Salai')) {
-    temperature += 1; // Urban heat island effect
-    condition = Math.random() > 0.8 ? 'overcast' : 'sunny';
-  }
-  
-  return {
-    temperature: Math.round(temperature),
-    condition,
-    humidity: Math.round(humidity),
-    windSpeed: 8 + Math.random() * 8, // 8-16 km/h
-    location: area,
-    lastUpdated: new Date(Date.now() - Math.random() * 20 * 60 * 1000)
-  };
-};
-
 export function WeatherPanel({ weatherData, userLocation, className = '' }: WeatherPanelProps) {
-  const data = weatherData || getLocationSpecificWeather(userLocation);
+  const [data, setData] = useState<WeatherData | null>(weatherData || null);
+  const [loading, setLoading] = useState(!weatherData);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (weatherData) {
+      setData(weatherData);
+      return;
+    }
+
+    const fetchWeather = async () => {
+      const area = userLocation?.area || 'Chennai';
+      setLoading(true);
+      setError(null);
+
+      try {
+        const realWeather = await LiveDataService.getWeather(area);
+
+        // Map AI response to our interface
+        const mappedData: WeatherData = {
+          temperature: realWeather.temp,
+          condition: mapConditionString(realWeather.condition),
+          humidity: realWeather.humidity,
+          windSpeed: 10, // Default if not provided
+          location: area,
+          lastUpdated: new Date(),
+          aqi: realWeather.aqi,
+        };
+
+        setData(mappedData);
+      } catch (err) {
+        console.error('Failed to fetch weather:', err);
+        setError('Unable to load weather data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeather();
+  }, [userLocation?.area, weatherData]);
+
+  const mapConditionString = (condition: string): WeatherData['condition'] => {
+    const lower = condition.toLowerCase();
+    if (lower.includes('rain') || lower.includes('shower')) return 'rainy';
+    if (lower.includes('cloud') || lower.includes('overcast')) return 'cloudy';
+    if (lower.includes('sun') || lower.includes('clear')) return 'sunny';
+    return 'overcast';
+  };
 
   const getWeatherIcon = (condition: WeatherData['condition']) => {
     switch (condition) {
@@ -86,13 +107,43 @@ export function WeatherPanel({ weatherData, userLocation, className = '' }: Weat
     }
   };
 
+  if (loading) {
+    return (
+      <div className={`${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Sun className="w-5 h-5 text-yellow-500" />
+          Weather Update
+        </h3>
+        <div className="p-4 rounded-lg border bg-gray-50 border-gray-200 shadow-sm flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-orange-500 animate-spin mr-2" />
+          <span className="text-gray-600">Loading weather...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className={`${className}`}>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Sun className="w-5 h-5 text-yellow-500" />
+          Weather Update
+        </h3>
+        <div className="p-4 rounded-lg border bg-red-50 border-red-200 shadow-sm flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <span className="text-red-700 text-sm">{error || 'Weather data unavailable'}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`${className}`}>
       <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
         {getWeatherIcon(data.condition)}
         Weather Update
       </h3>
-      
+
       <div className={`p-4 rounded-lg border ${getConditionBg(data.condition)} shadow-sm`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -121,6 +172,14 @@ export function WeatherPanel({ weatherData, userLocation, className = '' }: Weat
             <span className="text-gray-600">Wind</span>
             <span className="font-medium text-gray-800">{data.windSpeed} km/h</span>
           </div>
+          {data.aqi && (
+            <div className="flex items-center gap-2 text-sm col-span-2">
+              <span className="text-gray-600">AQI</span>
+              <span className={`font-medium ${data.aqi > 100 ? 'text-red-600' : 'text-green-600'}`}>
+                {data.aqi} ({data.aqi > 100 ? 'Poor' : 'Good'})
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

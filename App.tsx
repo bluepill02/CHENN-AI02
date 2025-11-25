@@ -7,7 +7,7 @@ import { LanguageProvider } from './services/LanguageService';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthCallback } from './pages/AuthCallback';
+
 
 function Home() {
   const { user, loading } = useAuth();
@@ -53,7 +53,7 @@ export default function App() {
               <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 relative overflow-hidden">
                 <div className="relative z-10">
                   <Routes>
-                    <Route path="/auth/callback" element={<AuthCallback />} />
+                   
                     <Route path="/" element={<Home />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
