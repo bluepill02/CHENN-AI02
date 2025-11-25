@@ -284,17 +284,46 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Load saved locations from localStorage on initialization
   useEffect(() => {
-    const savedCurrentLocation = localStorage.getItem('chennai-app-current-location');
-    const savedPreviousLocations = localStorage.getItem('chennai-app-previous-locations');
+    const loadInitialLocation = async () => {
+      // First check for user_pincode and user_area (set by LocationSetupScreen)
+      const userPincode = localStorage.getItem('user_pincode');
+      const userArea = localStorage.getItem('user_area');
 
-    if (savedCurrentLocation) {
-      try {
-        setCurrentLocation(JSON.parse(savedCurrentLocation));
-      } catch (e) {
-        console.error('Error parsing saved current location:', e);
+      if (userPincode && userArea) {
+        // Create location data from saved pincode and area
+        const locationData: LocationData = {
+          pincode: userPincode,
+          area: userArea,
+          district: 'Chennai',
+          state: 'Tamil Nadu',
+          verified: true,
+          timestamp: Date.now(),
+          localContent: {
+            communityName: `${userArea} Community`,
+            localLanguage: 'Tamil',
+            culturalElements: ['Local Temple', 'Community Center'],
+            nearbyLandmarks: []
+          }
+        };
+        setCurrentLocation(locationData);
+        return;
       }
-    }
 
+      // Fallback: check for old chennai-app-current-location format
+      const savedCurrentLocation = localStorage.getItem('chennai-app-current-location');
+      if (savedCurrentLocation) {
+        try {
+          setCurrentLocation(JSON.parse(savedCurrentLocation));
+        } catch (e) {
+          console.error('Error parsing saved current location:', e);
+        }
+      }
+    };
+
+    loadInitialLocation();
+
+    // Load previous locations
+    const savedPreviousLocations = localStorage.getItem('chennai-app-previous-locations');
     if (savedPreviousLocations) {
       try {
         setPreviousLocations(JSON.parse(savedPreviousLocations));
@@ -308,6 +337,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     if (currentLocation) {
       localStorage.setItem('chennai-app-current-location', JSON.stringify(currentLocation));
+      // Also save in the format expected by other parts of the app
+      localStorage.setItem('user_pincode', currentLocation.pincode);
+      localStorage.setItem('user_area', currentLocation.area);
     }
   }, [currentLocation]);
 
