@@ -1,0 +1,55 @@
+{
+    "title": "Recording 25/11/2025 at 16:39:13",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 703,
+            "height": 646,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://chenn-ai.vercel.app/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://chenn-ai.vercel.app/",
+                    "title": "Chennai Community App (Copy)"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Continue with Google"
+                ],
+                [
+                    "div.bg-gradient-to-br > button.whitespace-nowrap"
+                ],
+                [
+                    "xpath///*[@id=\"root\"]/div/div/div/div[2]/div[2]/button[1]"
+                ],
+                [
+                    "pierce/div.bg-gradient-to-br > button.whitespace-nowrap"
+                ],
+                [
+                    "text/Continue with"
+                ]
+            ],
+            "offsetY": 22.4000244140625,
+            "offsetX": 220.40000915527344,
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://chenn-ai.vercel.app/auth/callback#access_token=eyJhbGciOiJIUzI1NiIsImtpZCI6IjAvcm5iRlJkY2NyYWJacXciLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lleGNicmpydXZkb3dkanN6ZXh4LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyMjYxMjRlMS01NjMzLTRlODUtOGRmMC1iZWI1Y2Y1ZTA1YWQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY0MDcyNTY3LCJpYXQiOjE3NjQwNjg5NjcsImVtYWlsIjoic212aW51NjlAZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCIsImdvb2dsZSJdfSwidXNlcl9tZXRhZGF0YSI6eyJhdmF0YXJfdXJsIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jS0RkQTJqdWpDRURpSFcza0NROUFNWW1jYktzWUVyLW5aMVUyX3RsZWdxWWVmZnpMRXY9czk2LWMiLCJlbWFpbCI6InNtdmludTY5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJibHVlcGlsbCIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsIm5hbWUiOiJibHVlcGlsbCIsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0tEZEEyanVqQ0VEaUhXM2tDUTlBTVltY2JLc1lFci1uWjFVMl90bGVncVllZmZ6TEV2PXM5Ni1jIiwicHJvdmlkZXJfaWQiOiIxMDkzNjc1OTY4Nzc4NDcyODc0MzIiLCJzdWIiOiIxMDkzNjc1OTY4Nzc4NDcyODc0MzIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJvYXV0aCIsInRpbWVzdGFtcCI6MTc2NDA2ODk2N31dLCJzZXNzaW9uX2lkIjoiNDU3NjMwMGEtZDQ3MS00NjIxLWI3YzItOTFmNzM4ZTE4ZjBlIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.fRK6GjG_53BRlHxlgy0XjXcUHFm7hF1M4K7JbyH0GMY&expires_at=1764072567&expires_in=3600&provider_token=ya29.A0ATi6K2v7ExR5c-kI6y07hIqgEBkquuVhnwG1eREp0NKh3YPJM0jOi2jc-ldSC_xNJqhiQmGPFpxdrUJ0IaOJt5Vm7nFDD-K6gl7C_i0JCjCXlQvpx28itUMR83QkUoWtAf021Aic8GHZ5KaY03ds-r3XFb1NsERMmNAU94dODjz5N6PvJiy6aOMrtHWZ-urOpHZKVlvW_6XL8QDAYAhAJYuQl4AbnYFc6iyWMgaDk_2mzadxwQdiQoHCNXTLvDVNx1DGYCwIuiC1NsSUXNddHnbH4P4aCgYKAdESARYSFQHGX2Mi-4NQN3FVQkp9IBxTJmrnNA0290&refresh_token=uiovikpqufjk&token_type=bearer",
+                    "title": ""
+                }
+            ]
+        }
+    ]
+}
