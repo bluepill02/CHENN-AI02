@@ -107,7 +107,6 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
             const rawName = locationData.PostOffice[0]?.Name || locationData.PostOffice[0]?.Block || 'Chennai';
             // Remove "(Chennai)" or "Chennai" suffix if present to be cleaner
             const area = rawName.replace(/\s*\(?Chennai\)?/i, '').trim() || rawName;
-            const district = locationData.PostOffice[0]?.District || 'Chennai';
 
             // Update user profile with location
             const { error: updateError } = await supabase
@@ -116,7 +115,6 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
                     id: user?.id,
                     area: area,
                     pincode: pincode,
-                    district: district,
                     updated_at: new Date().toISOString(),
                 });
 
@@ -125,7 +123,6 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
             // Store in localStorage for location-aware content
             localStorage.setItem('user_pincode', pincode);
             localStorage.setItem('user_area', area);
-            localStorage.setItem('user_district', district);
 
             onComplete();
         } catch (err: any) {
@@ -139,7 +136,6 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
         // Set default Chennai location
         localStorage.setItem('user_pincode', '600004');
         localStorage.setItem('user_area', 'Mylapore');
-        localStorage.setItem('user_district', 'Chennai');
         onComplete();
     };
 
