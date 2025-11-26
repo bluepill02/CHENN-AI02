@@ -65,29 +65,42 @@ export const PostService = {
      * Create a new post
      */
     async createPost(content: string, category: string, area: string, userId: string): Promise<Post | null> {
-        const { data, error } = await supabase
-            .from('posts')
-            .insert({
-                content,
-                category,
-                area,
-                user_id: userId
-            })
-            .select(`
-                *,
-                profiles (
-                    full_name,
-                    avatar_url
-                )
-            `)
-            .single();
+        try {
+            // Validate input
+            if (!content || !content.trim()) {
+                throw new Error('Post content cannot be empty');
+            }
+            if (!userId) {
+                throw new Error('User ID is required');
+            }
 
-        if (error) {
-            console.error('Error creating post:', error);
-            throw error;
+            const { data, error } = await supabase
+                .from('posts')
+                .insert({
+                    content: content.trim(),
+                    category: category || 'general',
+                    area: area || 'Chennai',
+                    user_id: userId
+                })
+                .select(`
+                    *,
+                    profiles (
+                        full_name,
+                        avatar_url
+                    )
+                `)
+                .single();
+
+            if (error) {
+                console.error('Error creating post:', error);
+                throw error;
+            }
+
+            return data;
+        } catch (err) {
+            console.error('Unexpected error creating post:', err);
+            throw err;
         }
-
-        return data;
     },
 
     /**
