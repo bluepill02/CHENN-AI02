@@ -20,7 +20,7 @@ export default function AutoShareCard({ pincode }: { pincode: string }) {
   const [posts, setPosts] = useState<AutoSharePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState<boolean>(false);
 
   // Load posts from localStorage
   const loadPosts = () => {
