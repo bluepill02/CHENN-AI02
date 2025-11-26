@@ -87,31 +87,34 @@ export function LiveUpdatesScreen({ userLocation, onBack }: LiveUpdatesScreenPro
                         <div>
                             <h3 className="font-semibold text-blue-900 mb-1">Real-Time Data</h3>
                             <p className="text-sm text-blue-700">
-                                All information is fetched live from the web using AI. Data updates every 15 minutes.
+                                All information is fetched live from web search using AI. Data is cached for 15 minutes to reduce API calls. Only real data is displayed, no mock data.
                             </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Weather Section */}
-                <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <WeatherPanel userLocation={userLocation} />
                 </div>
 
                 {/* Traffic Section */}
-                <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <TrafficStatusPanel userLocation={userLocation} />
                 </div>
 
                 {/* Alerts Section */}
-                <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <LiveAlertsPanel userLocation={userLocation} />
                 </div>
 
                 {/* Footer Info */}
                 <div className="text-center text-sm text-gray-500 py-4">
-                    <p>Data powered by AI web search</p>
-                    <p className="text-xs mt-1">Updates cached for 15 minutes</p>
+                    <p>Data powered by AI web search (Groq, Azure OpenAI, HuggingFace)</p>
+                    {lastRefreshTime && (
+                        <p className="text-xs mt-1">Last refreshed: {lastRefreshTime.toLocaleTimeString()}</p>
+                    )}
+                    <p className="text-xs mt-1">⚠️ Only showing real data fetched from the web</p>
                 </div>
             </div>
         </div>
