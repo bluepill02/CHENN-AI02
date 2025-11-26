@@ -1,4 +1,5 @@
-import { ArrowLeft, Zap, MapPin } from 'lucide-react';
+import { ArrowLeft, Zap, MapPin, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { WeatherPanel } from './LiveData/WeatherPanel';
 import { TrafficStatusPanel } from './LiveData/TrafficStatusPanel';
@@ -11,6 +12,30 @@ interface LiveUpdatesScreenProps {
 
 export function LiveUpdatesScreen({ userLocation, onBack }: LiveUpdatesScreenProps) {
     const locationName = userLocation?.area || userLocation?.pincode || 'Chennai';
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            // Trigger a hard refresh of the page to fetch fresh data
+            window.location.reload();
+        } catch (err) {
+            console.error('Refresh failed:', err);
+        } finally {
+            setIsRefreshing(false);
+            setLastRefreshTime(new Date());
+        }
+    };
+
+    // Auto-refresh every 20 minutes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            handleRefresh();
+        }, 20 * 60 * 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 pb-20">
