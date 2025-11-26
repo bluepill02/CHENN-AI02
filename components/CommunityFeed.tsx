@@ -426,6 +426,19 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
 
       {/* Community posts */}
       <div className="px-6 space-y-4 pb-20">
+        {error && (
+          <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 text-sm">
+            <p className="font-semibold mb-2">Error loading posts</p>
+            <p className="mb-3">{error}</p>
+            <Button
+              size="sm"
+              onClick={() => fetchPosts(0)}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Try Again
+            </Button>
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
@@ -435,7 +448,8 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
             No posts yet. Be the first to share!
           </div>
         ) : (
-          filteredPosts.map((post) => (
+          <>
+            {filteredPosts.map((post) => (
             <Card key={post.id} className="p-4 bg-[#FFFFF0] backdrop-blur-md border-2 border-[#E1AD01]/60 shadow-lg shadow-orange-200/80 rounded-xl">
               {/* Post header */}
               <div className="flex items-start justify-between mb-3">
@@ -528,7 +542,26 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
                 </button>
               </div>
             </Card>
-          ))
+          ))}
+            {hasMore && (
+              <div className="flex justify-center pt-6 pb-10">
+                <Button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Load More Posts'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
