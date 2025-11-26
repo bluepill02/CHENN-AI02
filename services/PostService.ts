@@ -78,26 +78,19 @@ export const PostService = {
     },
 
     /**
-     * Like a post (Simple increment for now, ideally should be a separate table)
+     * Like a post - uses database literal for atomic increment
      */
     async likePost(postId: string): Promise<void> {
-        // RPC call would be better for atomicity, but simple update for MVP
-        // First get current likes
-        const { data: post, error: fetchError } = await supabase
-            .from('posts')
-            .select('likes')
-            .eq('id', postId)
-            .single();
+        try {
+            const { error } = await supabase
+                .from('posts')
+                .update({ likes: supabase.literal('likes + 1') })
+                .eq('id', postId);
 
-        if (fetchError) throw fetchError;
-
-        const newLikes = (post?.likes || 0) + 1;
-
-        const { error: updateError } = await supabase
-            .from('posts')
-            .update({ likes: newLikes })
-            .eq('id', postId);
-
-        if (updateError) throw updateError;
+            if (error) throw error;
+        } catch (err) {
+            console.error('Error liking post:', err);
+            throw err;
+        }
     }
 };
