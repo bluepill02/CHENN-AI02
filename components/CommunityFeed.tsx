@@ -159,14 +159,14 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
     setIsPosting(true);
     try {
       const area = activeLocation?.area || 'Chennai';
-      // Default category for now, could add a selector
-      const category = 'general';
+      const category = newPostCategory;
 
       const newPost = await PostService.createPost(newPostContent, category, area, user.id);
 
       if (newPost) {
         setPosts([newPost, ...posts]);
         setNewPostContent('');
+        setNewPostCategory('general');
         setIsPostDialogOpen(false);
         toast.success('Post created successfully!');
       }
@@ -290,7 +290,7 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
         textColor: 'text-gray-700',
         borderColor: 'border-gray-200',
         icon: ChennaiIcons.family,
-        tamil: '��ொதுவானது',
+        tamil: 'பொதுவானது',
         english: 'General'
       }
     };
