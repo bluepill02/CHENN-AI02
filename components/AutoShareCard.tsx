@@ -113,19 +113,25 @@ export default function AutoShareCard({ pincode }: { pincode: string }) {
     <Card className="p-3 border border-green-200">
       <h4 className="font-medium mb-2">🚖 Auto Share ({pincode})</h4>
       
-      <video 
-        src={rickshawVideo} 
-        autoPlay
-        muted
-        loop
-        playsInline
-        onError={() => {/* Optionally handle video load error here */}}
-        onLoadedData={() => setVideoError(null)}
-      >
-        <p>Your browser does not support the video tag or the video failed to load.</p>
-      </video>
-      {videoError && (
-        <div className="text-xs text-red-500 mb-2">{videoError}</div>
+      {!videoError ? (
+        <video
+          src={rickshawVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full rounded-lg mb-3 bg-gray-100"
+          onError={() => setVideoError(true)}
+          onLoadedData={() => setVideoError(false)}
+        >
+          Video not supported
+        </video>
+      ) : (
+        <div className="w-full rounded-lg bg-gray-100 p-4 mb-3 flex flex-col items-center justify-center text-gray-600 min-h-[150px]">
+          <span className="text-3xl mb-2">🚖</span>
+          <p className="text-sm text-center">Auto Share Rides</p>
+          <p className="text-xs text-gray-500 text-center mt-1">Video preview unavailable</p>
+        </div>
       )}
       
       {loading && <div>Loading rides…</div>}
