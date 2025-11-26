@@ -216,40 +216,97 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
     ? posts.filter(post => post.category === activeFilter)
     : posts;
 
-  const getPostBadge = (type: string | undefined) => {
+  const getCategoryConfig = (type: string | undefined) => {
     if (!type) return null;
-    switch (type) {
-      case 'food_recommendation':
-        return (
-          <Badge className="bg-orange-100 text-orange-700 border-orange-200 flex items-center gap-1 text-xs">
-            <IllustratedIcon src={ChennaiIcons.food} alt="Food" size="sm" className="w-3 h-3" />
-            சாப்பாடு
-          </Badge>
-        );
-      case 'community_event':
-        return (
-          <Badge className="bg-purple-100 text-purple-700 border-purple-200 flex items-center gap-1 text-xs">
-            <IllustratedIcon src={ChennaiIcons.community} alt="Event" size="sm" className="w-3 h-3" />
-            நிகழ்ச்சி
-          </Badge>
-        );
-      case 'cultural_event':
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 flex items-center gap-1 text-xs">
-            <IllustratedIcon src={ChennaiIcons.temple} alt="Festival" size="sm" className="w-3 h-3" />
-            பண்டிகை
-          </Badge>
-        );
-      case 'help_request':
-        return (
-          <Badge className="bg-blue-100 text-blue-700 border-blue-200 flex items-center gap-1 text-xs">
-            <IllustratedIcon src={ChennaiIcons.auto} alt="Help" size="sm" className="w-3 h-3" />
-            உதவி
-          </Badge>
-        );
-      default:
-        return null;
-    }
+
+    const categoryMap: Record<string, { color: string, textColor: string, borderColor: string, icon: any, tamil: string, english: string }> = {
+      'food_recommendation': {
+        color: 'bg-orange-100',
+        textColor: 'text-orange-700',
+        borderColor: 'border-orange-200',
+        icon: ChennaiIcons.food,
+        tamil: 'சாப்பாடு',
+        english: 'Food'
+      },
+      'food': {
+        color: 'bg-orange-100',
+        textColor: 'text-orange-700',
+        borderColor: 'border-orange-200',
+        icon: ChennaiIcons.food,
+        tamil: 'சாப்பாடு',
+        english: 'Food'
+      },
+      'community_event': {
+        color: 'bg-purple-100',
+        textColor: 'text-purple-700',
+        borderColor: 'border-purple-200',
+        icon: ChennaiIcons.community,
+        tamil: 'நிகழ்ச்சி',
+        english: 'Event'
+      },
+      'event': {
+        color: 'bg-purple-100',
+        textColor: 'text-purple-700',
+        borderColor: 'border-purple-200',
+        icon: ChennaiIcons.community,
+        tamil: 'நிகழ்ச்சி',
+        english: 'Event'
+      },
+      'cultural_event': {
+        color: 'bg-yellow-100',
+        textColor: 'text-yellow-700',
+        borderColor: 'border-yellow-200',
+        icon: ChennaiIcons.temple,
+        tamil: 'பண்டிகை',
+        english: 'Festival'
+      },
+      'help_request': {
+        color: 'bg-blue-100',
+        textColor: 'text-blue-700',
+        borderColor: 'border-blue-200',
+        icon: ChennaiIcons.auto,
+        tamil: 'உதவி',
+        english: 'Help'
+      },
+      'help': {
+        color: 'bg-blue-100',
+        textColor: 'text-blue-700',
+        borderColor: 'border-blue-200',
+        icon: ChennaiIcons.auto,
+        tamil: 'உதவி',
+        english: 'Help'
+      },
+      'alert': {
+        color: 'bg-red-100',
+        textColor: 'text-red-700',
+        borderColor: 'border-red-200',
+        icon: ChennaiIcons.auto,
+        tamil: 'எச்சரிக்கை',
+        english: 'Alert'
+      },
+      'general': {
+        color: 'bg-gray-100',
+        textColor: 'text-gray-700',
+        borderColor: 'border-gray-200',
+        icon: ChennaiIcons.family,
+        tamil: 'பொதுவானது',
+        english: 'General'
+      }
+    };
+
+    return categoryMap[type.toLowerCase()] || null;
+  };
+
+  const getPostBadge = (type: string | undefined) => {
+    const config = getCategoryConfig(type);
+    if (!config) return null;
+
+    return (
+      <Badge className={`${config.color} ${config.textColor} ${config.borderColor} flex items-center gap-1 text-xs`}>
+        <IllustratedIcon src={config.icon} alt={config.english} size="sm" className="w-3 h-3" />
+        {config.tamil}
+      </Badge>
+    );
   };
 
   return (
