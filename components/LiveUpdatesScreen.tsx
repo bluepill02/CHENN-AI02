@@ -60,8 +60,20 @@ export function LiveUpdatesScreen({ userLocation, onBack }: LiveUpdatesScreenPro
                             <span>{locationName}</span>
                         </div>
                     </div>
-                    <div className="relative">
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                            className="text-white hover:bg-orange-600"
+                            title="Refresh live data"
+                        >
+                            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <div className="relative">
+                            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
                     </div>
                 </div>
             </div>
