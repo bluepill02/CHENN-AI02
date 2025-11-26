@@ -290,7 +290,7 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
         textColor: 'text-gray-700',
         borderColor: 'border-gray-200',
         icon: ChennaiIcons.family,
-        tamil: 'பொதுவானது',
+        tamil: '��ொதுவானது',
         english: 'General'
       }
     };
@@ -467,6 +467,54 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
               />
+
+              {/* Category Selector */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setNewPostCategory('food_recommendation')}
+                    className={`p-2 rounded-lg text-sm font-medium transition-all ${
+                      newPostCategory === 'food_recommendation'
+                        ? 'bg-orange-100 text-orange-700 border-2 border-orange-400'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    🍛 Food Hunt
+                  </button>
+                  <button
+                    onClick={() => setNewPostCategory('help_request')}
+                    className={`p-2 rounded-lg text-sm font-medium transition-all ${
+                      newPostCategory === 'help_request'
+                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-400'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    🚖 Auto Share
+                  </button>
+                  <button
+                    onClick={() => setNewPostCategory('community_event')}
+                    className={`p-2 rounded-lg text-sm font-medium transition-all ${
+                      newPostCategory === 'community_event'
+                        ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    🎉 Event
+                  </button>
+                  <button
+                    onClick={() => setNewPostCategory('general')}
+                    className={`p-2 rounded-lg text-sm font-medium transition-all ${
+                      newPostCategory === 'general'
+                        ? 'bg-gray-200 text-gray-800 border-2 border-gray-400'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    💬 General
+                  </button>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsPostDialogOpen(false)} className="border-orange-200 text-orange-700 hover:bg-orange-50">Cancel</Button>
                 <Button
