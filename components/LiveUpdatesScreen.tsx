@@ -1,4 +1,5 @@
 import { ArrowLeft, Zap, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { WeatherPanel } from './LiveData/WeatherPanel';
 import { TrafficStatusPanel } from './LiveData/TrafficStatusPanel';
@@ -6,10 +7,10 @@ import { LiveAlertsPanel } from './LiveData/LiveAlertsPanel';
 
 interface LiveUpdatesScreenProps {
     userLocation?: any;
-    onBack: () => void;
 }
 
-export function LiveUpdatesScreen({ userLocation, onBack }: LiveUpdatesScreenProps) {
+export function LiveUpdatesScreen({ userLocation }: LiveUpdatesScreenProps) {
+    const navigate = useNavigate();
     const locationName = userLocation?.area || userLocation?.pincode || 'Chennai';
 
     return (
@@ -20,7 +21,7 @@ export function LiveUpdatesScreen({ userLocation, onBack }: LiveUpdatesScreenPro
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={onBack}
+                        onClick={() => navigate(-1)}
                         className="text-white hover:bg-orange-600"
                     >
                         <ArrowLeft className="w-5 h-5" />

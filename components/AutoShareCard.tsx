@@ -2,165 +2,408 @@ import { useEffect, useState } from "react";
 import rickshawVideo from "../assets/Rickshaw.webm";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { useAuth } from "./auth/SupabaseAuthProvider";
+import { AutoShareService, type AutoSharePost } from "../services/AutoShareService";
+import { toast } from "sonner";
+import { Clock, User, MapPin, Users, Loader2, X, Edit2, Trash2, CheckCircle2 } from "lucide-react";
 
-interface AutoSharePost {
-  id: string;
-  user: string;
-  from: string;
-  to: string;
-  seatsAvailable: number;
-  timestamp: string;
-  expiresAt: string;
+interface AutoShareCardProps {
   pincode: string;
 }
 
-const STORAGE_KEY = 'autoSharePosts';
-
-export default function AutoShareCard({ pincode }: { pincode: string }) {
+export default function AutoShareCard({ pincode }: AutoShareCardProps) {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<AutoSharePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<AutoSharePost | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Load posts from localStorage
-  const loadPosts = () => {
+  // Form fields
+  const [fromLocation, setFromLocation] = useState("");
+  const [toLocation, setToLocation] = useState("");
+  const [seatsAvailable, setSeatsAvailable] = useState(2);
+  const [notes, setNotes] = useState("");
+
+  // Fetch posts
+  const fetchPosts = async () => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const allPosts: AutoSharePost[] = JSON.parse(stored);
-        const now = new Date();
-        // Filter active posts for this pincode
-        const active = allPosts.filter(
-          p => p.pincode === pincode && new Date(p.expiresAt) > now
-        );
-        setPosts(active);
-      }
+      setLoading(true);
+      const data = await AutoShareService.getPosts(pincode);
+      setPosts(data);
     } catch (error) {
-      console.error('Error loading posts:', error);
+      console.error("Error fetching posts:", error);
+      toast.error("Failed to load rides");
     } finally {
       setLoading(false);
     }
   };
 
-  // Save posts to localStorage
-  const savePosts = (postsToSave: AutoSharePost[]) => {
+  // Subscribe to real-time updates
+  useEffect(() => {
+    fetchPosts();
+
+    const unsubscribe = AutoShareService.subscribeToUpdates(pincode, (payload) => {
+      console.log("Real-time update:", payload);
+      // Refetch posts on any change
+      fetchPosts();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [pincode]);
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please sign in to post rides");
+      return;
+    }
+
+    if (!fromLocation.trim() || !toLocation.trim()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const allPosts: AutoSharePost[] = stored ? JSON.parse(stored) : [];
-      
-      // Remove expired posts and add/update new ones
-      const now = new Date();
-      const activePosts = allPosts.filter(p => new Date(p.expiresAt) > now);
-      
-      // Merge with new posts
-      const updatedPosts = [...activePosts];
-      postsToSave.forEach(newPost => {
-        const existingIndex = updatedPosts.findIndex(p => p.id === newPost.id);
-        if (existingIndex >= 0) {
-          updatedPosts[existingIndex] = newPost;
-        } else {
-          updatedPosts.push(newPost);
-        }
-      });
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPosts));
+      setSubmitting(true);
+
+      if (editingPost) {
+        // Update existing post
+        await AutoShareService.updatePost(editingPost.id, {
+          from_location: fromLocation,
+          to_location: toLocation,
+          seats_available: seatsAvailable,
+          notes: notes || undefined,
+        });
+        toast.success("Ride updated successfully!");
+      } else {
+        // Create new post
+        await AutoShareService.createPost(
+          {
+            from_location: fromLocation,
+            to_location: toLocation,
+            seats_available: seatsAvailable,
+            notes: notes || undefined,
+            pincode,
+          },
+          user.id
+        );
+        toast.success("Ride posted successfully!");
+      }
+
+      // Reset form
+      resetForm();
+      setFormOpen(false);
     } catch (error) {
-      console.error('Error saving posts:', error);
+      console.error("Error submitting ride:", error);
+      toast.error("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  async function fetchPosts() {
-    setLoading(true);
-    loadPosts();
-  }
+  // Reset form
+  const resetForm = () => {
+    setFromLocation("");
+    setToLocation("");
+    setSeatsAvailable(2);
+    setNotes("");
+    setEditingPost(null);
+  };
 
-  async function addPost(e: any) {
-    e.preventDefault();
-    const form = new FormData(e.target);
-    const body = {
-      user: form.get("user") as string,
-      from: form.get("from") as string,
-      to: form.get("to") as string,
-      seatsAvailable: Number(form.get("seats")),
-      pincode
-    };
+  // Edit post
+  const handleEdit = (post: AutoSharePost) => {
+    setEditingPost(post);
+    setFromLocation(post.from_location);
+    setToLocation(post.to_location);
+    setSeatsAvailable(post.seats_available);
+    setNotes(post.notes || "");
+    setFormOpen(true);
+  };
 
+  // Delete post
+  const handleDelete = async (postId: string) => {
+    if (!confirm("Are you sure you want to delete this ride?")) return;
+
+    try {
+      await AutoShareService.deletePost(postId);
+      toast.success("Ride deleted");
+    } catch (error) {
+      toast.error("Failed to delete ride");
+    }
+  };
+
+  // Mark as filled
+  const handleMarkFilled = async (postId: string) => {
+    try {
+      await AutoShareService.markAsFilled(postId);
+      toast.success("Ride marked as filled");
+    } catch (error) {
+      toast.error("Failed to update ride");
+    }
+  };
+
+  // Calculate time remaining
+  const getTimeRemaining = (expiresAt: string) => {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 30 * 60000); // 30 mins
+    const expiry = new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+    const minutes = Math.floor(diff / 60000);
 
-    const post: AutoSharePost = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      ...body,
-      timestamp: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-    };
+    if (minutes < 0) return "Expired";
+    if (minutes < 5) return `${minutes}m (Expiring soon!)`;
+    return `${minutes}m remaining`;
+  };
 
-    const updatedPosts = [...posts, post];
-    setPosts(updatedPosts);
-    savePosts(updatedPosts);
-    
-    setFormOpen(false);
-    // No need to refetch since we updated locally
-  }
-
-  useEffect(() => {
-    fetchPosts();
-    const interval = setInterval(fetchPosts, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, [pincode]);
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "filled":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "cancelled":
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      case "expired":
+        return "bg-red-100 text-red-700 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
 
   return (
-    <Card className="p-3 border border-green-200">
-      <h4 className="font-medium mb-2">🚖 Auto Share ({pincode})</h4>
-      
-      <video 
-        src={rickshawVideo} 
+    <Card className="p-3 border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-medium flex items-center gap-2">
+          🚖 Auto Share
+          <Badge variant="outline" className="text-xs">
+            {pincode}
+          </Badge>
+        </h4>
+        {user && (
+          <Button
+            size="sm"
+            onClick={() => {
+              resetForm();
+              setFormOpen(!formOpen);
+            }}
+            variant={formOpen ? "ghost" : "default"}
+            className="h-7 text-xs"
+          >
+            {formOpen ? "Cancel" : "Post Ride"}
+          </Button>
+        )}
+      </div>
+
+      {/* Video */}
+      <video
+        src={rickshawVideo}
         autoPlay
         muted
         loop
         playsInline
-        onError={() => {/* Optionally handle video load error here */}}
-        onLoadedData={() => setVideoError(null)}
-      >
-        <p>Your browser does not support the video tag or the video failed to load.</p>
-      </video>
-      {videoError && (
-        <div className="text-xs text-red-500 mb-2">{videoError}</div>
-      )}
-      
-      {loading && <div>Loading rides…</div>}
+        className="w-full rounded-lg mb-2"
+        style={{ maxHeight: "120px", objectFit: "cover" }}
+      />
 
-      {!loading && posts.length === 0 && (
-        <div className="text-sm text-gray-600">No active rides right now.</div>
-      )}
-
-      <ul className="space-y-2">
-        {posts.map((p) => (
-          <li key={p.id} className="text-sm border-b pb-1">
-            <strong>{p.user}</strong>: {p.from} → {p.to} ({p.seatsAvailable} seats)
-            <div className="text-xs text-gray-500">
-              Posted {new Date(p.timestamp).toLocaleTimeString()}
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <Button className="mt-3" onClick={() => setFormOpen(!formOpen)}>
-        {formOpen ? "Cancel" : "Post Ride"}
-      </Button>
-
+      {/* Create/Edit Form */}
       {formOpen && (
-        <form onSubmit={addPost} className="mt-3 space-y-2">
-          <input name="user" placeholder="Your name" className="border p-1 w-full" required />
-          <input name="from" placeholder="From" className="border p-1 w-full" required />
-          <input name="to" placeholder="To" className="border p-1 w-full" required />
-          <input name="seats" type="number" placeholder="Seats available" className="border p-1 w-full" required />
-          <Button type="submit" className="w-full">Submit</Button>
+        <form onSubmit={handleSubmit} className="mb-3 space-y-2 p-3 bg-white rounded-lg border border-green-200">
+          <div className="text-sm font-medium text-gray-900">
+            {editingPost ? "Edit Ride" : "Post New Ride"}
+          </div>
+
+          <input
+            type="text"
+            placeholder="From (e.g., T. Nagar)"
+            value={fromLocation}
+            onChange={(e) => setFromLocation(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            required
+          />
+
+          <input
+            type="text"
+            placeholder="To (e.g., Anna Nagar)"
+            value={toLocation}
+            onChange={(e) => setToLocation(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            required
+          />
+
+          <div>
+            <label className="text-xs text-gray-600 block mb-1">Seats Available</label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={seatsAvailable}
+              onChange={(e) => setSeatsAvailable(Number(e.target.value))}
+              className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <textarea
+            placeholder="Additional notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+          />
+
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-green-600 hover:bg-green-700"
+            size="sm"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                {editingPost ? "Updating..." : "Posting..."}
+              </>
+            ) : editingPost ? (
+              "Update Ride"
+            ) : (
+              "Post Ride"
+            )}
+          </Button>
         </form>
       )}
 
-      <div className="mt-2 text-xs text-gray-500">
-        ⚠️ Posts expire automatically after 30 minutes.
+      {/* Posts List */}
+      <div className="space-y-2">
+        {loading ? (
+          <div className="text-center py-4 text-sm text-gray-500">
+            <Loader2 className="w-4 h-4 animate-spin mx-auto mb-1" />
+            Loading rides...
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-sm text-gray-600 text-center py-4 bg-white rounded-lg border border-dashed border-gray-300">
+            No active rides right now.
+            {user && <div className="text-xs mt-1">Be the first to post!</div>}
+          </div>
+        ) : (
+          posts.map((post) => {
+            const isOwner = user?.id === post.user_id;
+            const timeRemaining = getTimeRemaining(post.expires_at);
+
+            return (
+              <div
+                key={post.id}
+                className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
+                      {post.profiles?.full_name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">
+                        {post.profiles?.full_name || "Anonymous"}
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {timeRemaining}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Badge className={`${getStatusColor(post.status)} text-xs`}>
+                    {post.status}
+                  </Badge>
+                </div>
+
+                {/* Route */}
+                <div className="mb-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span className="font-medium truncate">{post.from_location}</span>
+                    <span className="text-gray-400">→</span>
+                    <span className="font-medium truncate">{post.to_location}</span>
+                  </div>
+                </div>
+
+                {/* Seats */}
+                <div className="flex items-center gap-1 text-sm text-gray-700 mb-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span>
+                    {post.seats_available} {post.seats_available === 1 ? "seat" : "seats"} available
+                  </span>
+                </div>
+
+                {/* Notes */}
+                {post.notes && (
+                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 mb-2">
+                    {post.notes}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="text-xs text-gray-500">
+                    {post.views_count} {post.views_count === 1 ? "view" : "views"}
+                  </div>
+
+                  {isOwner ? (
+                    <div className="flex items-center gap-1">
+                      {post.status === "active" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => handleEdit(post)}
+                          >
+                            <Edit2 className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                            onClick={() => handleMarkFilled(post.id)}
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            Mark Filled
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  ) : (
+                    post.status === "active" && (
+                      <Button size="sm" variant="outline" className="h-6 text-xs">
+                        Contact
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="mt-3 text-xs text-gray-500 flex items-start gap-1 bg-yellow-50 p-2 rounded border border-yellow-100">
+        <span>⚠️</span>
+        <span>Posts expire automatically after 30 minutes. {!user && "Sign in to post rides."}</span>
       </div>
     </Card>
   );

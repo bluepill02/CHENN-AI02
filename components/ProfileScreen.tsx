@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
-import { Switch } from './ui/switch';
-import { ScrollArea } from './ui/scroll-area';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { AchievementBadges } from './AchievementBadges';
 import { ChennaiIcons } from './IllustratedIcon';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -14,17 +14,83 @@ import { AppHealthCheck } from './AppHealthCheck';
 import DeploymentReadiness from './DeploymentReadiness';
 import { useLocation } from '../services/LocationService';
 import { useAuth } from './auth/SupabaseAuthProvider';
+import { ProfileService, type Profile } from '../services/ProfileService';
+import { toast } from 'sonner';
 import {
   MapPin,
   ChevronRight,
-  Navigation
+  Edit2,
+  Loader2,
+  User
 } from 'lucide-react';
 import profileCommunity from 'figma:asset/39dd468cce8081c14f345796484cc8b182dc6bb6.png';
 
 export function ProfileScreen() {
+  const { user, signOut } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit form state
+  const [editFullName, setEditFullName] = useState('');
+  const [editArea, setEditArea] = useState('');
+  const [editAvatarUrl, setEditAvatarUrl] = useState('');
+
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'status'>('overview');
   const { currentLocation, setLocationModalOpen, previousLocations } = useLocation();
-  const { signOut } = useAuth();
+
+  // Fetch profile on mount
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const loadProfile = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const data = await ProfileService.getProfile(user.id);
+      if (data) {
+        setProfile(data);
+        // Initialize edit form with current values
+        setEditFullName(data.full_name || '');
+        setEditArea(data.area || '');
+        setEditAvatarUrl(data.avatar_url || '');
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditProfile = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+      const updated = await ProfileService.updateProfile(user.id, {
+        full_name: editFullName || undefined,
+        area: editArea || undefined,
+        avatar_url: editAvatarUrl || undefined,
+      });
+
+      if (updated) {
+        setProfile(updated);
+        setEditDialogOpen(false);
+        toast.success('Profile updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const userStats = [
     {
@@ -73,13 +139,6 @@ export function ProfileScreen() {
       rarity: 'Rare'
     },
     {
-      title: 'கோவில் Organizer',
-      description: 'Community event நடத்தியது',
-      icon: '🏛️',
-      earned: false,
-      rarity: 'Epic'
-    },
-    {
       title: 'Trust-ed Chennai-ite',
       description: '4.5+ நம்பிக்கை score',
       icon: '⭐',
@@ -92,13 +151,6 @@ export function ProfileScreen() {
       icon: '🌊',
       earned: true,
       rarity: 'Rare'
-    },
-    {
-      title: 'தமிழ் Pride Ambassador',
-      description: 'Tamil culture promote செய்தது',
-      icon: '🏺',
-      earned: false,
-      rarity: 'Epic'
     }
   ];
 
@@ -144,6 +196,24 @@ export function ProfileScreen() {
     }
   ];
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 to-yellow-25">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
       {/* Profile community background */}
@@ -161,24 +231,95 @@ export function ProfileScreen() {
         <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-8 rounded-b-[2rem]">
           <div className="flex items-center gap-4 mb-6">
             <Avatar className="w-20 h-20">
-              <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-2xl">PR</span>
-              </div>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.full_name || 'User'} className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-2xl">{getInitials(profile?.full_name)}</span>
+                </div>
+              )}
             </Avatar>
             <div className="flex-1">
-              <h1 className="text-white text-2xl font-bold">Priya Raman</h1>
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-white text-2xl font-bold">{profile?.full_name || 'User'}</h1>
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="full_name">Full Name</Label>
+                        <Input
+                          id="full_name"
+                          value={editFullName}
+                          onChange={(e) => setEditFullName(e.target.value)}
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="area">Area</Label>
+                        <Input
+                          id="area"
+                          value={editArea}
+                          onChange={(e) => setEditArea(e.target.value)}
+                          placeholder="e.g., Mylapore, Chennai"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="avatar_url">Avatar URL</Label>
+                        <Input
+                          id="avatar_url"
+                          value={editAvatarUrl}
+                          onChange={(e) => setEditAvatarUrl(e.target.value)}
+                          placeholder="https://..."
+                        />
+                        <p className="text-xs text-gray-500">Enter a URL to your profile picture</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditDialogOpen(false)}
+                        disabled={saving}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleEditProfile}
+                        disabled={saving}
+                        className="bg-orange-500 hover:bg-orange-600"
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex items-center gap-2 text-orange-100 mb-2">
                 <MapPin className="w-4 h-4" />
-                <span>Mylapore, Chennai</span>
+                <span>{profile?.area || 'Chennai'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-white/20 text-white border-white/30">
                   <span className="mr-1">🛡️</span>
                   Verified Neighbor
-                </Badge>
-                <Badge className="bg-yellow-500/20 text-yellow-100 border-yellow-400/30">
-                  <span className="mr-1">🏆</span>
-                  Top Helper
                 </Badge>
               </div>
             </div>
@@ -244,8 +385,11 @@ export function ProfileScreen() {
               <Card className="p-4 bg-card backdrop-blur-sm border-orange-200 shadow-lg shadow-orange-100/50">
                 <h3 className="font-medium mb-2">About</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Born and raised in Chennai. Love exploring local food spots and helping neighbors.
-                  இங்கு 15 வருடங்களாக வசிக்கிறேன். Always happy to share recommendations! 🙏
+                  {profile?.full_name ? (
+                    `Chennai community member. Area: ${profile.area || 'Chennai'}.`
+                  ) : (
+                    'Update your profile to add more information about yourself!'
+                  )}
                 </p>
               </Card>
             </div>

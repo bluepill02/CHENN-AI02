@@ -1,5 +1,5 @@
 {
-      "name": "Chennai Community App (Copy)",
+      "name": "chennai-community-app",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
@@ -64,6 +64,7 @@
       "scripts": {
             "dev": "vite",
             "build": "vite build",
-            "test": "vitest"
+            "test": "vitest",
+            "generate:env-types": "node scripts/generate-env-types.js"
       }
 }

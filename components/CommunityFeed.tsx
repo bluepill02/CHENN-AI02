@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -18,13 +19,14 @@ import { AiService } from '../services/AiService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import communityScenes from 'figma:asset/39dd468cce8081c14f345796484cc8b182dc6bb6.png';
 import { toast } from 'sonner';
+import { PostSkeleton } from './SkeletonLoaders';
 
 interface CommunityFeedProps {
   userLocation?: any;
-  onShowLiveUpdates?: () => void;
 }
 
-export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeedProps) {
+export function CommunityFeed({ userLocation }: CommunityFeedProps) {
+  const navigate = useNavigate();
   const [showChennaiPride, setShowChennaiPride] = useState(false);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -279,7 +281,7 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
           <Button
             variant="outline"
             className="flex-col h-auto py-3 border-orange-200 hover:bg-orange-50"
-            onClick={onShowLiveUpdates}
+            onClick={() => navigate('/live')}
           >
             <Zap className="w-5 h-5 mb-1" />
             <span className="text-xs">Live Updates</span>
@@ -348,9 +350,11 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
       {/* Community posts */}
       <div className="px-6 space-y-4 pb-20">
         {loading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-          </div>
+          <>
+            <PostSkeleton />
+            <PostSkeleton />
+            <PostSkeleton />
+          </>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
             No posts yet. Be the first to share!
