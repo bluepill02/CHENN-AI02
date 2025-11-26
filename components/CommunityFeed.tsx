@@ -514,7 +514,11 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
                   <div className="relative flex-shrink-0">
                     <Avatar className="w-10 h-10">
                       {post.profiles?.avatar_url ? (
-                        <img src={post.profiles.avatar_url} alt={post.profiles.full_name} className="w-full h-full object-cover rounded-full" />
+                        <ImageWithFallback
+                          src={post.profiles.avatar_url}
+                          alt={post.profiles.full_name || 'User avatar'}
+                          className="w-full h-full object-cover rounded-full"
+                        />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-sm">
