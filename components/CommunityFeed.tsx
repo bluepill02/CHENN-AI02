@@ -38,6 +38,7 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState('');
+  const [newPostCategory, setNewPostCategory] = useState<string>('general');
   const [isPosting, setIsPosting] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -289,7 +290,7 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
         textColor: 'text-gray-700',
         borderColor: 'border-gray-200',
         icon: ChennaiIcons.family,
-        tamil: 'பொதுவானது',
+        tamil: '��ொதுவானது',
         english: 'General'
       }
     };
