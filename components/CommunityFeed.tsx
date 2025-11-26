@@ -16,6 +16,7 @@ import { useExternalData } from '../services/ExternalDataService';
 import { PostService, Post } from '../services/PostService';
 import { AiService } from '../services/AiService';
 import { useAuth } from './auth/SupabaseAuthProvider';
+import { supabase } from '../services/supabaseClient';
 import communityScenes from 'figma:asset/39dd468cce8081c14f345796484cc8b182dc6bb6.png';
 import { toast } from 'sonner';
 
