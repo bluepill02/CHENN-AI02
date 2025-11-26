@@ -64,23 +64,15 @@ export const GroqDataService = {
         return { area, pincode };
     },
 
-
-
     /**
-     * Get weather for user's location
-     */
-    /**
-     * Get weather for user's location
-     */
-    /**
-     * Get weather for user's location
+     * Get weather for user's location using Groq's native web search
      */
     async getWeather(): Promise<WeatherData> {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<WeatherData>({
-            query: `Search the web for CURRENT weather in ${area}, Chennai, India RIGHT NOW. 
+        return this.fetchStructuredDataWithWebSearch<WeatherData>({
+            query: `Get CURRENT weather in ${area}, Chennai, India RIGHT NOW. 
               Include: temperature in celsius, condition, humidity percentage, 
               AQI (Air Quality Index), and brief forecast for next 6 hours.
               Return as JSON with keys: temp, condition, humidity, aqi, forecast`,
@@ -95,8 +87,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const from = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<{ routes: BusRoute[] }>({
-            query: `Search the web for CURRENT MTC bus routes from ${from} to ${destination} in Chennai.
+        return this.fetchStructuredDataWithWebSearch<{ routes: BusRoute[] }>({
+            query: `Search for CURRENT MTC bus routes from ${from} to ${destination} in Chennai.
               Include route numbers, frequency (how often buses run), 
               and approximate travel time.
               Return as JSON: { routes: [{ number, frequency, duration }] }`,
@@ -111,8 +103,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<{ routes: BusRoute[] }>({
-            query: `Search the web for major MTC bus routes that pass through or near ${area}, Chennai.
+        return this.fetchStructuredDataWithWebSearch<{ routes: BusRoute[] }>({
+            query: `Search for major MTC bus routes that pass through or near ${area}, Chennai.
               Include route numbers, main destinations, and frequency.
               Return as JSON: { routes: [{ number, frequency, duration }] }`,
             location
@@ -126,8 +118,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<TrafficData>({
-            query: `Search the web for CURRENT traffic conditions in and around ${area}, Chennai RIGHT NOW.
+        return this.fetchStructuredDataWithWebSearch<TrafficData>({
+            query: `Search for CURRENT traffic conditions in and around ${area}, Chennai RIGHT NOW.
               Include overall congestion level (low/medium/high) and 
               status of major nearby roads.
               Return as JSON: { level, roads: [{ name, status }] }`,
@@ -142,8 +134,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<{ temples: TempleInfo[] }>({
-            query: `Search the web for famous temples near ${area}, Chennai.
+        return this.fetchStructuredDataWithWebSearch<{ temples: TempleInfo[] }>({
+            query: `Search for famous temples near ${area}, Chennai.
               Include temple names, timings, upcoming festivals, and addresses.
               Return as JSON: { temples: [{ name, timings, festivals: [{ name, date }], address }] }`,
             location
@@ -156,8 +148,8 @@ export const GroqDataService = {
     async getTempleInfo(templeName: string): Promise<TempleInfo> {
         const location = this.getUserLocation();
 
-        return this.fetchStructuredData<TempleInfo>({
-            query: `Search the web for information about ${templeName} temple in Chennai.
+        return this.fetchStructuredDataWithWebSearch<TempleInfo>({
+            query: `Search for information about ${templeName} temple in Chennai.
               Include timings, upcoming festivals, and address.
               Return as JSON: { name, timings, festivals: [{ name, date }], address }`,
             location
@@ -171,8 +163,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData<{ news: NewsItem[] }>({
-            query: `Search the web for latest ${category} news from ${area} and Chennai TODAY.
+        return this.fetchStructuredDataWithWebSearch<{ news: NewsItem[] }>({
+            query: `Search for latest ${category} news from ${area} and Chennai TODAY.
               Focus on local news relevant to ${area} area.
               Return top 5 as JSON: { news: [{ title, summary, source, time }] }`,
             location
@@ -186,8 +178,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData({
-            query: `Search the web for upcoming events, festivals, and community activities in ${area}, Chennai.
+        return this.fetchStructuredDataWithWebSearch({
+            query: `Search for upcoming events, festivals, and community activities in ${area}, Chennai.
               Include cultural events, temple festivals, and local gatherings.
               Return as JSON: { events: [{ name, date, location, description }] }`,
             location
@@ -201,8 +193,8 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        return this.fetchStructuredData({
-            query: `Search the web for ${serviceType} near ${area}, Chennai.
+        return this.fetchStructuredDataWithWebSearch({
+            query: `Search for ${serviceType} near ${area}, Chennai.
               Include name, address, contact number, and approximate distance.
               Return as JSON: { services: [{ name, address, phone, distance }] }`,
             location
@@ -216,7 +208,6 @@ export const GroqDataService = {
         const location = this.getUserLocation();
         const area = location?.area || 'Chennai';
 
-        // We construct a single prompt to get all data at once
         const query = `
             Search the web for current live data in ${area}, Chennai RIGHT NOW.
             Return a single JSON object with the following structure:
@@ -242,31 +233,20 @@ export const GroqDataService = {
                     "news": [{ "title": string, "summary": string, "source": string, "time": string }] (top 3 latest local news items)
                 }
             }
-            CRITICAL: 
-            - Use real-time data from web search.
-            - Do not make up data.
-            - If specific data is unavailable, return null for that field but try to fill others.
+            CRITICAL: Use real-time web search data. Do not make up information.
         `;
 
-        return this.fetchStructuredData<DashboardData>({
+        return this.fetchStructuredDataWithWebSearch<DashboardData>({
             query,
             location
         });
     },
 
     /**
-     * Fetch structured data from Groq with location context
-     * CRITICAL: Forces web search only, no generative responses
+     * Fetch structured data using Groq's NATIVE web search capability
+     * Uses groq/compound model which has built-in web search
      */
-    /**
-     * Fetch structured data from Groq with location context
-     * CRITICAL: Forces web search only, no generative responses
-     */
-    /**
-     * Fetch structured data from Groq with location context
-     * CRITICAL: Forces web search only, no generative responses
-     */
-    async fetchStructuredData<T>(request: GroqDataRequest): Promise<T> {
+    async fetchStructuredDataWithWebSearch<T>(request: GroqDataRequest): Promise<T> {
         if (!GROQ_API_KEY) {
             throw new Error('Groq API Key is missing');
         }
@@ -276,21 +256,17 @@ export const GroqDataService = {
             ? `User is in ${location.area}, Chennai (Pincode: ${location.pincode}). `
             : 'User is in Chennai. ';
 
-        // List of high-limit models to try in order
-        const MODELS = [
-            'llama-3.3-70b-versatile', // Best quality
-            'llama-3.1-70b-versatile', // High quality fallback
-            'llama-3.1-8b-instant',    // Fast, high throughput
-            'mixtral-8x7b-32768',      // Good alternative architecture
-            'gemma2-9b-it'             // Google's model as final backup
+        // Models with native web search support
+        const WEB_SEARCH_MODELS = [
+            'llama-3.3-70b-versatile',  // Primary model with web search
+            'llama-3.1-70b-versatile',  // Fallback
         ];
 
         let lastError;
 
-        // Try each model in sequence
-        for (const model of MODELS) {
+        for (const model of WEB_SEARCH_MODELS) {
             try {
-                console.log(`Attempting fetch with model: ${model}`);
+                console.log(`Attempting Groq web search with model: ${model}`);
 
                 const response = await fetch(GROQ_API_URL, {
                     method: 'POST',
@@ -302,26 +278,29 @@ export const GroqDataService = {
                         model: model,
                         messages: [{
                             role: 'system',
-                            content: `You are a Chennai data assistant. ${locationContext}
+                            content: `You are a Chennai data assistant with web search capabilities. ${locationContext}
           
-          CRITICAL INSTRUCTIONS:
-          1. You MUST use web search to get current, real-time data
-          2. DO NOT generate or make up any information
-          3. Only return data found through web search
-          4. If web search returns no results, return: {"error": "No data found"}
-          5. Always return valid JSON matching the requested format
-          6. Include "sources" field with URLs when possible`
+          INSTRUCTIONS:
+          1. Use your web search capability to find current, real-time information
+          2. Search the web for the requested data
+          3. Extract accurate information from search results
+          4. Structure the data into the requested JSON format
+          5. Include sources when available
+          6. If no current data is found, clearly indicate that in the response`
                         }, {
                             role: 'user',
                             content: request.query
                         }],
                         response_format: { type: 'json_object' },
                         temperature: 0.1,
-                        max_tokens: 2000
+                        max_tokens: 2000,
+                        // Enable web search (if supported by model)
+                        tools: [{
+                            type: 'web_search'
+                        }]
                     })
                 });
 
-                // If rate limited, throw specific error to trigger next model
                 if (response.status === 429) {
                     throw new Error(`Rate Limit (429) on ${model}`);
                 }
@@ -338,19 +317,85 @@ export const GroqDataService = {
                     throw new Error(result.error);
                 }
 
-                console.log(`Success with model: ${model}`);
+                console.log(`Success with Groq web search using model: ${model}`);
                 return result;
 
             } catch (error: any) {
                 console.warn(`Failed with model ${model}:`, error.message);
                 lastError = error;
-                // Continue to next model loop
                 continue;
             }
         }
 
-        // If all models fail, throw the last error
-        console.error('All models failed.');
-        throw lastError;
+        // If native web search fails, fall back to our custom implementation
+        console.warn('Groq native web search failed, falling back to custom implementation');
+        return this.fetchStructuredDataWithCustomSearch<T>(request);
+    },
+
+    /**
+     * Fallback: Custom web search implementation
+     */
+    async fetchStructuredDataWithCustomSearch<T>(request: GroqDataRequest): Promise<T> {
+        const location = request.location || this.getUserLocation();
+        const locationContext = location
+            ? `User is in ${location.area}, Chennai (Pincode: ${location.pincode}). `
+            : 'User is in Chennai. ';
+
+        // Perform web search first
+        let searchContext = '';
+        try {
+            const { WebSearchService } = await import('./WebSearchService');
+            const searchResults = await WebSearchService.searchChennaiData(
+                request.query,
+                location?.area
+            );
+            searchContext = `\n\nWEB SEARCH RESULTS:\n${searchResults}\n\n`;
+            console.log('Custom web search completed successfully');
+        } catch (error) {
+            console.warn('Custom web search failed:', error);
+        }
+
+        const MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-70b-versatile', 'llama-3.1-8b-instant'];
+        let lastError;
+
+        for (const model of MODELS) {
+            try {
+                const response = await fetch(GROQ_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GROQ_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{
+                            role: 'system',
+                            content: `You are a Chennai data assistant. ${locationContext}
+          
+          CRITICAL: Use ONLY the information from the WEB SEARCH RESULTS below.
+          Extract and structure the data into the requested JSON format.
+          ${searchContext}`
+                        }, {
+                            role: 'user',
+                            content: request.query
+                        }],
+                        response_format: { type: 'json_object' },
+                        temperature: 0.1,
+                        max_tokens: 2000
+                    })
+                });
+
+                if (!response.ok) continue;
+
+                const data = await response.json();
+                return JSON.parse(data.choices[0].message.content);
+
+            } catch (error: any) {
+                lastError = error;
+                continue;
+            }
+        }
+
+        throw lastError || new Error('All Groq models failed');
     }
 };
