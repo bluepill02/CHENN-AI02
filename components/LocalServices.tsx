@@ -1,137 +1,227 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
-import { MapPin, Star, Phone, Clock, Navigation } from 'lucide-react';
-import { LanguageToggle } from './LanguageToggle';
-import { useLocation, getLocationSpecificContent } from '../services/LocationService';
+import { MapPin, Star, Phone, Clock, Navigation, Search, X, Plus, Briefcase, CheckCircle2, ShieldCheck, MessageSquare } from 'lucide-react';
+import { useLocation } from '../services/LocationService';
+import { BusinessService, type BusinessProfile, type ServiceReview } from '../services/BusinessService';
+import { useAuth } from './auth/SupabaseAuthProvider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { toast } from 'sonner';
 import servicesMarketplace from 'figma:asset/4108c802b3e078fed252c2b3f591ce76fb2675b2.png';
+import { Avatar } from './ui/avatar';
 
 interface LocalServicesProps {
   userLocation?: any;
 }
 
+interface DynamicCategory {
+  id: string;
+  name: string;
+  count: string;
+  iconSrc: string;
+  iconEmoji: string;
+}
+
 export function LocalServices({ userLocation }: LocalServicesProps) {
+  const { user } = useAuth();
   const { currentLocation, setLocationModalOpen } = useLocation();
-  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [businesses, setBusinesses] = useState<BusinessProfile[]>([]);
+  const [categories, setCategories] = useState<DynamicCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Dialog States
+  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+  const [isPartnerOpen, setIsPartnerOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBusinessForReview, setSelectedBusinessForReview] = useState<BusinessProfile | null>(null);
+
+  // Partner Form State
+  const [partnerForm, setPartnerForm] = useState({
+    business_name: '',
+    category: '',
+    location: '',
+    contact_number: '',
+    description: '',
+    price_range: ''
+  });
+
+  // Review Form State
+  const [reviewForm, setReviewForm] = useState({
+    rating: '5',
+    review_text: ''
+  });
+
   // Use location from context if available, otherwise use prop
   const activeLocation = currentLocation || userLocation;
-  const locationContent = getLocationSpecificContent(activeLocation);
-  const serviceCategories = [
-    {
-      iconSrc: ChennaiIcons.food,
-      iconEmoji: '🍽️',
-      name: 'சாப்பாடு • Mess/Hotels',
-      color: 'from-orange-400 to-red-500',
-      count: '127 அருகில்',
-      description: 'Authentic தமிழ் food'
-    },
-    {
-      iconSrc: ChennaiIcons.auto,
-      iconEmoji: '🛺',
-      name: 'Auto/Share • போக்குவரத்து',
-      color: 'from-green-400 to-teal-500',
-      count: '45 drivers',
-      description: 'Trusted local drivers'
-    },
-    {
-      iconSrc: ChennaiIcons.shop,
-      iconEmoji: '🏪',
-      name: 'கடைகள் • Local Shops',
-      color: 'from-blue-400 to-purple-500',
-      count: '89 கடைகள்',
-      description: 'From groceries to silk'
-    },
-    {
-      iconSrc: ChennaiIcons.repair,
-      iconEmoji: '🔧',
-      name: 'பழுது • Repairs',
-      color: 'from-yellow-400 to-orange-500',
-      count: '67 வேலை',
-      description: 'Bike, cycle, electronics'
-    },
-    {
-      iconSrc: ChennaiIcons.medical,
-      iconEmoji: '🏥',
-      name: 'மருத்துவம் • Healthcare',
-      color: 'from-red-400 to-pink-500',
-      count: '56 clinics',
-      description: 'Tamil-speaking doctors'
-    },
-    {
-      iconSrc: ChennaiIcons.education,
-      iconEmoji: '📚',
-      name: 'படிப்பு • Tuition',
-      color: 'from-purple-400 to-pink-500',
-      count: '34 centers',
-      description: 'Tamil + English medium'
-    }
-  ];
 
-  const featuredServices = [
-    {
-      id: 1,
-      name: 'Raman Anna Auto Works',
-      category: 'வாகன் பழுது • Vehicle Repair',
-      location: 'Mylapore Main Road • மயிலாப்பூர்',
-      rating: 4.8,
-      distance: '300m',
-      price: '₹200-500',
-      isOpen: true,
-      image: 'https://images.unsplash.com/photo-1486754735734-325b5831c3ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-      speciality: 'நம்பகமான service, 15 வருஷ அனுபவம்',
-      trusted: true,
-      language: 'தமிழ் + English',
-      communityScore: '4.8/5'
-    },
-    {
-      id: 2,
-      name: 'சரஸ்வதி அம்மா Mess',
-      category: 'Traditional Tamil Food',
-      location: 'Luz Corner • லூஸ் கார்னர்',
-      rating: 4.9,
-      distance: '500m',
-      price: '₹80-150',
-      isOpen: true,
-      image: 'https://images.unsplash.com/photo-1652595802737-56d08ad31f09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-      speciality: 'சூடான இட்லி, authentic கூட்டு, home taste',
-      trusted: true,
-      language: 'தமிழ் பேசுவார்கள்',
-      communityScore: '4.9/5'
-    },
-    {
-      id: 3,
-      name: 'Dr. Lakshmi Clinic',
-      category: 'Family Doctor • குடும்ப மருத்துவர்',
-      location: 'Kapaleeshwarar Temple St',
-      rating: 4.7,
-      distance: '700m',
-      price: '₹300-600',
-      isOpen: false,
-      image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-      speciality: 'தமிழ்-ல பேசுவார், children specialist',
-      trusted: true,
-      language: 'தமிழ் + English',
-      communityScore: '4.7/5'
-    },
-    {
-      id: 4,
-      name: 'Kumar Auto Share',
-      category: 'Daily Commute • தினசரி பயணம்',
-      location: 'T.Nagar to OMR Route',
-      rating: 4.6,
-      distance: '200m pickup',
-      price: '₹80-120/day',
-      isOpen: true,
-      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-      speciality: 'Safe rides, women-friendly, AC auto',
-      trusted: true,
-      language: 'தமிழ் + हिंदी',
-      communityScore: '4.6/5'
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [fetchedBusinesses, fetchedCategories] = await Promise.all([
+        BusinessService.getBusinesses(),
+        BusinessService.getCategories()
+      ]);
+
+      setBusinesses(fetchedBusinesses);
+
+      // Map dynamic categories to icons
+      const mappedCategories = fetchedCategories.map((cat: any) => {
+        let iconSrc = ChennaiIcons.shop;
+        let iconEmoji = '🏪';
+
+        const lowerName = cat.name.toLowerCase();
+        if (lowerName.includes('food') || lowerName.includes('mess') || lowerName.includes('hotel')) {
+          iconSrc = ChennaiIcons.food;
+          iconEmoji = '🍽️';
+        } else if (lowerName.includes('auto') || lowerName.includes('transport') || lowerName.includes('travel')) {
+          iconSrc = ChennaiIcons.auto;
+          iconEmoji = '🛺';
+        } else if (lowerName.includes('repair') || lowerName.includes('mechanic') || lowerName.includes('service')) {
+          iconSrc = ChennaiIcons.repair;
+          iconEmoji = '🔧';
+        } else if (lowerName.includes('medical') || lowerName.includes('doctor') || lowerName.includes('clinic')) {
+          iconSrc = ChennaiIcons.medical;
+          iconEmoji = '🏥';
+        } else if (lowerName.includes('education') || lowerName.includes('tuition') || lowerName.includes('school')) {
+          iconSrc = ChennaiIcons.education;
+          iconEmoji = '📚';
+        }
+
+        return {
+          ...cat,
+          iconSrc,
+          iconEmoji
+        };
+      });
+      setCategories(mappedCategories);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load services.");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const filteredBusinesses = businesses.filter(b => {
+    const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
+    const matchesSearch = searchQuery
+      ? b.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.location.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesCategory && matchesSearch;
+  });
+
+  const handleCall = (phoneNumber: string) => {
+    toast.info(`Calling ${phoneNumber}...`);
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
+  const handleDirection = (query: string) => {
+    const encodedQuery = encodeURIComponent(query);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedQuery}`, '_blank');
+  };
+
+  const handleSuggestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSuggestOpen(false);
+    toast.success("Thanks! We'll verify and list this business soon.");
+  };
+
+  const handlePartnerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Please sign in to register your business!");
+      return;
+    }
+
+    try {
+      await BusinessService.createBusiness({
+        user_id: user.id,
+        business_name: partnerForm.business_name,
+        category: partnerForm.category,
+        location: partnerForm.location,
+        contact_number: partnerForm.contact_number,
+        description: partnerForm.description,
+        price_range: partnerForm.price_range
+      });
+      setIsPartnerOpen(false);
+      toast.success("Business registered successfully! We will verify it shortly.");
+      setPartnerForm({
+        business_name: '',
+        category: '',
+        location: '',
+        contact_number: '',
+        description: '',
+        price_range: ''
+      });
+      fetchData(); // Refresh list
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to register business. Please try again.");
+    }
+  };
+
+  const openReviewModal = (business: BusinessProfile) => {
+    setSelectedBusinessForReview(business);
+    setReviewModalOpen(true);
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!user || !selectedBusinessForReview) {
+      toast.error("Please sign in to review!");
+      return;
+    }
+
+    try {
+      await BusinessService.addReview({
+        business_id: selectedBusinessForReview.id,
+        user_id: user.id,
+        rating: parseInt(reviewForm.rating),
+        review_text: reviewForm.review_text,
+        is_verified_visit: false // Could be true if we had booking integration
+      });
+      toast.success("Review submitted! Thanks for helping the community.");
+      setReviewModalOpen(false);
+      setReviewForm({ rating: '5', review_text: '' });
+      fetchData(); // Refresh to show new rating
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit review.");
+    }
+  };
+
+  // Helper to determine trust badge
+  const getTrustBadge = (business: BusinessProfile) => {
+    if (business.is_verified) {
+      return (
+        <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] px-1.5 flex items-center gap-1">
+          <ShieldCheck className="w-3 h-3" /> Verified Partner
+        </Badge>
+      );
+    }
+    if (business.rating >= 4.5 && business.review_count > 5) {
+      return (
+        <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-[10px] px-1.5 flex items-center gap-1">
+          <Star className="w-3 h-3 fill-current" /> Community Choice
+        </Badge>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
@@ -143,151 +233,376 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {/* Content */}
       <div className="relative z-10">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-6 rounded-b-[2rem]">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h1 className="text-white text-2xl font-bold">நம்ம area சேவைகள் 🏪</h1>
-            <div className="flex items-center gap-2">
-              <p className="text-orange-100">
-                {activeLocation ? `Services in ${activeLocation.area}` : 'Local services தமிழ் style-ல'}
-              </p>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 px-2 text-orange-200 hover:text-white hover:bg-white/10"
-                onClick={() => setLocationModalOpen(true)}
-              >
-                <Navigation className="w-3 h-3" />
-              </Button>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-6 rounded-b-[2rem] shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h1 className="text-white text-2xl font-bold flex items-center gap-2">
+                நம்ம area சேவைகள் <span className="text-xl">🏪</span>
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-orange-100 text-sm">
+                  {activeLocation ? `Services in ${activeLocation.area}` : 'Local services தமிழ் style-ல'}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-orange-200 hover:text-white hover:bg-white/10"
+                  onClick={() => setLocationModalOpen(true)}
+                >
+                  <Navigation className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {/* Partner Button */}
+              <Dialog open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-white text-orange-600 hover:bg-orange-50 font-bold border-none shadow-sm">
+                    <Briefcase className="w-4 h-4 mr-1" /> Partner
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-orange-600 flex items-center gap-2">
+                      <Briefcase className="w-5 h-5" />
+                      Neenga Business Owner-a?
+                    </DialogTitle>
+                    <DialogDescription>
+                      Register your service for free and reach thousands of Chennai makkal!
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handlePartnerSubmit} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="p-name">Business Name / Unga Kadai Peyar</Label>
+                      <Input
+                        id="p-name"
+                        placeholder="e.g. Siva Cycles"
+                        required
+                        value={partnerForm.business_name}
+                        onChange={e => setPartnerForm({ ...partnerForm, business_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="p-category">Category</Label>
+                        <Input
+                          id="p-category"
+                          placeholder="e.g. Electrician, Mess"
+                          required
+                          value={partnerForm.category}
+                          onChange={e => setPartnerForm({ ...partnerForm, category: e.target.value })}
+                        />
+                        <p className="text-[10px] text-gray-500">Type your own category</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="p-phone">Phone Number</Label>
+                        <Input
+                          id="p-phone"
+                          placeholder="9876543210"
+                          required
+                          value={partnerForm.contact_number}
+                          onChange={e => setPartnerForm({ ...partnerForm, contact_number: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="p-location">Location / Area</Label>
+                      <Input
+                        id="p-location"
+                        placeholder="e.g. Anna Nagar West"
+                        required
+                        value={partnerForm.location}
+                        onChange={e => setPartnerForm({ ...partnerForm, location: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="p-desc">Description (Speciality)</Label>
+                      <Textarea
+                        id="p-desc"
+                        placeholder="We repair all types of bikes..."
+                        value={partnerForm.description}
+                        onChange={e => setPartnerForm({ ...partnerForm, description: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="p-price">Price Range (Optional)</Label>
+                      <Input
+                        id="p-price"
+                        placeholder="e.g. ₹200 - ₹500"
+                        value={partnerForm.price_range}
+                        onChange={e => setPartnerForm({ ...partnerForm, price_range: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="bg-orange-50 p-3 rounded-lg flex items-start gap-2 text-xs text-orange-800">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                      <p>By registering, you agree to provide accurate services to the community. Your profile will be verified before listing.</p>
+                    </div>
+
+                    <DialogFooter>
+                      <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold">
+                        Register My Business
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              {/* Suggest Button */}
+              <Dialog open={isSuggestOpen} onOpenChange={setIsSuggestOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm">
+                    <Plus className="w-4 h-4 mr-1" /> Suggest
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Suggest a Local Business</DialogTitle>
+                    <DialogDescription>
+                      Know a good shop or service? Let us know!
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSuggestSubmit} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Business Name</Label>
+                      <Input id="name" placeholder="e.g. Siva Cycles" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Input id="category" placeholder="e.g. Repair" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location</Label>
+                      <Input id="location" placeholder="e.g. Anna Nagar" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="details">Why do you recommend them?</Label>
+                      <Textarea id="details" placeholder="Good service, cheap price..." />
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white">Submit Suggestion</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            {activeLocation && (
+              <>
+                <span className="text-green-200 text-xs bg-green-900/20 px-2 py-0.5 rounded-full">🔒 Verified area</span>
+              </>
+            )}
+            <span className="text-yellow-200 text-xs bg-yellow-900/20 px-2 py-0.5 rounded-full">⭐ Community verified</span>
+            <span className="text-orange-100 text-xs bg-orange-900/20 px-2 py-0.5 rounded-full">Tamil-friendly</span>
+          </div>
+
+          {/* Search bar */}
+          <div className="mt-6">
+            <div className="bg-white rounded-xl px-4 py-3 flex items-center gap-3 shadow-inner">
+              <Search className="text-gray-400 w-5 h-5" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="இங்கே என்ன வேணும்? Search பண்ணுங்க..."
+                className="flex-1 outline-none text-gray-700 placeholder:text-gray-400"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          {activeLocation && (
-            <>
-              <span className="text-green-200 text-xs">🔒 Verified area only</span>
-              <span className="text-orange-200 text-xs">•</span>
-            </>
+
+        {/* Dynamic Service Categories */}
+        <div className="px-6 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-gray-800">Browse Categories</h2>
+            {selectedCategory && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCategory(null)}
+                className="text-orange-600 hover:text-orange-700 h-auto p-0 text-xs"
+              >
+                Clear Filter
+              </Button>
+            )}
+          </div>
+          {categories.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {categories.map((category) => (
+                <Card
+                  key={category.name}
+                  onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
+                  className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 ${selectedCategory === category.name
+                      ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
+                      : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
+                    }`}
+                >
+                  <div className="flex items-center justify-center mb-3">
+                    <IllustratedIcon
+                      src={category.iconSrc}
+                      alt={category.name}
+                      size="md"
+                      fallbackEmoji={category.iconEmoji}
+                      style="rounded"
+                    />
+                  </div>
+                  <h3 className="text-sm font-bold text-center mb-1 text-gray-800 capitalize">{category.name}</h3>
+                  <p className="text-xs text-gray-500 text-center mb-1">{category.count}</p>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 bg-white/50 rounded-lg border border-dashed border-gray-300">
+              <p>No categories yet. Be the first to register!</p>
+            </div>
           )}
-          <span className="text-yellow-200 text-xs">⭐ Community verified</span>
-          <span className="text-orange-200 text-xs">•</span>
-          <span className="text-orange-200 text-xs">Tamil-friendly</span>
         </div>
-        
-        {/* Search bar */}
-        <div className="mt-4">
-          <div className="bg-white rounded-xl px-4 py-3 flex items-center gap-3">
-            <span className="text-2xl">🔍</span>
-            <input 
-              placeholder="இங்கே என்ன வேணும்? Search பண்ணுங்க..." 
-              className="flex-1 outline-none text-gray-700"
-            />
+
+        {/* Featured services */}
+        <div className="px-6 pb-24">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-gray-800">
+              {selectedCategory ? 'Filtered Results' : 'Trusted Nearby'}
+            </h2>
+            <Badge className="bg-green-100 text-green-700 border-green-200">
+              ✅ Community Verified
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            {loading ? (
+              <div className="text-center py-10">Loading services...</div>
+            ) : filteredBusinesses.length === 0 ? (
+              <div className="text-center py-10 bg-white/50 rounded-xl border border-dashed border-gray-300">
+                <p className="text-gray-500">No services found matching your criteria.</p>
+                <Button
+                  variant="link"
+                  onClick={() => { setSearchQuery(''); setSelectedCategory(null); }}
+                  className="text-orange-500"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            ) : (
+              filteredBusinesses.map((service) => (
+                <Card key={service.id} className="p-4 bg-white border-orange-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex gap-3">
+                    {/* Service image */}
+                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                      <ImageWithFallback
+                        src={service.image_url || 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400'}
+                        alt={service.business_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Service details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="truncate pr-2">
+                          <h3 className="font-bold text-gray-900 truncate">{service.business_name}</h3>
+                          <p className="text-xs text-gray-600 truncate capitalize">{service.category}</p>
+                        </div>
+                        {getTrustBadge(service)}
+                      </div>
+
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                        <span className="text-xs text-gray-600 truncate">{service.location}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-0.5 rounded">
+                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                          <span className="text-xs font-medium">{service.rating?.toFixed(1) || 'New'}</span>
+                          <span className="text-[10px] text-gray-400">({service.review_count || 0})</span>
+                        </div>
+                        {service.price_range && <span className="text-xs text-gray-500">{service.price_range}</span>}
+                      </div>
+
+                      <p className="text-xs text-gray-500 mb-3 italic line-clamp-1">"{service.description}"</p>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs"
+                          onClick={() => handleCall(service.contact_number)}
+                        >
+                          <Phone className="w-3 h-3 mr-1.5" />
+                          Call
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50 h-8 text-xs"
+                          onClick={() => openReviewModal(service)}
+                        >
+                          <Star className="w-3 h-3 mr-1.5" />
+                          Rate
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Service categories */}
-      <div className="px-6 py-6">
-        <h2 className="mb-4">Categories</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {serviceCategories.map((category, index) => (
-            <Card key={index} className="p-4 bg-card backdrop-blur-sm border-orange-200 hover:shadow-lg transition-all cursor-pointer hover:scale-105 shadow-orange-100/50">
-              <div className="flex items-center justify-center mb-3">
-                <IllustratedIcon 
-                  src={category.iconSrc}
-                  alt={category.name}
-                  size="md"
-                  fallbackEmoji={category.iconEmoji}
-                  style="rounded"
-                />
-              </div>
-              <h3 className="text-sm font-medium mb-1">{category.name}</h3>
-              <p className="text-xs text-gray-500 mb-1">{category.count}</p>
-              <p className="text-xs text-gray-400">{category.description}</p>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Featured services */}
-      <div className="px-6 pb-20">
-        <div className="flex items-center justify-between mb-4">
-          <h2>Trusted Nearby</h2>
-          <Badge className="bg-green-100 text-green-700 border-green-200">
-            ✅ Community Verified
-          </Badge>
-        </div>
-        
-        <div className="space-y-4">
-          {featuredServices.map((service) => (
-            <Card key={service.id} className="p-4 bg-card border-orange-200 shadow-lg shadow-orange-100/50">
-              <div className="flex gap-3">
-                {/* Service image */}
-                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                  <ImageWithFallback
-                    src={service.image}
-                    alt={service.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                {/* Service details */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{service.name}</h3>
-                      <p className="text-sm text-gray-600">{service.category}</p>
-                    </div>
-                    {service.trusted && (
-                      <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs">
-                        🌟 Trusted
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-2">
-                    <MapPin className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-600">{service.location}</span>
-                    <span className="text-xs text-gray-400">•</span>
-                    <span className="text-xs text-gray-600">{service.distance}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                      <span className="text-xs">{service.rating}</span>
-                    </div>
-                    <span className="text-xs text-gray-600">{service.price}</span>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-gray-400" />
-                      <span className={`text-xs ${service.isOpen ? 'text-green-600' : 'text-red-600'}`}>
-                        {service.isOpen ? 'Open' : 'Closed'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs text-gray-500 mb-3">{service.speciality}</p>
-                  
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
-                      <Phone className="w-3 h-3 mr-1" />
-                      Call
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1 border-orange-200 text-orange-600">
-                      Direction
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-      </div>
+      {/* Review Modal */}
+      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Rate & Review</DialogTitle>
+            <DialogDescription>
+              Share your experience with <span className="font-bold text-gray-900">{selectedBusinessForReview?.business_name}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Rating</Label>
+              <Select
+                value={reviewForm.rating}
+                onValueChange={v => setReviewForm({ ...reviewForm, rating: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 ⭐ - Excellent</SelectItem>
+                  <SelectItem value="4">4 ⭐ - Good</SelectItem>
+                  <SelectItem value="3">3 ⭐ - Average</SelectItem>
+                  <SelectItem value="2">2 ⭐ - Poor</SelectItem>
+                  <SelectItem value="1">1 ⭐ - Terrible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Your Review</Label>
+              <Textarea
+                placeholder="How was the service? Was it worth the price?"
+                value={reviewForm.review_text}
+                onChange={e => setReviewForm({ ...reviewForm, review_text: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleReviewSubmit} className="bg-orange-500 hover:bg-orange-600 text-white">Submit Review</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

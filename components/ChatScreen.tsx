@@ -342,6 +342,9 @@ export function ChatScreen() {
                 key={index}
                 variant="outline"
                 className="flex-1 h-auto p-3 flex-col gap-2 border-orange-200 hover:bg-orange-50"
+                onClick={() => {
+                  toast.info(`${action.label} feature coming soon!`);
+                }}
               >
                 <IllustratedIcon
                   src={action.iconSrc}
@@ -352,8 +355,7 @@ export function ChatScreen() {
                 />
                 <span className="text-xs text-gray-600">{action.label}</span>
               </Button>
-            ))
-            }
+            ))}
           </div>
         </div>
 

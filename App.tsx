@@ -12,6 +12,7 @@ import { LocalServices } from './components/LocalServices';
 import { ChatScreen } from './components/ChatScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { LiveUpdatesScreen } from './components/LiveUpdatesScreen';
+import { ChennaiGethuScreen } from './components/ChennaiGethuScreen';
 import { useLocation as useLocationService } from './services/LocationService';
 
 function ProtectedRoutes() {
@@ -56,6 +57,7 @@ function ProtectedRoutes() {
         <Route path="chat" element={<ChatScreen />} />
         <Route path="profile" element={<ProfileScreen />} />
         <Route path="live" element={<LiveUpdatesScreenWrapper />} />
+        <Route path="chennai-gethu" element={<ChennaiGethuScreenWrapper />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Route>
     </Routes>
@@ -76,6 +78,11 @@ function LocalServicesWrapper() {
 function LiveUpdatesScreenWrapper() {
   const { currentLocation } = useLocationService();
   return <LiveUpdatesScreen userLocation={currentLocation} />;
+}
+
+function ChennaiGethuScreenWrapper() {
+  const { currentLocation } = useLocationService();
+  return <ChennaiGethuScreen userLocation={currentLocation} />;
 }
 
 export default function App() {

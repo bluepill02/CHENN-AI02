@@ -1,0 +1,259 @@
+api/autoShare.ts(3,28): error TS2307: Cannot find module 'uuid' or its corresponding type declarations.
+api/parking.ts(1,26): error TS2307: Cannot find module 'cheerio' or its corresponding type declarations.
+api/parking.ts(4,39): error TS6133: 'req' is declared but its value is never read.
+api/parking.ts(11,31): error TS7006: Parameter '_' implicitly has an 'any' type.
+api/parking.ts(11,34): error TS7006: Parameter 'el' implicitly has an 'any' type.
+api/parking.ts(12,42): error TS7006: Parameter '_' implicitly has an 'any' type.
+api/parking.ts(12,45): error TS7006: Parameter 'td' implicitly has an 'any' type.
+components/AchievementBadges.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+components/AchievementBadges.tsx(4,1): error TS6133: 'Button' is declared but its value is never read.
+components/AiAssistant.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/AiAssistant.tsx(4,70): error TS6133: 'SheetFooter' is declared but its value is never read.
+components/AiAssistant.tsx(7,46): error TS6133: 'X' is declared but its value is never read.
+components/AiAssistant.tsx(10,1): error TS6192: All imports in import declaration are unused.
+components/AiAssistant.tsx(20,9): error TS6133: 'user' is declared but its value is never read.
+components/AppHealthCheck.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/AutoShareCard.tsx(9,17): error TS6133: 'User' is declared but its value is never read.
+components/AutoShareCard.tsx(9,47): error TS6133: 'X' is declared but its value is never read.
+components/ChaloBusDisplay.tsx(6,53): error TS2307: Cannot find module '../services/BusApiHandler' or its corresponding type declarations.
+components/ChaloBusDisplay.tsx(7,35): error TS2307: Cannot find module '../services/ChaloProxyService' or its corresponding type declarations.
+components/ChatScreen.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/ChatScreen.tsx(12,10): error TS6133: 'MapPin' is declared but its value is never read.
+components/ChennaiPride.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+components/ChennaiPride.tsx(4,1): error TS6133: 'ImageWithFallback' is declared but its value is never read.
+components/DeploymentReadiness.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/DeploymentReadiness.tsx(4,1): error TS6133: 'Button' is declared but its value is never read.
+components/IllustratedIcon.tsx(13,3): error TS6133: 'src' is declared but its value is never read.
+components/IllustratedIcon.tsx(14,3): error TS6133: 'alt' is declared but its value is never read.
+components/IllustratedIcon.tsx(17,3): error TS6133: 'fallbackEmoji' is declared but its value is never read.
+components/LanguageToggle.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+components/LiveData/LiveAlertsPanel.tsx(1,53): error TS6133: 'AlertCircle' is declared but its value is never read.
+components/LiveDataWidget.tsx(6,10): error TS2614: Module '"./LiveData/LiveDataWidget"' has no exported member 'LiveDataWidget'. Did you mean to use 'import LiveDataWidget from "./LiveData/LiveDataWidget"' instead?
+components/LocalServices.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+components/LocalServices.tsx(8,1): error TS6133: 'LanguageToggle' is declared but its value is never read.
+components/LocalServices.tsx(21,9): error TS6133: 'locationContent' is declared but its value is never read.
+components/MappslDemo.tsx(10,11): error TS2339: Property 'validateChennaiPincode' does not exist on type 'ExternalDataContextType'.
+components/MappslDemo.tsx(10,35): error TS2339: Property 'getMappslLocationData' does not exist on type 'ExternalDataContextType'.
+components/PincodeVerification.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/PincodeVerification.tsx(26,9): error TS6133: 'chennaiPincodes' is declared but its value is never read.
+components/ProfileScreen.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/ProfileScreen.tsx(12,1): error TS6133: 'useLanguage' is declared but its value is never read.
+components/ProfileScreen.tsx(24,3): error TS6133: 'User' is declared but its value is never read.
+components/Shared/ApiStatusIndicator.tsx(14,11): error TS2339: Property 'isApiConnected' does not exist on type 'ExternalDataContextType'.
+components/Shared/ApiStatusIndicator.tsx(14,27): error TS2339: Property 'apiStatus' does not exist on type 'ExternalDataContextType'.
+components/Shared/index.tsx(3,34): error TS2307: Cannot find module './ConnectionStatus' or its corresponding type declarations.
+components/TamilKeyboard.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+components/TimetableCard.tsx(1,42): error TS2307: Cannot find module '@/utils/getConnectionStatusColor' or its corresponding type declarations.
+components/TimetableCard.tsx(4,23): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Badge.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/badge.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocationModal.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/TimetableCard.tsx(5,22): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Card.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/card.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ErrorBoundary.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/SkeletonLoaders.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LocationAwareLiveData.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/TwitterFeedCard.tsx(3,23): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Badge.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/badge.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocationModal.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/TwitterFeedCard.tsx(4,22): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Card.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/card.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ErrorBoundary.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/SkeletonLoaders.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LocationAwareLiveData.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/TwitterLocalCard.tsx(3,23): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Badge.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/badge.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocationModal.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Badge" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/badge' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/TwitterLocalCard.tsx(4,22): error TS1149: File name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/Card.tsx' differs from already included file name 'C:/Users/smvin/Downloads/CHENN-AI/components/ui/card.tsx' only in casing.
+  The file is in the program because:
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ErrorBoundary.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/CommunityFeed.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChennaiPride.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/SkeletonLoaders.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LocalServices.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChatScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TamilKeyboard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ProfileScreen.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AchievementBadges.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AppHealthCheck.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/DeploymentReadiness.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/AutoShareCard.tsx'
+    Imported via "./ui/card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/BusByPincodeCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/ChaloBusDisplay.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LiveDataWidget.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/MappslDemo.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/PincodeVerification.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TimetableCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterFeedCard.tsx'
+    Imported via "./ui/Card" from file 'C:/Users/smvin/Downloads/CHENN-AI/components/TwitterLocalCard.tsx'
+    Imported via './ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/WeatherDebug.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/LiveData/LocationAwareLiveData.tsx'
+    Imported via '../ui/card' from file 'C:/Users/smvin/Downloads/CHENN-AI/components/Shared/ApiStatusIndicator.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/smvin/Downloads/CHENN-AI/tsconfig.json'
+components/ui/alert.tsx(2,40): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/ui/aspect-ratio.tsx(3,39): error TS2307: Cannot find module '@radix-ui/react-aspect-ratio@1.1.2' or its corresponding type declarations.
+components/ui/badge.tsx(2,22): error TS2307: Cannot find module '@radix-ui/react-slot@1.1.2' or its corresponding type declarations.
+components/ui/badge.tsx(3,40): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/ui/breadcrumb.tsx(2,22): error TS2307: Cannot find module '@radix-ui/react-slot@1.1.2' or its corresponding type declarations.
+components/ui/breadcrumb.tsx(3,46): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/button.tsx(2,22): error TS2307: Cannot find module '@radix-ui/react-slot@1.1.2' or its corresponding type declarations.
+components/ui/button.tsx(3,40): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/ui/calendar.tsx(4,43): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/calendar.tsx(5,27): error TS2307: Cannot find module 'react-day-picker@8.10.1' or its corresponding type declarations.
+components/ui/calendar.tsx(63,22): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/calendar.tsx(66,23): error TS7031: Binding element 'className' implicitly has an 'any' type.
+components/ui/carousel.tsx(6,8): error TS2307: Cannot find module 'embla-carousel-react@8.6.0' or its corresponding type declarations.
+components/ui/carousel.tsx(7,39): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/chart.tsx(4,36): error TS2307: Cannot find module 'recharts@2.15.2' or its corresponding type declarations.
+components/ui/chart.tsx(182,23): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/chart.tsx(182,29): error TS7006: Parameter 'index' implicitly has an 'any' type.
+components/ui/chart.tsx(278,21): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/collapsible.tsx(3,39): error TS2307: Cannot find module '@radix-ui/react-collapsible@1.1.3' or its corresponding type declarations.
+components/ui/form.tsx(4,33): error TS2307: Cannot find module '@radix-ui/react-label@2.1.2' or its corresponding type declarations.
+components/ui/form.tsx(5,22): error TS2307: Cannot find module '@radix-ui/react-slot@1.1.2' or its corresponding type declarations.
+components/ui/form.tsx(14,8): error TS2307: Cannot find module 'react-hook-form@7.55.0' or its corresponding type declarations.
+components/ui/input-otp.tsx(4,43): error TS2307: Cannot find module 'input-otp@1.4.2' or its corresponding type declarations.
+components/ui/input-otp.tsx(5,27): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/input-otp.tsx(47,61): error TS2339: Property 'slots' does not exist on type '{}'.
+components/ui/pagination.tsx(6,8): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/pagination.tsx(75,7): error TS2783: 'size' is specified more than once, so this usage will be overwritten.
+components/ui/pagination.tsx(92,7): error TS2783: 'size' is specified more than once, so this usage will be overwritten.
+components/ui/radio-group.tsx(4,38): error TS2307: Cannot find module '@radix-ui/react-radio-group@1.2.3' or its corresponding type declarations.
+components/ui/radio-group.tsx(5,28): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/resizable.tsx(4,34): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/resizable.tsx(5,37): error TS2307: Cannot find module 'react-resizable-panels@2.1.7' or its corresponding type declarations.
+components/ui/select.tsx(4,34): error TS2307: Cannot find module '@radix-ui/react-select@2.1.6' or its corresponding type declarations.
+components/ui/select.tsx(9,8): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/sidebar.tsx(4,22): error TS2307: Cannot find module '@radix-ui/react-slot@1.1.2' or its corresponding type declarations.
+components/ui/sidebar.tsx(5,35): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/ui/sidebar.tsx(6,31): error TS2307: Cannot find module 'lucide-react@0.487.0' or its corresponding type declarations.
+components/ui/sidebar.tsx(270,17): error TS7006: Parameter 'event' implicitly has an 'any' type.
+components/ui/sonner.tsx(3,26): error TS2307: Cannot find module 'next-themes@0.4.6' or its corresponding type declarations.
+components/ui/sonner.tsx(4,49): error TS2307: Cannot find module 'sonner@2.0.3' or its corresponding type declarations.
+components/ui/toggle-group.tsx(4,39): error TS2307: Cannot find module '@radix-ui/react-toggle-group@1.1.2' or its corresponding type declarations.
+components/ui/toggle-group.tsx(5,35): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/ui/toggle.tsx(4,34): error TS2307: Cannot find module '@radix-ui/react-toggle@1.1.2' or its corresponding type declarations.
+components/ui/toggle.tsx(5,40): error TS2307: Cannot find module 'class-variance-authority@0.7.1' or its corresponding type declarations.
+components/WeatherDebug.tsx(8,20): error TS2339: Property 'apiStatus' does not exist on type 'ExternalDataContextType'.
+components/WeatherDebug.tsx(9,9): error TS6133: 'language' is declared but its value is never read.
+components/WeatherDebug.tsx(46,50): error TS2339: Property 'temperature' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(52,54): error TS2339: Property 'conditionTamil' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(58,60): error TS2339: Property 'windSpeed' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(61,47): error TS2339: Property 'uvIndex' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(64,50): error TS2339: Property 'airQuality' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(67,56): error TS2339: Property 'airQualityTamil' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(73,55): error TS2339: Property 'description' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(76,55): error TS2339: Property 'descriptionTamil' does not exist on type 'WeatherData'.
+components/WeatherDebug.tsx(79,51): error TS2339: Property 'lastUpdated' does not exist on type 'WeatherData'.
+components/WelcomeScreen.tsx(2,1): error TS6133: 'React' is declared but its value is never read.
+components/WelcomeScreen.tsx(8,1): error TS6133: 'chennaiCityscape' is declared but its value is never read.
+services/DuckDuckGoService.ts(58,24): error TS6133: 'from' is declared but its value is never read.
+services/DuckDuckGoService.ts(58,38): error TS6133: 'to' is declared but its value is never read.
+services/DuckDuckGoService.ts(66,22): error TS6133: 'area' is declared but its value is never read.
+services/DuckDuckGoService.ts(94,24): error TS6133: 'area' is declared but its value is never read.
+services/LanguageService.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+services/RealTimeDataService.tsx(1,8): error TS6133: 'React' is declared but its value is never read.

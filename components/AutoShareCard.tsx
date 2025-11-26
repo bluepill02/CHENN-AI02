@@ -6,7 +6,9 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "./auth/SupabaseAuthProvider";
 import { AutoShareService, type AutoSharePost } from "../services/AutoShareService";
 import { toast } from "sonner";
-import { Clock, User, MapPin, Users, Loader2, X, Edit2, Trash2, CheckCircle2 } from "lucide-react";
+import { Clock, MapPin, Users, Loader2, Edit2, Trash2, CheckCircle2, Phone, MessageCircle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 interface AutoShareCardProps {
   pincode: string;
@@ -25,6 +27,8 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   const [toLocation, setToLocation] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(2);
   const [notes, setNotes] = useState("");
+  const [contactVia, setContactVia] = useState<"chat" | "phone" | "both">("chat");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   // Fetch posts
   const fetchPosts = async () => {
@@ -69,8 +73,19 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       return;
     }
 
+    if ((contactVia === "phone" || contactVia === "both") && !phoneNumber.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
     try {
       setSubmitting(true);
+
+      // Prepend phone number to notes if applicable
+      let finalNotes = notes;
+      if (phoneNumber.trim()) {
+        finalNotes = `[PHONE:${phoneNumber.trim()}] ${notes}`;
+      }
 
       if (editingPost) {
         // Update existing post
@@ -78,7 +93,8 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
           from_location: fromLocation,
           to_location: toLocation,
           seats_available: seatsAvailable,
-          notes: notes || undefined,
+          notes: finalNotes || undefined,
+          contact_via: contactVia,
         });
         toast.success("Ride updated successfully!");
       } else {
@@ -88,8 +104,9 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             from_location: fromLocation,
             to_location: toLocation,
             seats_available: seatsAvailable,
-            notes: notes || undefined,
+            notes: finalNotes || undefined,
             pincode,
+            contact_via: contactVia,
           },
           user.id
         );
@@ -113,6 +130,8 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
     setToLocation("");
     setSeatsAvailable(2);
     setNotes("");
+    setContactVia("chat");
+    setPhoneNumber("");
     setEditingPost(null);
   };
 
@@ -122,7 +141,19 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
     setFromLocation(post.from_location);
     setToLocation(post.to_location);
     setSeatsAvailable(post.seats_available);
-    setNotes(post.notes || "");
+
+    // Extract phone number from notes if present
+    let currentNotes = post.notes || "";
+    let currentPhone = "";
+    const phoneMatch = currentNotes.match(/\[PHONE:(.*?)\]/);
+    if (phoneMatch) {
+      currentPhone = phoneMatch[1];
+      currentNotes = currentNotes.replace(phoneMatch[0], "").trim();
+    }
+
+    setNotes(currentNotes);
+    setPhoneNumber(currentPhone);
+    setContactVia(post.contact_via);
     setFormOpen(true);
   };
 
@@ -176,6 +207,15 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
     }
   };
 
+  // Helper to extract phone and clean notes for display
+  const parsePostContent = (notes?: string) => {
+    if (!notes) return { phone: null, cleanNotes: null };
+    const phoneMatch = notes.match(/\[PHONE:(.*?)\]/);
+    const phone = phoneMatch ? phoneMatch[1] : null;
+    const cleanNotes = notes.replace(/\[PHONE:.*?\]/, "").trim();
+    return { phone, cleanNotes };
+  };
+
   return (
     <Card className="p-3 border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
       <div className="flex items-center justify-between mb-2">
@@ -213,28 +253,30 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
 
       {/* Create/Edit Form */}
       {formOpen && (
-        <form onSubmit={handleSubmit} className="mb-3 space-y-2 p-3 bg-white rounded-lg border border-green-200">
+        <form onSubmit={handleSubmit} className="mb-3 space-y-3 p-3 bg-white rounded-lg border border-green-200">
           <div className="text-sm font-medium text-gray-900">
             {editingPost ? "Edit Ride" : "Post New Ride"}
           </div>
 
-          <input
-            type="text"
-            placeholder="From (e.g., T. Nagar)"
-            value={fromLocation}
-            onChange={(e) => setFromLocation(e.target.value)}
-            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            required
-          />
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="From (e.g., T. Nagar)"
+              value={fromLocation}
+              onChange={(e) => setFromLocation(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            />
 
-          <input
-            type="text"
-            placeholder="To (e.g., Anna Nagar)"
-            value={toLocation}
-            onChange={(e) => setToLocation(e.target.value)}
-            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            required
-          />
+            <input
+              type="text"
+              placeholder="To (e.g., Anna Nagar)"
+              value={toLocation}
+              onChange={(e) => setToLocation(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            />
+          </div>
 
           <div>
             <label className="text-xs text-gray-600 block mb-1">Seats Available</label>
@@ -244,17 +286,50 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               max="10"
               value={seatsAvailable}
               onChange={(e) => setSeatsAvailable(Number(e.target.value))}
-              className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
               required
             />
           </div>
+
+          <div>
+            <label className="text-xs text-gray-600 block mb-1">Contact Method</label>
+            <RadioGroup
+              value={contactVia}
+              onValueChange={(val: "chat" | "phone" | "both") => setContactVia(val)}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="chat" id="chat" />
+                <Label htmlFor="chat" className="text-xs">Chat</Label>
+              </div>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="phone" id="phone" />
+                <Label htmlFor="phone" className="text-xs">Phone</Label>
+              </div>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="both" id="both" />
+                <Label htmlFor="both" className="text-xs">Both</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {(contactVia === "phone" || contactVia === "both") && (
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            />
+          )}
 
           <textarea
             placeholder="Additional notes (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="border border-gray-300 rounded px-2 py-1 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+            className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
           />
 
           <Button
@@ -293,6 +368,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
           posts.map((post) => {
             const isOwner = user?.id === post.user_id;
             const timeRemaining = getTimeRemaining(post.expires_at);
+            const { phone, cleanNotes } = parsePostContent(post.notes);
 
             return (
               <div
@@ -340,9 +416,9 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                 </div>
 
                 {/* Notes */}
-                {post.notes && (
+                {cleanNotes && (
                   <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 mb-2">
-                    {post.notes}
+                    {cleanNotes}
                   </div>
                 )}
 
@@ -372,7 +448,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                             onClick={() => handleMarkFilled(post.id)}
                           >
                             <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Mark Filled
+                            Filled
                           </Button>
                         </>
                       )}
@@ -388,9 +464,29 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                     </div>
                   ) : (
                     post.status === "active" && (
-                      <Button size="sm" variant="outline" className="h-6 text-xs">
-                        Contact
-                      </Button>
+                      <div className="flex gap-2">
+                        {(post.contact_via === "chat" || post.contact_via === "both") && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs px-2"
+                            onClick={() => toast.success(`Request sent to ${post.profiles?.full_name || 'user'}!`)}
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Chat
+                          </Button>
+                        )}
+                        {(post.contact_via === "phone" || post.contact_via === "both") && phone && (
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs px-2 bg-green-600 hover:bg-green-700"
+                            onClick={() => window.location.href = `tel:${phone}`}
+                          >
+                            <Phone className="w-3 h-3 mr-1" />
+                            Call
+                          </Button>
+                        )}
+                      </div>
                     )
                   )}
                 </div>

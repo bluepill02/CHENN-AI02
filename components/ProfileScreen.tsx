@@ -1,33 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Textarea } from './ui/textarea';
+import { Switch } from './ui/switch';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from './ui/dialog';
 import { AchievementBadges } from './AchievementBadges';
 import { ChennaiIcons } from './IllustratedIcon';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { useLanguage } from '../services/LanguageService';
-import { AppHealthCheck } from './AppHealthCheck';
-import DeploymentReadiness from './DeploymentReadiness';
 import { useLocation } from '../services/LocationService';
 import { useAuth } from './auth/SupabaseAuthProvider';
-import { ProfileService, type Profile } from '../services/ProfileService';
+import { ProfileService, type Profile, type ProfileStats } from '../services/ProfileService';
 import { toast } from 'sonner';
 import {
   MapPin,
   ChevronRight,
   Edit2,
   Loader2,
-  User
+  Shield,
+  HelpCircle,
+  Leaf,
+  Mail,
+  Globe
 } from 'lucide-react';
 import profileCommunity from 'figma:asset/39dd468cce8081c14f345796484cc8b182dc6bb6.png';
 
 export function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -36,8 +41,15 @@ export function ProfileScreen() {
   const [editFullName, setEditFullName] = useState('');
   const [editArea, setEditArea] = useState('');
   const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [editBio, setEditBio] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'status'>('overview');
+  // Dialog States
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const [impactOpen, setImpactOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'achievements'>('overview');
   const { currentLocation, setLocationModalOpen, previousLocations } = useLocation();
 
   // Fetch profile on mount
@@ -52,14 +64,20 @@ export function ProfileScreen() {
 
     try {
       setLoading(true);
-      const data = await ProfileService.getProfile(user.id);
-      if (data) {
-        setProfile(data);
+      const [profileData, statsData] = await Promise.all([
+        ProfileService.getProfile(user.id),
+        ProfileService.getProfileStats(user.id)
+      ]);
+
+      if (profileData) {
+        setProfile(profileData);
         // Initialize edit form with current values
-        setEditFullName(data.full_name || '');
-        setEditArea(data.area || '');
-        setEditAvatarUrl(data.avatar_url || '');
+        setEditFullName(profileData.full_name || '');
+        setEditArea(profileData.area || '');
+        setEditAvatarUrl(profileData.avatar_url || '');
+        setEditBio(profileData.bio || '');
       }
+      setStats(statsData);
     } catch (error) {
       console.error('Error loading profile:', error);
       toast.error('Failed to load profile');
@@ -77,6 +95,7 @@ export function ProfileScreen() {
         full_name: editFullName || undefined,
         area: editArea || undefined,
         avatar_url: editAvatarUrl || undefined,
+        bio: editBio || undefined,
       });
 
       if (updated) {
@@ -92,31 +111,58 @@ export function ProfileScreen() {
     }
   };
 
+  const handleLanguageToggle = async (checked: boolean) => {
+    if (!user) return;
+    const newLang = checked ? 'ta' : 'en';
+    try {
+      const updated = await ProfileService.updateProfile(user.id, { language: newLang });
+      if (updated) {
+        setProfile(updated);
+        toast.success(`Language changed to ${newLang === 'ta' ? 'Tamil' : 'English'}`);
+      }
+    } catch (error) {
+      toast.error("Failed to update language");
+    }
+  };
+
+  const handleLocationPrivacyToggle = async (checked: boolean) => {
+    if (!user) return;
+    try {
+      const updated = await ProfileService.updateProfile(user.id, { share_location: checked });
+      if (updated) {
+        setProfile(updated);
+        toast.success(`Location sharing ${checked ? 'enabled' : 'disabled'}`);
+      }
+    } catch (error) {
+      toast.error("Failed to update privacy settings");
+    }
+  };
+
   const userStats = [
     {
       label: 'Trust Score',
-      value: '4.8',
+      value: stats?.trustScore.toFixed(1) || '3.0',
       iconSrc: ChennaiIcons.trust,
       iconEmoji: '⭐',
       color: 'text-yellow-600'
     },
     {
-      label: 'Connections',
-      value: '127',
-      iconSrc: ChennaiIcons.community,
-      iconEmoji: '👥',
+      label: 'Rides Shared',
+      value: stats?.ridesShared.toString() || '0',
+      iconSrc: ChennaiIcons.auto,
+      iconEmoji: '🛺',
       color: 'text-blue-600'
     },
     {
       label: 'Posts Shared',
-      value: '23',
+      value: stats?.postsCount.toString() || '0',
       iconSrc: ChennaiIcons.chat,
       iconEmoji: '💬',
       color: 'text-green-600'
     },
     {
-      label: 'Events Joined',
-      value: '8',
+      label: 'Actions',
+      value: stats?.eventsJoined.toString() || '0',
       iconSrc: ChennaiIcons.celebration,
       iconEmoji: '🎉',
       color: 'text-purple-600'
@@ -128,28 +174,28 @@ export function ProfileScreen() {
       title: 'நல்ல பக்கத்து வீட்டுக்காரர்',
       description: '10+ neighbors-க்கு உதவி செய்தது',
       icon: '🤝',
-      earned: true,
+      earned: (stats?.ridesShared || 0) > 10,
       rarity: 'Common'
     },
     {
       title: 'சென்னை Food Expert',
       description: '5+ authentic food spots share',
       icon: '🍽️',
-      earned: true,
+      earned: false, // Need food hunt stats
       rarity: 'Rare'
     },
     {
       title: 'Trust-ed Chennai-ite',
       description: '4.5+ நம்பிக்கை score',
       icon: '⭐',
-      earned: true,
+      earned: (stats?.trustScore || 0) >= 4.5,
       rarity: 'Legendary'
     },
     {
-      title: 'Marina Cleanup Hero',
-      description: 'Beach cleanup-ல பங்கேற்றது',
-      icon: '🌊',
-      earned: true,
+      title: 'Active Citizen',
+      description: 'Posted 5+ updates',
+      icon: '📢',
+      earned: (stats?.postsCount || 0) >= 5,
       rarity: 'Rare'
     }
   ];
@@ -166,25 +212,29 @@ export function ProfileScreen() {
       iconSrc: ChennaiIcons.verified,
       iconEmoji: '⚙️',
       label: 'Settings',
-      subtitle: 'Privacy, notifications, language'
+      subtitle: 'Privacy, notifications, language',
+      action: () => setSettingsOpen(true)
     },
     {
       iconSrc: ChennaiIcons.trust,
       iconEmoji: '🛡️',
       label: 'Safety & Trust',
-      subtitle: 'Community guidelines, reporting'
+      subtitle: 'Community guidelines, reporting',
+      action: () => setSafetyOpen(true)
     },
     {
       iconSrc: ChennaiIcons.helper,
       iconEmoji: '💝',
       label: 'Your Impact',
-      subtitle: 'See how you\'ve helped the community'
+      subtitle: 'See how you\'ve helped the community',
+      action: () => setImpactOpen(true)
     },
     {
       iconSrc: ChennaiIcons.community,
       iconEmoji: '❓',
       label: 'Help & Support',
-      subtitle: 'FAQ, contact us'
+      subtitle: 'FAQ, contact us',
+      action: () => setHelpOpen(true)
     },
     {
       iconSrc: ChennaiIcons.community,
@@ -195,6 +245,65 @@ export function ProfileScreen() {
       action: signOut
     }
   ];
+
+  const getDynamicAchievements = () => {
+    if (!stats) return undefined;
+
+    return [
+      {
+        id: 'first_post',
+        title: 'First Post',
+        tamilTitle: 'முதல் பதிவு',
+        description: 'Posted your first message in the community',
+        icon: '✍️',
+        color: 'from-blue-400 to-blue-600',
+        progress: stats.postsCount,
+        maxProgress: 1,
+        isUnlocked: stats.postsCount >= 1,
+        rarity: 'common',
+        category: 'community'
+      },
+      {
+        id: 'neighborhood_helper',
+        title: 'Neighborhood Helper',
+        tamilTitle: 'சமூக உதவியாளர்',
+        description: 'Helped 10 neighbors with local services',
+        icon: '🤝',
+        color: 'from-green-400 to-green-600',
+        progress: stats.ridesShared, // Using rides as proxy for help
+        maxProgress: 10,
+        isUnlocked: stats.ridesShared >= 10,
+        rarity: 'rare',
+        category: 'community'
+      },
+      {
+        id: 'trust_builder',
+        title: 'Trust Builder',
+        tamilTitle: 'நம்பிக்கை கட்டுபவர்',
+        description: 'Maintained 4.5+ trust score',
+        icon: '⭐',
+        color: 'from-yellow-400 to-orange-600',
+        progress: Math.min(stats.trustScore, 4.5),
+        maxProgress: 4.5,
+        isUnlocked: stats.trustScore >= 4.5,
+        rarity: 'epic',
+        category: 'trust'
+      },
+      {
+        id: 'active_citizen',
+        title: 'Active Citizen',
+        tamilTitle: 'செயலில் உள்ள குடிமகன்',
+        description: 'Participated in 5 community actions',
+        icon: '📢',
+        color: 'from-purple-400 to-purple-600',
+        progress: stats.eventsJoined,
+        maxProgress: 5,
+        isUnlocked: stats.eventsJoined >= 5,
+        rarity: 'rare',
+        category: 'community'
+      }
+    ] as any[]; // Using any to bypass strict type check for now if interface mismatch
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -252,7 +361,7 @@ export function ProfileScreen() {
                       <Edit2 className="w-4 h-4" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Edit Profile</DialogTitle>
                     </DialogHeader>
@@ -273,6 +382,15 @@ export function ProfileScreen() {
                           value={editArea}
                           onChange={(e) => setEditArea(e.target.value)}
                           placeholder="e.g., Mylapore, Chennai"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="bio">Bio / About Me</Label>
+                        <Textarea
+                          id="bio"
+                          value={editBio}
+                          onChange={(e) => setEditBio(e.target.value)}
+                          placeholder="Tell us about yourself..."
                         />
                       </div>
                       <div className="space-y-2">
@@ -363,17 +481,6 @@ export function ProfileScreen() {
               <span className="mr-1">🏆</span>
               Achievements
             </Button>
-            <Button
-              onClick={() => setActiveTab('status')}
-              variant={activeTab === 'status' ? 'default' : 'ghost'}
-              className={`flex-1 text-xs ${activeTab === 'status'
-                ? 'bg-white text-orange-600 shadow-sm'
-                : 'text-orange-600 hover:bg-orange-200'
-                }`}
-            >
-              <span className="mr-1">🚀</span>
-              App Status
-            </Button>
           </div>
         </div>
 
@@ -383,12 +490,22 @@ export function ProfileScreen() {
             {/* Community bio */}
             <div className="px-6 pb-4">
               <Card className="p-4 bg-card backdrop-blur-sm border-orange-200 shadow-lg shadow-orange-100/50">
-                <h3 className="font-medium mb-2">About</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {profile?.full_name ? (
-                    `Chennai community member. Area: ${profile.area || 'Chennai'}.`
-                  ) : (
-                    'Update your profile to add more information about yourself!'
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium">About</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-orange-400"
+                    onClick={() => setEditDialogOpen(true)}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </Button>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                  {profile?.bio || (
+                    <span className="text-gray-400 italic">
+                      No bio yet. Click edit to tell the community about yourself!
+                    </span>
                   )}
                 </p>
               </Card>
@@ -409,19 +526,25 @@ export function ProfileScreen() {
                 </Button>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {achievements.filter(a => a.earned).slice(0, 3).map((achievement, index) => (
-                  <Card key={index} className="p-2 bg-card border-orange-200 text-center shadow-md shadow-orange-100/30">
-                    <div className="text-lg mb-1">{achievement.icon}</div>
-                    <h4 className="text-xs font-medium text-gray-900 mb-1">{achievement.title}</h4>
-                    <Badge className={`text-xs ${achievement.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-700' :
-                      achievement.rarity === 'Epic' ? 'bg-purple-100 text-purple-700' :
-                        achievement.rarity === 'Rare' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-700'
-                      }`}>
-                      {achievement.rarity}
-                    </Badge>
-                  </Card>
-                ))}
+                {achievements.filter(a => a.earned).slice(0, 3).length > 0 ? (
+                  achievements.filter(a => a.earned).slice(0, 3).map((achievement, index) => (
+                    <Card key={index} className="p-2 bg-card border-orange-200 text-center shadow-md shadow-orange-100/30">
+                      <div className="text-lg mb-1">{achievement.icon}</div>
+                      <h4 className="text-xs font-medium text-gray-900 mb-1">{achievement.title}</h4>
+                      <Badge className={`text-xs ${achievement.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-700' :
+                        achievement.rarity === 'Epic' ? 'bg-purple-100 text-purple-700' :
+                          achievement.rarity === 'Rare' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                        }`}>
+                        {achievement.rarity}
+                      </Badge>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-3 text-center py-4 text-gray-500 text-sm bg-white/50 rounded-lg border border-dashed border-gray-300">
+                    Start engaging to earn badges!
+                  </div>
+                )}
               </div>
             </div>
           </>
@@ -429,14 +552,7 @@ export function ProfileScreen() {
 
         {activeTab === 'achievements' && (
           <div className="px-6 pb-4">
-            <AchievementBadges />
-          </div>
-        )}
-
-        {activeTab === 'status' && (
-          <div className="px-6 pb-4 space-y-4">
-            <AppHealthCheck />
-            <DeploymentReadiness />
+            <AchievementBadges userAchievements={getDynamicAchievements()} />
           </div>
         )}
 
@@ -474,6 +590,233 @@ export function ProfileScreen() {
           </div>
         </div>
       </div>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              ⚙️ Settings & Preferences
+            </DialogTitle>
+            <DialogDescription>
+              Customize your Chennai Community experience
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Language Setting */}
+            <Card className="p-4 border-orange-100 bg-orange-50/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 flex-1">
+                  <div className="font-medium flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-orange-600" />
+                    Language / மொழி
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Current: <span className="font-medium text-orange-700">
+                      {profile?.language === 'ta' ? 'தமிழ் (Tamil)' : 'English'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Toggle to switch between English and Tamil
+                  </div>
+                </div>
+                <Switch
+                  checked={profile?.language === 'ta'}
+                  onCheckedChange={handleLanguageToggle}
+                />
+              </div>
+            </Card>
+
+            {/* Location Privacy Setting */}
+            <Card className="p-4 border-blue-100 bg-blue-50/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 flex-1">
+                  <div className="font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-600" />
+                    Location Sharing
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Status: <span className="font-medium text-blue-700">
+                      {profile?.share_location !== false ? 'Enabled ✓' : 'Disabled'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    When enabled, neighbors can see your approximate area (e.g., "{profile?.area || 'Mylapore'}")
+                  </div>
+                </div>
+                <Switch
+                  checked={profile?.share_location !== false}
+                  onCheckedChange={handleLocationPrivacyToggle}
+                />
+              </div>
+            </Card>
+
+            {/* Account Info */}
+            <div className="pt-4 border-t">
+              <h4 className="text-sm font-medium mb-3 text-gray-700">Account Information</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Full Name:</span>
+                  <span className="font-medium">{profile?.full_name || 'Not set'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Area:</span>
+                  <span className="font-medium">{profile?.area || 'Not set'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Trust Score:</span>
+                  <span className="font-medium text-yellow-600">⭐ {stats?.trustScore.toFixed(1) || '3.0'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setEditDialogOpen(true)}
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setSettingsOpen(false)}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Safety & Trust Dialog */}
+      <Dialog open={safetyOpen} onOpenChange={setSafetyOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-orange-500" />
+              Safety & Trust Center
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+              <h4 className="font-medium text-orange-800 mb-2">Community Guidelines</h4>
+              <ul className="list-disc list-inside text-sm text-orange-700 space-y-1">
+                <li>Be respectful to your neighbors (மரியாதையுடன் பழகுங்கள்)</li>
+                <li>Verify information before sharing</li>
+                <li>No spam or commercial promotions without approval</li>
+                <li>Report suspicious activity immediately</li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-3 border-red-100 bg-red-50">
+                <div className="text-red-600 font-bold text-lg mb-1">100</div>
+                <div className="text-xs text-red-500">Police Control Room</div>
+              </Card>
+              <Card className="p-3 border-red-100 bg-red-50">
+                <div className="text-red-600 font-bold text-lg mb-1">108</div>
+                <div className="text-xs text-red-500">Ambulance / Fire</div>
+              </Card>
+              <Card className="p-3 border-blue-100 bg-blue-50">
+                <div className="text-blue-600 font-bold text-lg mb-1">1098</div>
+                <div className="text-xs text-blue-500">Child Helpline</div>
+              </Card>
+              <Card className="p-3 border-purple-100 bg-purple-50">
+                <div className="text-purple-600 font-bold text-lg mb-1">1091</div>
+                <div className="text-xs text-purple-500">Women's Helpline</div>
+              </Card>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Your Impact Dialog */}
+      <Dialog open={impactOpen} onOpenChange={setImpactOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Leaf className="w-5 h-5 text-green-500" />
+              Your Community Impact
+            </DialogTitle>
+            <DialogDescription>
+              Thank you for making Chennai better!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-green-600">
+                  {((stats?.ridesShared || 0) * 2.5).toFixed(1)}kg
+                </div>
+                <div className="text-xs text-gray-500">CO₂ Saved</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-blue-600">
+                  {((stats?.postsCount || 0) * 10 + (stats?.eventsJoined || 0) * 5)}
+                </div>
+                <div className="text-xs text-gray-500">People Reached</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-orange-600">Top 10%</div>
+                <div className="text-xs text-gray-500">Community Rank</div>
+              </div>
+            </div>
+
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-100">
+              <h4 className="font-medium text-green-800 mb-2">Did you know?</h4>
+              <p className="text-sm text-green-700">
+                By sharing {stats?.ridesShared || 0} rides, you've helped reduce traffic congestion in {profile?.area || 'Chennai'} equivalent to removing {(stats?.ridesShared || 0)} cars from the road for an hour!
+              </p>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Help & Support Dialog */}
+      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-blue-500" />
+              Help & Support
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>How do I get verified?</AccordionTrigger>
+                <AccordionContent>
+                  To get the "Verified Neighbor" badge, you need to verify your location using GPS while in your registered area. Go to "Manage Locations" and click "Verify".
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>How is Trust Score calculated?</AccordionTrigger>
+                <AccordionContent>
+                  Your Trust Score increases when you help neighbors, receive positive reviews, and participate in community events. It decreases if your posts are reported.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Is my data safe?</AccordionTrigger>
+                <AccordionContent>
+                  Yes! We only share your approximate location (area level) with neighbors. Your exact address is never revealed publicly.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <div className="pt-4 border-t">
+              <h4 className="text-sm font-medium mb-3">Contact Support</h4>
+              <Button variant="outline" className="w-full gap-2">
+                <Mail className="w-4 h-4" />
+                support@chenn-ai.com
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

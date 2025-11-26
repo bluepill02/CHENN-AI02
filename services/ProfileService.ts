@@ -8,6 +8,8 @@ export interface Profile {
     avatar_url?: string;
     area?: string;
     language?: string;
+    bio?: string;
+    share_location?: boolean;
 }
 
 export interface UpdateProfileData {
@@ -16,6 +18,15 @@ export interface UpdateProfileData {
     area?: string;
     username?: string;
     language?: string;
+    bio?: string;
+    share_location?: boolean;
+}
+
+export interface ProfileStats {
+    postsCount: number;
+    ridesShared: number;
+    eventsJoined: number; // Placeholder for now
+    trustScore: number;
 }
 
 export class ProfileService {
@@ -36,6 +47,54 @@ export class ProfileService {
         } catch (error) {
             console.error('Error fetching profile:', error);
             return null;
+        }
+    }
+
+    /**
+     * Get user stats
+     */
+    static async getProfileStats(userId: string): Promise<ProfileStats> {
+        try {
+            // Count posts
+            const { count: postsCount } = await supabase
+                .from('posts')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId);
+
+            // Count auto shares
+            const { count: ridesShared } = await supabase
+                .from('auto_share_posts')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId);
+
+            // Count reviews given (as a proxy for activity)
+            const { count: reviewsGiven } = await supabase
+                .from('service_reviews')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId);
+
+            // Calculate a basic trust score (mock logic for now)
+            // Base 3.0 + 0.1 per post + 0.2 per ride share + 0.5 per verified status (if we had it)
+            // Cap at 5.0
+            let score = 3.0;
+            score += (postsCount || 0) * 0.1;
+            score += (ridesShared || 0) * 0.2;
+            score += (reviewsGiven || 0) * 0.1;
+
+            return {
+                postsCount: postsCount || 0,
+                ridesShared: ridesShared || 0,
+                eventsJoined: reviewsGiven || 0, // Using reviews as a proxy for "Community Actions"
+                trustScore: Math.min(Math.round(score * 10) / 10, 5.0)
+            };
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            return {
+                postsCount: 0,
+                ridesShared: 0,
+                eventsJoined: 0,
+                trustScore: 3.0
+            };
         }
     }
 
