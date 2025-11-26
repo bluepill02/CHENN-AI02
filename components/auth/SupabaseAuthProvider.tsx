@@ -15,25 +15,54 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
+        let isMounted = true;
+
+        const initializeSession = async () => {
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError) {
+                    console.error('Failed to get session:', sessionError);
+                    if (isMounted) {
+                        setError('Failed to initialize authentication');
+                    }
+                } else if (isMounted) {
+                    setSession(session);
+                    setUser(session?.user ?? null);
+                }
+            } catch (err) {
+                console.error('Unexpected error during session initialization:', err);
+                if (isMounted) {
+                    setError('An unexpected error occurred during authentication');
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        initializeSession();
 
         // Listen for auth changes
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
+            if (isMounted) {
+                setSession(session);
+                setUser(session?.user ?? null);
+                setLoading(false);
+                setError(null);
+            }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const signOut = async () => {
