@@ -35,8 +35,12 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // AI Summarization State
   const [summaries, setSummaries] = useState<Record<string, string>>({});
@@ -48,24 +52,98 @@ export function CommunityFeed({ userLocation, onShowLiveUpdates }: CommunityFeed
   // Get location-specific content
   const locationContent = getLocationSpecificContent(activeLocation);
 
-  // Fetch posts
+  // Fetch posts with pagination
   useEffect(() => {
-    fetchPosts();
+    setCurrentPage(0);
+    setHasMore(true);
+    fetchPosts(0);
+
+    // Set up real-time subscription for new posts
+    const subscription = setupRealtimeSubscription();
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [activeLocation]);
 
-  const fetchPosts = async () => {
-    setLoading(true);
+  const setupRealtimeSubscription = () => {
     try {
-      // If we have a specific area, we could filter by it. 
-      // For now, let's fetch all to populate the feed, or filter if you prefer strict locality.
-      // const area = activeLocation?.area; 
-      const data = await PostService.getPosts();
-      setPosts(data);
-    } catch (error) {
-      console.error('Failed to fetch posts', error);
-      toast.error('Failed to load posts');
+      const channel = supabase
+        .channel(`posts-${activeLocation?.area || 'all'}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'posts',
+            filter: activeLocation?.area ? `area=eq.${activeLocation.area}` : undefined
+          },
+          (payload: any) => {
+            if (payload.new) {
+              const newPost: Post = {
+                id: payload.new.id,
+                created_at: payload.new.created_at,
+                content: payload.new.content,
+                image_url: payload.new.image_url,
+                user_id: payload.new.user_id,
+                area: payload.new.area,
+                category: payload.new.category,
+                likes: payload.new.likes || 0,
+                comments_count: payload.new.comments_count || 0,
+                is_liked_by_user: false,
+                profiles: undefined
+              };
+              setPosts(prev => [newPost, ...prev]);
+            }
+          }
+        )
+        .subscribe();
+
+      return channel;
+    } catch (err) {
+      console.error('Failed to setup realtime subscription:', err);
+      return null;
+    }
+  };
+
+  const fetchPosts = async (page: number = 0) => {
+    try {
+      if (page === 0) {
+        setLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+      setError(null);
+
+      const pageSize = 10;
+      const area = activeLocation?.area;
+      const data = await PostService.getPosts(page, pageSize, area);
+
+      if (page === 0) {
+        setPosts(data);
+      } else {
+        setPosts(prev => [...prev, ...data]);
+      }
+
+      // Check if we have more posts
+      setHasMore(data.length === pageSize);
+      setCurrentPage(page);
+    } catch (err) {
+      console.error('Failed to fetch posts', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      fetchPosts(currentPage + 1);
     }
   };
 
