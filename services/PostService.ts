@@ -19,9 +19,16 @@ export interface Post {
 
 export const PostService = {
     /**
-     * Fetch posts, optionally filtered by area
+     * Fetch posts with pagination, optionally filtered by area
+     * @param page - Page number (0-indexed)
+     * @param pageSize - Number of posts per page (default: 10, max: 50)
+     * @param area - Optional area filter
      */
-    async getPosts(area?: string): Promise<Post[]> {
+    async getPosts(page: number = 0, pageSize: number = 10, area?: string): Promise<Post[]> {
+        // Validate pagination parameters
+        const normalizedPageSize = Math.min(Math.max(pageSize, 1), 50);
+        const offset = Math.max(page, 0) * normalizedPageSize;
+
         let query = supabase
             .from('posts')
             .select(`
@@ -31,21 +38,27 @@ export const PostService = {
                     avatar_url
                 )
             `)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .range(offset, offset + normalizedPageSize - 1);
 
         if (area) {
             // Simple filter for now, can be improved with PostGIS later
             query = query.ilike('area', `%${area}%`);
         }
 
-        const { data, error } = await query;
+        try {
+            const { data, error } = await query;
 
-        if (error) {
-            console.error('Error fetching posts:', error);
-            throw error;
+            if (error) {
+                console.error('Error fetching posts:', error);
+                throw error;
+            }
+
+            return data || [];
+        } catch (err) {
+            console.error('Unexpected error fetching posts:', err);
+            throw err;
         }
-
-        return data || [];
     },
 
     /**
