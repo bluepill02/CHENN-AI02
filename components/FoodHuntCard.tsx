@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { useAuth } from "./auth/SupabaseAuthProvider";
 import { FoodHuntService, type FoodHuntPost } from "../services/FoodHuntService";
 import { toast } from "sonner";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Image as ImageIcon, X } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { CustomIcon } from "./CustomIcons";
 
@@ -26,6 +26,9 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
     const [rating, setRating] = useState(5);
     const [review, setReview] = useState("");
     const [priceRange, setPriceRange] = useState<"cheap" | "moderate" | "expensive">("moderate");
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Fetch posts
     const fetchPosts = async () => {
@@ -55,6 +58,31 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
         };
     }, [pincode]);
 
+    // Handle image selection
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                toast.error("Image size should be less than 5MB");
+                return;
+            }
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,6 +99,16 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
 
         try {
             setSubmitting(true);
+            let imageUrl = undefined;
+
+            if (selectedImage) {
+                const url = await FoodHuntService.uploadImage(selectedImage);
+                if (url) {
+                    imageUrl = url;
+                } else {
+                    toast.error("Failed to upload image, posting without it.");
+                }
+            }
 
             await FoodHuntService.createPost(
                 {
@@ -80,6 +118,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                     review: review || undefined,
                     price_range: priceRange,
                     pincode,
+                    image_url: imageUrl,
                 },
                 user.id
             );
@@ -102,6 +141,11 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
         setRating(5);
         setReview("");
         setPriceRange("moderate");
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     // Delete post
@@ -217,6 +261,49 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                         className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black resize-none bg-white transition-all"
                     />
 
+                    {/* Image Upload */}
+                    <div className="space-y-2">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageSelect}
+                            className="hidden"
+                            ref={fileInputRef}
+                        />
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="text-xs border-orange-200 text-orange-700 hover:bg-orange-50"
+                            >
+                                <ImageIcon className="w-4 h-4 mr-1" />
+                                {selectedImage ? "Change Image" : "Add Photo"}
+                            </Button>
+                            {selectedImage && (
+                                <span className="text-xs text-gray-500 truncate max-w-[150px]">
+                                    {selectedImage.name}
+                                </span>
+                            )}
+                        </div>
+
+                        {imagePreview && (
+                            <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden border border-orange-100">
+                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="destructive"
+                                    className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                                    onClick={removeImage}
+                                >
+                                    <X className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
                     <Button
                         type="submit"
                         disabled={submitting}
@@ -296,6 +383,13 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                                             <CustomIcon icon="Idli" className="w-3 h-3 mr-1" />
                                             {post.dish_name}
                                         </Badge>
+                                    </div>
+                                )}
+
+                                {/* Image */}
+                                {post.image_url && (
+                                    <div className="mb-3 rounded-lg overflow-hidden border border-orange-100">
+                                        <img src={post.image_url} alt="Food" className="w-full h-48 object-cover" />
                                     </div>
                                 )}
 

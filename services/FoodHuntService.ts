@@ -156,6 +156,34 @@ export class FoodHuntService {
     }
 
     /**
+     * Upload an image for a food hunt post
+     */
+    static async uploadImage(file: File): Promise<string | null> {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `food_hunt/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('post_images')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data } = supabase.storage
+                .from('post_images')
+                .getPublicUrl(filePath);
+
+            return data.publicUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    }
+
+    /**
      * Unsubscribe from a specific channel
      */
     static unsubscribe(channelName: string): void {

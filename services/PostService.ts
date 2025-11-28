@@ -78,26 +78,76 @@ export const PostService = {
     },
 
     /**
-     * Like a post (Simple increment for now, ideally should be a separate table)
+     * Toggle like on a post
      */
-    async likePost(postId: string): Promise<void> {
-        // RPC call would be better for atomicity, but simple update for MVP
-        // First get current likes
-        const { data: post, error: fetchError } = await supabase
-            .from('posts')
-            .select('likes')
-            .eq('id', postId)
+    async likePost(postId: string, userId: string): Promise<void> {
+        // Check if already liked
+        const { data: existingLike } = await supabase
+            .from('post_likes')
+            .select('*')
+            .eq('post_id', postId)
+            .eq('user_id', userId)
             .single();
 
-        if (fetchError) throw fetchError;
+        if (existingLike) {
+            // Unlike
+            await supabase
+                .from('post_likes')
+                .delete()
+                .eq('post_id', postId)
+                .eq('user_id', userId);
+        } else {
+            // Like
+            await supabase
+                .from('post_likes')
+                .insert({
+                    post_id: postId,
+                    user_id: userId
+                });
+        }
+    },
 
-        const newLikes = (post?.likes || 0) + 1;
+    /**
+     * Get comments for a post
+     */
+    async getComments(postId: string): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('comments')
+            .select(`
+                *,
+                profiles (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .eq('post_id', postId)
+            .order('created_at', { ascending: true });
 
-        const { error: updateError } = await supabase
-            .from('posts')
-            .update({ likes: newLikes })
-            .eq('id', postId);
+        if (error) throw error;
+        return data || [];
+    },
 
-        if (updateError) throw updateError;
+    /**
+     * Add a comment to a post
+     */
+    async addComment(postId: string, userId: string, content: string): Promise<any> {
+        const { data, error } = await supabase
+            .from('comments')
+            .insert({
+                post_id: postId,
+                user_id: userId,
+                content
+            })
+            .select(`
+                *,
+                profiles (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .single();
+
+        if (error) throw error;
+        return data;
     }
 };

@@ -8,36 +8,12 @@ import { Brain, Coffee, Sparkles, RefreshCw, CheckCircle2, XCircle, Loader2, Map
 import { toast } from 'sonner';
 import { CinemaService, type CinemaPost } from '../services/CinemaService';
 import { KaapiJobService, type KaapiJob } from '../services/KaapiJobService';
+import { QuizService } from '../services/QuizService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { Avatar } from './ui/avatar';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-
-// --- Madras Meter Data ---
-const slangQuestions = [
-    { word: "Gethu", options: ["Angry", "Style/Swag", "Lazy"], correct: 1 },
-    { word: "Vetti", options: ["Busy", "Jobless/Free", "Smart"], correct: 1 },
-    { word: "Semma", options: ["Awesome", "Bad", "Average"], correct: 0 },
-    { word: "Macha", options: ["Enemy", "Stranger", "Friend/Bro"], correct: 2 },
-    { word: "OC", options: ["Free of cost", "Over Clock", "Old City"], correct: 0 },
-    { word: "Peter", options: ["A Name", "Speaking English", "Pizza"], correct: 1 },
-    { word: "Sothu", options: ["Property", "Rice/Food", "Both"], correct: 2 },
-    { word: "Alapparai", options: ["Silence", "Show off/Noise", "Sleeping"], correct: 1 },
-];
-
-// --- Auto Anna Quotes ---
-const autoQuotes = [
-    "Change illa pa, GPay pannunga. (No change, do GPay)",
-    "Meter pota kattu padi aagadhu. (Meter won't work out)",
-    "Madam, straight road dhaan, but one way.",
-    "Teynampet signal is temporary, Traffic is permanent.",
-    "Life is like a share auto, adjust panni poganum.",
-    "Rain varudhu, extra 50 aagum. (It's raining, extra 50)",
-    "Horn adikadheenga, aama porumai. (Don't honk, turtle patience)",
-    "Chennai-la winter is just a myth, macha."
-];
-
 import { useLocation } from '../services/LocationService';
 
 export function ChennaiGethu() {
@@ -45,12 +21,16 @@ export function ChennaiGethu() {
     const { currentLocation } = useLocation();
 
     // --- State: Madras Meter ---
+    const [slangQuestions, setSlangQuestions] = useState<any[]>([]);
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [score, setScore] = useState(0);
+    const [loadingQuiz, setLoadingQuiz] = useState(true);
 
     // --- State: Auto Anna ---
+    const [autoQuotes, setAutoQuotes] = useState<string[]>([]);
     const [quoteIndex, setQuoteIndex] = useState(0);
+    const [loadingQuotes, setLoadingQuotes] = useState(true);
 
     // --- State: Cinema Kottai ---
     const [cinemaPosts, setCinemaPosts] = useState<CinemaPost[]>([]);
@@ -80,6 +60,7 @@ export function ChennaiGethu() {
     useEffect(() => {
         fetchCinemaPosts();
         fetchJobs();
+        fetchQuizData();
 
         const subCinema = CinemaService.subscribeToUpdates(() => fetchCinemaPosts());
         const subJobs = KaapiJobService.subscribeToUpdates(() => fetchJobs());
@@ -89,6 +70,24 @@ export function ChennaiGethu() {
             KaapiJobService.unsubscribe(subJobs);
         };
     }, [currentLocation]);
+
+    const fetchQuizData = async () => {
+        setLoadingQuiz(true);
+        setLoadingQuotes(true);
+        try {
+            const [questions, quotes] = await Promise.all([
+                QuizService.getQuestions(),
+                QuizService.getQuotes()
+            ]);
+            setSlangQuestions(questions);
+            setAutoQuotes(quotes.map(q => q.content));
+        } catch (error) {
+            console.error('Failed to fetch quiz data', error);
+        } finally {
+            setLoadingQuiz(false);
+            setLoadingQuotes(false);
+        }
+    };
 
     const fetchCinemaPosts = async () => {
         setLoadingCinema(true);
@@ -125,7 +124,7 @@ export function ChennaiGethu() {
     const handleAnswer = (index: number) => {
         if (selectedOption !== null) return;
         setSelectedOption(index);
-        const correct = index === slangQuestions[currentQIndex].correct;
+        const correct = index === slangQuestions[currentQIndex].correct_option;
         if (correct) {
             setScore(s => s + 10);
             toast.success("Semma! Correct Answer! 🎉");
@@ -339,36 +338,44 @@ export function ChennaiGethu() {
                                         Score: {score}
                                     </Badge>
                                     <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                        Q: {currentQIndex + 1}/{slangQuestions.length}
+                                        Q: {slangQuestions.length > 0 ? currentQIndex + 1 : 0}/{slangQuestions.length}
                                     </Badge>
                                 </div>
                             </div>
 
                             <div className="mb-6">
-                                <p className="text-sm text-gray-500 mb-2">What is the meaning of:</p>
-                                <h2 className="text-3xl font-black text-orange-600 mb-6">"{slangQuestions[currentQIndex].word}"</h2>
+                                {loadingQuiz ? (
+                                    <div className="flex justify-center p-8"><Loader2 className="animate-spin text-orange-500 w-8 h-8" /></div>
+                                ) : slangQuestions.length === 0 ? (
+                                    <div className="text-gray-500">No questions available.</div>
+                                ) : (
+                                    <>
+                                        <p className="text-sm text-gray-500 mb-2">What is the meaning of:</p>
+                                        <h2 className="text-3xl font-black text-orange-600 mb-6">"{slangQuestions[currentQIndex].question}"</h2>
 
-                                <div className="grid gap-3">
-                                    {slangQuestions[currentQIndex].options.map((option, idx) => (
-                                        <Button
-                                            key={idx}
-                                            variant={selectedOption === idx ? (idx === slangQuestions[currentQIndex].correct ? "default" : "destructive") : "outline"}
-                                            className={`w-full justify-start h-auto py-3 px-4 ${selectedOption === idx && idx === slangQuestions[currentQIndex].correct ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                                            onClick={() => handleAnswer(idx)}
-                                            disabled={selectedOption !== null}
-                                        >
-                                            <span className="mr-3 flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-xs">
-                                                {String.fromCharCode(65 + idx)}
-                                            </span>
-                                            {option}
-                                            {selectedOption === idx && (
-                                                <span className="ml-auto">
-                                                    {idx === slangQuestions[currentQIndex].correct ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                                                </span>
-                                            )}
-                                        </Button>
-                                    ))}
-                                </div>
+                                        <div className="grid gap-3">
+                                            {slangQuestions[currentQIndex].options.map((option: string, idx: number) => (
+                                                <Button
+                                                    key={idx}
+                                                    variant={selectedOption === idx ? (idx === slangQuestions[currentQIndex].correct_option ? "default" : "destructive") : "outline"}
+                                                    className={`w-full justify-start h-auto py-3 px-4 ${selectedOption === idx && idx === slangQuestions[currentQIndex].correct_option ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                                    onClick={() => handleAnswer(idx)}
+                                                    disabled={selectedOption !== null}
+                                                >
+                                                    <span className="mr-3 flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-xs">
+                                                        {String.fromCharCode(65 + idx)}
+                                                    </span>
+                                                    {option}
+                                                    {selectedOption === idx && (
+                                                        <span className="ml-auto">
+                                                            {idx === slangQuestions[currentQIndex].correct_option ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {selectedOption !== null && (
@@ -397,13 +404,20 @@ export function ChennaiGethu() {
                                 <h3 className="text-xl font-black text-black mb-1">AUTO ANNA SAYS...</h3>
                                 <div className="h-1 w-20 bg-black mx-auto mb-6"></div>
 
-                                <blockquote className="text-lg font-medium text-gray-800 italic mb-6 min-h-[80px] flex items-center justify-center">
-                                    "{autoQuotes[quoteIndex]}"
-                                </blockquote>
+                                {loadingQuotes ? (
+                                    <div className="flex justify-center p-8"><Loader2 className="animate-spin text-yellow-600 w-8 h-8" /></div>
+                                ) : autoQuotes.length === 0 ? (
+                                    <div className="text-gray-500 mb-6">Auto Anna is sleeping. Come back later!</div>
+                                ) : (
+                                    <blockquote className="text-lg font-medium text-gray-800 italic mb-6 min-h-[80px] flex items-center justify-center">
+                                        "{autoQuotes[quoteIndex]}"
+                                    </blockquote>
+                                )}
 
                                 <Button
                                     onClick={nextQuote}
                                     className="bg-black text-yellow-400 hover:bg-gray-900 border-2 border-yellow-400 font-bold"
+                                    disabled={autoQuotes.length === 0}
                                 >
                                     Innoru Quote Sollunga <RefreshCw className="w-4 h-4 ml-2" />
                                 </Button>

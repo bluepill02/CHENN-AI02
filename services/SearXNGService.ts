@@ -68,7 +68,7 @@ export const SearXNGService = {
             ...PUBLIC_SEARXNG_INSTANCES.filter(url => url !== SEARXNG_INSTANCE)
         ];
 
-        let lastError: any;
+
 
         // Try each instance until one works
         for (const instance of instances) {
@@ -118,7 +118,6 @@ export const SearXNGService = {
 
             } catch (error) {
                 console.warn(`Failed to fetch from ${instance}:`, error);
-                lastError = error;
                 // Continue to next instance
             }
         }
@@ -135,7 +134,6 @@ export const SearXNGService = {
         console.log('Generating mock data for:', query);
         const isNews = options.categories?.includes('news') || options.category === 'news';
         const isImages = options.categories?.includes('images') || options.category === 'images';
-        const isVideos = options.categories?.includes('videos') || options.category === 'videos';
 
         let results: SearXNGResult[] = [];
 

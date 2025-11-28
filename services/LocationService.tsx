@@ -5,12 +5,38 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 // For now, we'll create a local validation function
 
 // Mappls API integration for accurate Chennai pincode validation
-const MAPPLS_API_KEY = 'hlgokcsmvrbirjotoxixwqscpwvlspinyupy';
-const MAPPLS_GEOCODE_URL = 'https://apis.mappls.com/advancedmaps/v1/geocode';
+// Free APIs for location services
+const INDIA_POST_API_URL = 'https://api.postalpincode.in/pincode';
+const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org/search';
 
-interface MappslLocationResult {
-  lat: number;
-  lng: number;
+interface IndiaPostResult {
+  Message: string;
+  Status: string;
+  PostOffice: Array<{
+    Name: string;
+    Description: string | null;
+    BranchType: string;
+    DeliveryStatus: string;
+    Circle: string;
+    District: string;
+    Division: string;
+    Region: string;
+    Block: string;
+    State: string;
+    Country: string;
+    Pincode: string;
+  }>;
+}
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
+interface ValidatedLocation {
+  latitude: number;
+  longitude: number;
   area: string;
   city: string;
   district: string;
@@ -19,47 +45,59 @@ interface MappslLocationResult {
   formatted_address: string;
 }
 
-// Validate Chennai pincode using Mappls API
-const validatePincodeWithMappls = async (pincode: string): Promise<MappslLocationResult | null> => {
+// Validate pincode using India Post API and get coordinates from Nominatim
+const validatePincodeFree = async (pincode: string): Promise<ValidatedLocation | null> => {
   try {
-    const response = await fetch(
-      `${MAPPLS_GEOCODE_URL}?address=${pincode} Chennai Tamil Nadu&key=${MAPPLS_API_KEY}`
-    );
+    // 1. Get location details from India Post API
+    const postResponse = await fetch(`${INDIA_POST_API_URL}/${pincode}`);
+    if (!postResponse.ok) throw new Error('India Post API failed');
 
-    if (!response.ok) {
-      console.warn(`Mappls API error: ${response.status}, falling back to local data`);
+    const postData: IndiaPostResult[] = await postResponse.json();
+    if (postData[0].Status !== 'Success' || !postData[0].PostOffice) {
       return null;
     }
 
-    const data = await response.json();
-    const result = data.results?.[0];
+    const office = postData[0].PostOffice[0];
+    const area = office.Name;
+    const district = office.District;
+    const state = office.State;
 
-    if (!result || !result.lat || !result.lng) {
-      return null;
-    }
-
-    // Verify it's within Chennai area (rough bounds)
-    const isInChennai = (
-      result.lat >= 12.8 && result.lat <= 13.3 &&
-      result.lng >= 80.0 && result.lng <= 80.5
+    // 2. Get coordinates from Nominatim (OpenStreetMap)
+    // We search for "Pincode, District, State" to be specific
+    const query = `${pincode}, ${district}, ${state}, India`;
+    const geoResponse = await fetch(
+      `${NOMINATIM_API_URL}?format=json&q=${encodeURIComponent(query)}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'ChennaiCommunityApp/1.0'
+        }
+      }
     );
 
-    if (!isInChennai) {
-      return null;
+    let lat = 13.0827; // Default Chennai Lat
+    let lon = 80.2707; // Default Chennai Lon
+
+    if (geoResponse.ok) {
+      const geoData: NominatimResult[] = await geoResponse.json();
+      if (geoData.length > 0) {
+        lat = parseFloat(geoData[0].lat);
+        lon = parseFloat(geoData[0].lon);
+      }
     }
 
     return {
-      lat: result.lat,
-      lng: result.lng,
-      area: result.area || result.subLocality || result.locality || '',
-      city: result.city || 'Chennai',
-      district: result.district || 'Chennai',
-      state: result.state || 'Tamil Nadu',
+      latitude: lat,
+      longitude: lon,
+      area: area,
+      city: district, // Using District as City for better mapping
+      district: district,
+      state: state,
       pincode: pincode,
-      formatted_address: result.formatted_address || `${pincode}, Chennai`
+      formatted_address: `${area}, ${district}, ${state} - ${pincode}`
     };
+
   } catch (error) {
-    console.warn('Error validating pincode with Mappls:', error);
+    console.warn('Error validating pincode with free APIs:', error);
     return null;
   }
 };
@@ -351,25 +389,25 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsVerifying(true);
 
     try {
-      // First, try to validate with Mappls API for accurate Chennai data
-      const mappslResult = await validatePincodeWithMappls(pincode);
+      // First, try to validate with Free APIs (India Post + Nominatim)
+      const apiResult = await validatePincodeFree(pincode);
 
-      if (mappslResult) {
-        // Successfully validated with Mappls - create location data
+      if (apiResult) {
+        // Successfully validated - create location data
         const locationData: LocationData = {
-          pincode: mappslResult.pincode,
-          area: mappslResult.area || 'Chennai Area',
-          district: mappslResult.district,
-          state: mappslResult.state,
-          latitude: mappslResult.lat,
-          longitude: mappslResult.lng,
+          pincode: apiResult.pincode,
+          area: apiResult.area || 'Chennai Area',
+          district: apiResult.district,
+          state: apiResult.state,
+          latitude: apiResult.latitude,
+          longitude: apiResult.longitude,
           verified: true,
           timestamp: Date.now(),
           localContent: {
-            communityName: `${mappslResult.area} Neighborhood`,
+            communityName: `${apiResult.area} Neighborhood`,
             localLanguage: 'Tamil',
             culturalElements: ['Local Temple', 'Community Center'],
-            nearbyLandmarks: [mappslResult.formatted_address]
+            nearbyLandmarks: [apiResult.formatted_address]
           }
         };
 

@@ -12,7 +12,7 @@ import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
 export function AiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
-    { role: 'assistant', content: 'Vanakkam! I am Chennai AI. How can I help you today? Ask me about bus routes, food spots, or local events! 🙏' }
+    { role: 'assistant', content: 'Vanakkam! I am CHENN-AI. How can I help you today? Ask me about bus routes, food spots, or local events! 🙏' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,22 +51,22 @@ export function AiAssistant() {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-          className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center border-2 border-white"
+          className="fixed bottom-24 left-6 h-14 w-14 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex items-center justify-center border-2 border-white"
           size="icon"
           aria-label="Open AI Assistant"
         >
           <Sparkles className="w-6 h-6 text-white animate-pulse" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-0 bg-orange-50/50 backdrop-blur-sm">
-        <SheetHeader className="p-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white">
+      <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-0 bg-orange-50/50 backdrop-blur-sm overflow-hidden">
+        <SheetHeader className="p-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white shrink-0">
           <SheetTitle className="text-white flex items-center gap-2">
             <Bot className="w-6 h-6" />
-            Chennai AI Assistant
+            CHENN-AI Assistant
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollAreaRef}>
           <div className="space-y-4 pb-4">
             {messages.map((msg, index) => (
               <div

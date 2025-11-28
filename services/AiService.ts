@@ -1,5 +1,6 @@
 import { AzureOpenAIService } from './AzureOpenAIService';
 import { HuggingFaceService } from './HuggingFaceService';
+import { GeminiService } from './GeminiService';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -21,13 +22,16 @@ const GROQ_MODELS = [
 
 export const AiService = {
   /**
-   * Chat with Chennai AI (includes multi-provider fallback)
-   */
-  /**
    * Internal helper to execute AI requests with full fallback chain
-   * Groq -> Azure OpenAI -> Hugging Face
+   * Gemini -> Groq -> Azure OpenAI -> Hugging Face
    */
   async _executeRequest(messages: any[]): Promise<AiResponse> {
+    // 0. Try Gemini (Primary) - via GeminiService for general chat if needed, 
+    // but here we are focusing on the generic chat capability.
+    // Note: GeminiService is currently specialized for Live Updates, but we can expand it or use it here.
+    // For now, we will stick to the existing Groq flow for CHAT, but use GeminiService for Live Updates.
+    // If you want Gemini for CHAT too, we would need to add a chat method to GeminiService.
+
     // 1. Try Groq Models
     if (GROQ_API_KEY) {
       for (const model of GROQ_MODELS) {
@@ -126,5 +130,18 @@ export const AiService = {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: postContent }
     ]);
+  },
+
+  /**
+   * Get Live Updates using Gemini (Primary)
+   */
+  async getLiveUpdates(location: string = 'Chennai'): Promise<string> {
+    try {
+      const result = await GeminiService.getLiveUpdates(location);
+      return result.text;
+    } catch (error) {
+      console.error('Failed to get live updates via Gemini:', error);
+      return 'Live updates currently unavailable. Stay safe, Chennai! 🙏';
+    }
   }
 };

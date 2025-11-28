@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
@@ -10,10 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
-import { Star, Loader2 } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
 import { CustomIcon } from './CustomIcons';
-import { PremiumIcon } from './PremiumIcons';
-import { useLocation, getLocationSpecificContent } from '../services/LocationService';
+import { useLocation } from '../services/LocationService';
 import { useExternalData } from '../services/ExternalDataService';
 import { PostService, Post } from '../services/PostService';
 import { AiService } from '../services/AiService';
@@ -34,24 +32,25 @@ import {
   AnimatedShareButton,
   PostImageGallery,
 } from './FeedAnimationComponents';
+import { WeatherService, WeatherData } from '../services/WeatherService';
 
 interface CommunityFeedProps {
   userLocation?: any;
 }
 
 export function CommunityFeed({ userLocation }: CommunityFeedProps) {
-  const navigate = useNavigate();
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const { currentLocation, setLocationModalOpen } = useLocation();
-  const { } = useExternalData(); // Removed unused weather
-  const { } = useLanguage(); // Removed unused t
+  const { currentLocation } = useLocation();
+  const { } = useExternalData();
+  const { } = useLanguage();
   const { user } = useAuth();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPostContent, setNewPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [liveUpdate, setLiveUpdate] = useState<string>('');
 
   // AI Summarization State
   const [summaries, setSummaries] = useState<Record<string, string>>({});
@@ -61,21 +60,43 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const activeLocation = currentLocation || userLocation;
   const activePincode = activeLocation?.pincode || '600004';
 
-  // Get location-specific content
-  const locationContent = getLocationSpecificContent(activeLocation);
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+  const [loadingInfo, setLoadingInfo] = useState(false);
 
   // Story highlights data
   const storyHighlights = [
     { id: 1, image: '/assets/icon_auto.png', title: 'Auto Share', isNew: true },
     { id: 2, image: '/assets/icon_food.png', title: 'Food Hunt', isNew: true },
     { id: 3, image: '/assets/hero_welcome.png', title: 'Chennai Gethu', isNew: false },
-    { id: 4, image: '/assets/icon_info.png', title: 'Live Updates', isNew: true },
+    { id: 4, image: '/assets/icon_info.png', title: 'Info', isNew: false },
   ];
 
-  // Fetch posts
+  // Fetch posts and weather
   useEffect(() => {
     fetchPosts();
+    fetchWeather();
   }, [activeLocation]);
+
+  const handleStoryClick = async (title: string) => {
+    if (title === 'Info') {
+      setIsInfoDialogOpen(true);
+      if (!liveUpdate) {
+        setLoadingInfo(true);
+        const update = await AiService.getLiveUpdates(activeLocation?.area || 'Chennai');
+        setLiveUpdate(update);
+        setLoadingInfo(false);
+      }
+    } else {
+      toast.info(`${title} coming soon!`);
+    }
+  };
+
+  const fetchWeather = async () => {
+    if (activeLocation?.latitude && activeLocation?.longitude) {
+      const data = await WeatherService.getWeather(activeLocation.latitude, activeLocation.longitude);
+      setWeather(data);
+    }
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -125,35 +146,78 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     }
   };
 
+  // Comments State
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+
   const handleLike = async (postId: string) => {
+    if (!user) {
+      toast.error('Please sign in to like posts');
+      return;
+    }
     try {
       // Optimistic update
       setPosts(posts.map(p =>
-        p.id === postId ? { ...p, likes: p.likes + 1, is_liked_by_user: true } : p
+        p.id === postId ? {
+          ...p,
+          likes: (p.is_liked_by_user ? p.likes - 1 : p.likes + 1),
+          is_liked_by_user: !p.is_liked_by_user
+        } : p
       ));
 
-      await PostService.likePost(postId);
+      await PostService.likePost(postId, user.id);
     } catch (error) {
       console.error('Failed to like post', error);
-      fetchPosts();
+      fetchPosts(); // Revert on error
+    }
+  };
+
+  const openComments = async (postId: string) => {
+    setSelectedPostId(postId);
+    setIsCommentsOpen(true);
+    setLoadingComments(true);
+    try {
+      const data = await PostService.getComments(postId);
+      setComments(data);
+    } catch (error) {
+      console.error('Failed to load comments', error);
+      toast.error('Failed to load comments');
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!user || !selectedPostId || !newComment.trim()) return;
+
+    try {
+      const comment = await PostService.addComment(selectedPostId, user.id, newComment.trim());
+      setComments([...comments, comment]);
+      setNewComment('');
+
+      // Update comment count in post list
+      setPosts(posts.map(p =>
+        p.id === selectedPostId ? { ...p, comments_count: p.comments_count + 1 } : p
+      ));
+
+      toast.success('Comment added!');
+    } catch (error) {
+      console.error('Failed to add comment', error);
+      toast.error('Failed to add comment');
     }
   };
 
   const handleSummarize = async (postId: string, content: string) => {
-    if (summaries[postId]) return;
-
     setSummarizing(prev => ({ ...prev, [postId]: true }));
     try {
-      const response = await AiService.summarizePost(content);
-      if (response.content) {
-        setSummaries(prev => ({ ...prev, [postId]: response.content }));
-        toast.success('Summary generated! ✨');
-      } else {
-        toast.error('Could not summarize this post');
-      }
+      const summary = await AiService.summarizePost(content);
+      setSummaries(prev => ({ ...prev, [postId]: summary.content }));
     } catch (error) {
-      console.error('Summarization failed', error);
-      toast.error('Failed to summarize');
+      console.error('Failed to summarize', error);
+      toast.error('Failed to summarize post');
     } finally {
       setSummarizing(prev => ({ ...prev, [postId]: false }));
     }
@@ -162,321 +226,170 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const handleShare = (post: Post) => {
     if (navigator.share) {
       navigator.share({
-        title: `Post by ${post.profiles?.full_name || 'Community member'}`,
+        title: 'Check out this post on Chennai Community App',
         text: post.content,
-        url: window.location.href,
-      }).catch(() => { });
+        url: window.location.href
+      }).catch(console.error);
     } else {
-      navigator.clipboard.writeText(post.content);
-      toast.success('Post content copied to clipboard! 📋');
-    }
-  };
-
-  // Filter posts based on active filter
-  const filteredPosts = activeFilter
-    ? posts.filter(post => post.category === activeFilter)
-    : posts;
-
-  const getPostBadge = (type: string | undefined) => {
-    if (!type) return null;
-    switch (type) {
-      case 'food_recommendation':
-        return (
-          <Badge className="bg-orange-100 text-orange-700 border-orange-200 flex items-center gap-1 text-xs">
-            <PremiumIcon icon="Food" className="w-3 h-3" color="currentColor" />
-            சாப்பாடு
-          </Badge>
-        );
-      case 'community_event':
-        return (
-          <Badge className="bg-purple-100 text-purple-700 border-purple-200 flex items-center gap-1 text-xs">
-            <PremiumIcon icon="Community" className="w-3 h-3" color="currentColor" />
-            நிகழ்ச்சி
-          </Badge>
-        );
-      case 'cultural_event':
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 flex items-center gap-1 text-xs">
-            <PremiumIcon icon="Celebration" className="w-3 h-3" color="currentColor" />
-            பண்டிகை
-          </Badge>
-        );
-      case 'help_request':
-        return (
-          <Badge className="bg-blue-100 text-blue-700 border-blue-200 flex items-center gap-1 text-xs">
-            <PremiumIcon icon="Auto" className="w-3 h-3" color="currentColor" />
-            உதவி
-          </Badge>
-        );
-      default:
-        return null;
+      navigator.clipboard.writeText(`${window.location.href}`);
+      toast.success('Link copied to clipboard!');
     }
   };
 
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative overflow-hidden">
-      {/* Premium animated background */}
-      <div className="fixed inset-0 overflow-hidden">
+      {/* ... (existing background and header) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <FeedScreenBackground />
       </div>
 
-      {/* Header - Cinema Scope Style */}
-      <motion.div
-        className="bg-gradient-to-b from-auto-black to-black pb-8 pt-6 px-4 rounded-b-[2.5rem] relative overflow-hidden shadow-2xl border-b-4 border-auto-yellow z-20"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-      >
-        {/* Film Grain Overlay */}
-        <div className="absolute inset-0 film-grain opacity-20 pointer-events-none"></div>
+      <div className="relative z-10 pb-24">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-8 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/assets/kolam-pattern.png')] opacity-10 mix-blend-overlay"></div>
 
-        {/* Marquee Effect Background */}
-        <div className="absolute top-0 left-0 right-0 h-8 bg-auto-yellow overflow-hidden flex items-center">
-          <motion.div
-            className="whitespace-nowrap text-black font-display font-bold text-xs uppercase tracking-widest flex gap-8"
-            animate={{ x: [0, -1000] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          >
-            {[...Array(10)].map((_, i) => (
-              <span key={i}>★ NOW SHOWING: CHENNAI SUPERHITS ★ {locationContent.greeting} ★</span>
-            ))}
-          </motion.div>
-        </div>
-
-        <div className="flex items-center justify-between relative z-10 mt-6">
-          <div className="flex-1">
-            <motion.h1
-              className="text-auto-yellow text-4xl font-display font-bold drop-shadow-[0_2px_0_rgba(255,0,0,1)] tracking-wide"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              {activeLocation ? activeLocation.area.toUpperCase() : 'CHENNAI'}
-            </motion.h1>
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="bg-temple-red text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider border border-white/20">
-                LIVE ACTION
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+                  Chennai Community
+                </span>
               </div>
-              <p className="text-gray-400 text-sm font-medium">
-                {activeLocation?.pincode || '600004'}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-auto-yellow hover:text-white hover:bg-white/10"
-                onClick={() => setLocationModalOpen(true)}
-              >
-                <PremiumIcon icon="Location" className="w-4 h-4" color="currentColor" animated={false} />
-              </Button>
-            </motion.div>
-          </div>
-          <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-display font-bold text-white drop-shadow-md flex items-center gap-2">
+                Namma Ooru <span className="animate-pulse">🧡</span>
+              </h1>
+            </div>
             <LanguageToggle />
-            <motion.div
-              className="w-12 h-12 bg-auto-yellow rounded-full flex items-center justify-center border-4 border-black shadow-[0_0_15px_rgba(255,215,0,0.5)]"
-              whileHover={{ scale: 1.1, rotate: 10 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <PremiumIcon icon="Community" className="w-6 h-6" color="black" />
-            </motion.div>
+          </div>
+
+          {/* Location & Weather */}
+          <div className="flex items-center gap-3 text-orange-50 bg-black/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+            <div className="flex items-center gap-1.5">
+              <CustomIcon icon="LocationPin" className="w-4 h-4 text-yellow-300" />
+              <span className="font-medium text-sm">{activeLocation?.area || 'Chennai'}</span>
+            </div>
+            <div className="w-px h-4 bg-white/20"></div>
+            <div className="flex items-center gap-1.5">
+              {weather ? (
+                <>
+                  <span className="text-lg">{weather.icon}</span>
+                  <span className="font-medium text-sm">{weather.temperature}°C</span>
+                </>
+              ) : (
+                <span className="text-xs opacity-70">Loading weather...</span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Quick stats - Ticket Stub Style */}
-        <motion.div
-          className="mt-6 flex gap-3 overflow-x-auto pb-2 no-scrollbar"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <motion.div
-            className="bg-white/5 border-l-4 border-auto-yellow rounded-r-lg px-3 py-2 flex items-center gap-2 backdrop-blur-sm min-w-max"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Star className="w-4 h-4 text-auto-yellow fill-auto-yellow" />
-            <div className="flex flex-col">
-              <span className="text-gray-400 text-[10px] uppercase">Trust Score</span>
-              <span className="text-white text-sm font-bold font-display">4.8/5.0</span>
-            </div>
-          </motion.div>
-          <motion.div
-            className="bg-white/5 border-l-4 border-temple-red rounded-r-lg px-3 py-2 flex items-center gap-2 backdrop-blur-sm min-w-max"
-            whileHover={{ scale: 1.05 }}
-          >
-            <PremiumIcon icon="Location" className="w-4 h-4 text-temple-red" color="currentColor" animated={false} />
-            <div className="flex flex-col">
-              <span className="text-gray-400 text-[10px] uppercase">Radius</span>
-              <span className="text-white text-sm font-bold font-display">2.3 KM</span>
-            </div>
-          </motion.div>
-        </motion.div>
-      </motion.div>
-
-      {/* Story Highlights */}
-      <motion.div
-        className="px-6 py-4 overflow-x-auto"
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.6 }}
-      >
-        <div className="flex gap-4 pb-2">
-          {storyHighlights.map((story, index) => (
-            <motion.div
-              key={story.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.7 + index * 0.1 }}
-            >
+        {/* Stories / Highlights */}
+        <div className="px-6 mt-6 mb-2">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {storyHighlights.map((story) => (
               <StoryHighlight
-                image={story.image}
-                title={story.title}
-                isNew={story.isNew}
-                onClick={() => {
-                  if (story.title === 'Auto Share') setActiveFilter(activeFilter === 'help_request' ? null : 'help_request');
-                  else if (story.title === 'Food Hunt') setActiveFilter(activeFilter === 'food_recommendation' ? null : 'food_recommendation');
-                  else if (story.title === 'Chennai Gethu') navigate('/chennai-gethu');
-                  else if (story.title === 'Live Updates') navigate('/live');
-                }}
+                key={story.id}
+                {...story}
+                onClick={() => handleStoryClick(story.title)}
               />
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-      </motion.div>
 
+        <PullToRefresh onRefresh={handleRefresh}>
+          <div className="px-4 space-y-6 min-h-[50vh]">
+            {loading ? (
+              <div className="space-y-4">
+                <PostSkeleton />
+                <PostSkeleton />
+              </div>
+            ) : (
+              <>
+                {/* Auto Share Card */}
+                <StaggerContainer>
+                  <StaggerItem>
+                    <AutoShareCard pincode={activePincode} />
+                  </StaggerItem>
+                  <StaggerItem>
+                    <FoodHuntCard pincode={activePincode} />
+                  </StaggerItem>
+                </StaggerContainer>
 
-
-      {/* Content Area with Pull to Refresh */}
-      <PullToRefresh onRefresh={handleRefresh}>
-        <div className="px-6 space-y-4 pb-20">
-          {activeFilter === 'help_request' ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <AutoShareCard pincode={activePincode} />
-            </motion.div>
-          ) : activeFilter === 'food_recommendation' ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <FoodHuntCard pincode={activePincode} />
-            </motion.div>
-          ) : (
-            /* Default Community Posts */
-            <>
-              {loading ? (
-                <>
-                  <PostSkeleton />
-                  <PostSkeleton />
-                  <PostSkeleton />
-                </>
-              ) : filteredPosts.length === 0 ? (
-                <motion.div
-                  className="text-center py-10 text-gray-500"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <CustomIcon icon="Sparkles" className="w-16 h-16 mx-auto mb-4 text-orange-300" />
-                  <p className="text-lg font-medium">No posts yet</p>
-                  <p className="text-sm">Be the first to share! 🎉</p>
-                </motion.div>
-              ) : (
+                {/* Posts Feed */}
                 <StaggerContainer>
                   <AnimatePresence>
-                    {filteredPosts.map((post, index) => (
-                      <StaggerItem key={post.id} index={index}>
-                        <AnimatedPostCard delay={0}>
-                          <Card className="p-4 bg-white/80 backdrop-blur-md border border-orange-100 shadow-lg shadow-orange-100/50 rounded-[1.5rem] overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                            {/* Post header */}
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-start gap-3 flex-1 min-w-0">
-                                <motion.div
-                                  className="relative flex-shrink-0"
-                                  whileHover={{ scale: 1.1 }}
-                                >
-                                  <Avatar className="w-10 h-10 border-2 border-orange-100">
-                                    {post.profiles?.avatar_url ? (
-                                      <img src={post.profiles.avatar_url} alt={post.profiles.full_name} className="w-full h-full object-cover rounded-full" />
-                                    ) : (
-                                      <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">
-                                          {post.profiles?.full_name ? post.profiles.full_name.charAt(0).toUpperCase() : 'U'}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </Avatar>
-                                </motion.div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-sm font-bold text-[#4B1E1E] truncate">
-                                      {post.profiles?.full_name || 'Anonymous'}
-                                    </h3>
+                    {posts.map((post) => (
+                      <StaggerItem key={post.id}>
+                        <AnimatedPostCard>
+                          <Card className="overflow-hidden border-none shadow-lg bg-white/90 backdrop-blur-sm">
+                            {/* Post Header */}
+                            <div className="p-4 flex items-center gap-3">
+                              <Avatar className="w-10 h-10 border-2 border-orange-100">
+                                {post.profiles?.avatar_url ? (
+                                  <img src={post.profiles.avatar_url} alt={post.profiles.full_name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-700 font-bold">
+                                    {post.profiles?.full_name?.[0] || 'U'}
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                                    <CustomIcon icon="LocationPin" className="w-3 h-3 flex-shrink-0 text-orange-400" />
-                                    <span className="truncate">{post.area || 'Chennai'}</span>
-                                    <span className="text-gray-400">•</span>
-                                    <span className="whitespace-nowrap">
-                                      {new Date(post.created_at).toLocaleDateString()}
-                                    </span>
-                                  </div>
+                                )}
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-bold text-gray-900">{post.profiles?.full_name || 'Anonymous'}</h3>
+                                  <span className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</span>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ml-2">
-                                {getPostBadge(post.category)}
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="text-[10px] bg-orange-50 text-orange-700 hover:bg-orange-100">
+                                    {post.category}
+                                  </Badge>
+                                  {post.area && (
+                                    <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                                      <CustomIcon icon="LocationPin" className="w-3 h-3" />
+                                      {post.area}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
-                            {/* Post content */}
-                            <motion.p
-                              className="text-[#4B1E1E] mb-3 leading-relaxed break-words text-[15px]"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.2 }}
-                            >
-                              {post.content}
-                            </motion.p>
+                            {/* Post Content */}
+                            <div className="px-4 pb-2">
+                              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{post.content}</p>
 
-                            {/* Post image */}
-                            {post.image_url && (
-                              <PostImageGallery images={[post.image_url]} />
-                            )}
-
-                            {/* AI Summary Section */}
-                            <AnimatePresence>
+                              {/* AI Summary */}
                               {summaries[post.id] && (
                                 <motion.div
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: 'auto' }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="mb-3 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-100 rounded-xl flex gap-2 items-start overflow-hidden"
+                                  className="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100 text-sm text-purple-800"
                                 >
-                                  <CustomIcon icon="Sparkles" className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
-                                  <p className="text-sm text-gray-700 italic">{summaries[post.id]}</p>
+                                  <div className="flex items-center gap-2 mb-1 font-bold text-xs uppercase tracking-wider">
+                                    <CustomIcon icon="Sparkles" className="w-3 h-3" />
+                                    AI Summary
+                                  </div>
+                                  {summaries[post.id]}
                                 </motion.div>
                               )}
-                            </AnimatePresence>
+                            </div>
 
-                            {/* Post actions */}
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                            {/* Post Image */}
+                            {post.image_url && (
+                              <div className="mt-2">
+                                <PostImageGallery images={[post.image_url]} />
+                              </div>
+                            )}
+
+                            {/* Post Actions */}
+                            <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-gray-50/50">
                               <div className="flex items-center gap-4">
                                 <AnimatedLikeButton
                                   isLiked={post.is_liked_by_user || false}
                                   count={post.likes}
                                   onClick={() => handleLike(post.id)}
-                                  label="Podu Macha" // Custom label for Chennai vibe
+                                  label="Podu Macha"
                                 />
                                 <AnimatedCommentButton
                                   count={post.comments_count}
-                                  onClick={() => toast.info('Comments feature coming soon! 💬')}
+                                  onClick={() => openComments(post.id)}
                                 />
                                 <motion.button
                                   className="flex items-center gap-2 text-gray-500 hover:text-purple-500 transition-colors"
@@ -488,7 +401,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                                   {summarizing[post.id] ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                   ) : (
-                                    <CustomIcon icon="Sparkles" className="w-4 h-4" />
+                                    <Send className="w-4 h-4" />
                                   )}
                                   <span className="text-sm hidden sm:inline font-medium">AI Summary</span>
                                 </motion.button>
@@ -501,64 +414,155 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                     ))}
                   </AnimatePresence>
                 </StaggerContainer>
-              )}
-            </>
-          )}
-        </div>
-      </PullToRefresh>
-
-      {/* Floating Action Button */}
-      {!activeFilter && (
-        <FloatingActionButton onClick={() => setIsPostDialogOpen(true)} />
-      )}
-
-      {/* Create Post Dialog */}
-      <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[#FFFFF0] border-orange-200 rounded-[2rem]">
-          <DialogHeader>
-            <DialogTitle className="text-[#4B1E1E] flex items-center gap-2 text-xl font-bold">
-              <CustomIcon icon="Sparkles" className="w-6 h-6 text-orange-500" />
-              Create New Post
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Textarea
-              placeholder="Share what's happening in your neighborhood... 🏘️"
-              className="min-h-[120px] border-orange-200 focus-visible:ring-orange-400 bg-white rounded-xl resize-none"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsPostDialogOpen(false)}
-                className="border-orange-200 text-orange-700 hover:bg-orange-50 rounded-xl"
-              >
-                Cancel
-              </Button>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 rounded-xl shadow-lg shadow-orange-200"
-                  onClick={handleCreatePost}
-                  disabled={isPosting || !newPostContent.trim()}
-                >
-                  {isPosting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Posting...
-                    </>
-                  ) : (
-                    <>
-                      <CustomIcon icon="Sparkles" className="w-4 h-4 mr-2 text-white" />
-                      Post 🚀
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-            </div>
+              </>
+            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </PullToRefresh>
+
+        {/* Floating Action Button */}
+        <FloatingActionButton onClick={() => setIsPostDialogOpen(true)} />
+
+        {/* Create Post Dialog */}
+        <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+          {/* ... (existing dialog content) */}
+          <DialogContent className="sm:max-w-[425px] bg-[#FFFFF0] border-orange-200 rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle className="text-[#4B1E1E] flex items-center gap-2 text-xl font-bold">
+                <CustomIcon icon="Sparkles" className="w-6 h-6 text-orange-500" />
+                Create New Post
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Textarea
+                placeholder="Share what's happening in your neighborhood... 🏘️"
+                className="min-h-[120px] border-orange-200 focus-visible:ring-orange-400 bg-white rounded-xl resize-none"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsPostDialogOpen(false)}
+                  className="border-orange-200 text-orange-700 hover:bg-orange-50 rounded-xl"
+                >
+                  Cancel
+                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 rounded-xl shadow-lg shadow-orange-200"
+                    onClick={handleCreatePost}
+                    disabled={isPosting || !newPostContent.trim()}
+                  >
+                    {isPosting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Posting...
+                      </>
+                    ) : (
+                      <>
+                        <CustomIcon icon="Sparkles" className="w-4 h-4 mr-2 text-white" />
+                        Post 🚀
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Comments Dialog */}
+        <Dialog open={isCommentsOpen} onOpenChange={setIsCommentsOpen}>
+          <DialogContent className="sm:max-w-[500px] h-[80vh] flex flex-col p-0 gap-0 bg-[#fffdf5] overflow-hidden rounded-2xl">
+            <div className="p-4 border-b border-orange-100 bg-white/50 backdrop-blur-sm">
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-xl">💬</span> Comments
+              </DialogTitle>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {loadingComments ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-10 text-gray-400">
+                  No comments yet. Be the first!
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-3">
+                    <Avatar className="w-8 h-8 border border-orange-100">
+                      {comment.profiles?.avatar_url ? (
+                        <img src={comment.profiles.avatar_url} alt={comment.profiles.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-orange-100 flex items-center justify-center text-orange-600 text-xs font-bold">
+                          {comment.profiles?.full_name?.[0] || 'U'}
+                        </div>
+                      )}
+                    </Avatar>
+                    <div className="flex-1 bg-white p-3 rounded-2xl rounded-tl-none border border-orange-50 shadow-sm">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-xs font-bold text-gray-900">{comment.profiles?.full_name || 'User'}</span>
+                        <span className="text-[10px] text-gray-400">{new Date(comment.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-3 bg-white border-t border-orange-100">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Write a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="min-h-[40px] max-h-[100px] resize-none border-orange-200 focus-visible:ring-orange-400"
+                />
+                <Button
+                  size="icon"
+                  className="bg-orange-500 hover:bg-orange-600 text-white shrink-0"
+                  onClick={handleAddComment}
+                  disabled={!newComment.trim()}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Info Dialog */}
+        <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-white border-orange-200 rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle className="text-[#4B1E1E] flex items-center gap-2 text-xl font-bold">
+                <CustomIcon icon="Sparkles" className="w-6 h-6 text-orange-500" />
+                Live Updates ({activeLocation?.area || 'Chennai'})
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              {loadingInfo ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                  <p className="text-sm text-gray-500">Fetching latest updates...</p>
+                </div>
+              ) : (
+                <div className="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap font-medium">
+                    {liveUpdate || "No updates available at the moment. Stay safe! 🙏"}
+                  </p>
+                  <div className="mt-2 text-[10px] text-gray-400 text-right">
+                    Powered by Gemini ⚡
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

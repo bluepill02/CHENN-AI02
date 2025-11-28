@@ -202,6 +202,145 @@ export class ChatService {
     }
 
     /**
+     * Get all conversations for a user
+     */
+    static async getConversations(userId: string): Promise<any[]> {
+        // First get all chat IDs the user is part of
+        const { data: participations, error: partError } = await supabase
+            .from('chat_participants')
+            .select('chat_id')
+            .eq('user_id', userId);
+
+        if (partError) throw partError;
+
+        const chatIds = participations.map(p => p.chat_id);
+
+        if (chatIds.length === 0) return [];
+
+        // Then fetch the chat details
+        const { data: chats, error: chatError } = await supabase
+            .from('chat_groups')
+            .select('*')
+            .in('id', chatIds)
+            .order('created_at', { ascending: false });
+
+        if (chatError) throw chatError;
+
+        // For each chat, get the last message and other participants (for 1-on-1 names)
+        const conversations = await Promise.all(chats.map(async (chat) => {
+            // Get last message
+            const { data: lastMsg } = await supabase
+                .from('messages')
+                .select('content, created_at, is_read, sender_id')
+                .eq('chat_id', chat.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            // Get unread count
+            const unreadCount = await this.getUnreadCount(chat.id, userId);
+
+            // If it's not a named group (i.e., 1-on-1), find the other user's name
+            let chatName = chat.name;
+            let chatImage = chat.image_url;
+
+            if (!chat.is_public && !chat.name) { // Assuming private chats might not have names initially
+                const { data: otherPart } = await supabase
+                    .from('chat_participants')
+                    .select('profiles(full_name, avatar_url)')
+                    .eq('chat_id', chat.id)
+                    .neq('user_id', userId)
+                    .single();
+
+                if (otherPart && otherPart.profiles) {
+                    const profile = Array.isArray(otherPart.profiles) ? otherPart.profiles[0] : otherPart.profiles;
+                    if (profile) {
+                        chatName = profile.full_name;
+                        chatImage = profile.avatar_url;
+                    }
+                }
+            }
+
+            return {
+                ...chat,
+                name: chatName,
+                image_url: chatImage,
+                lastMessage: lastMsg?.content || 'No messages yet',
+                time: lastMsg?.created_at,
+                unread: unreadCount,
+                isActive: unreadCount > 0 // Simple logic for now
+            };
+        }));
+
+        return conversations;
+    }
+
+    /**
+     * Create a new group chat
+     */
+    static async createGroup(name: string, description: string, creatorId: string, isPublic: boolean = false): Promise<string | null> {
+        // 1. Create group
+        const { data: group, error: groupError } = await supabase
+            .from('chat_groups')
+            .insert({
+                name,
+                description,
+                created_by: creatorId,
+                is_public: isPublic
+            })
+            .select('id')
+            .single();
+
+        if (groupError) throw groupError;
+
+        // 2. Add creator as admin
+        const { error: partError } = await supabase
+            .from('chat_participants')
+            .insert({
+                chat_id: group.id,
+                user_id: creatorId,
+                role: 'admin'
+            });
+
+        if (partError) throw partError;
+
+        return group.id;
+    }
+
+    /**
+     * Start a direct chat with another user
+     */
+    static async startDirectChat(currentUserId: string, otherUserId: string): Promise<string> {
+        // Check if a direct chat already exists
+        // This is complex in SQL, simpler to just create a new one or check client-side for now
+        // For MVP, we'll create a new private group for them
+
+        // 1. Create private group
+        const { data: group, error: groupError } = await supabase
+            .from('chat_groups')
+            .insert({
+                name: '', // Empty name for 1-on-1, will be dynamic
+                is_public: false
+            })
+            .select('id')
+            .single();
+
+        if (groupError) throw groupError;
+
+        // 2. Add both users
+        const { error: partError } = await supabase
+            .from('chat_participants')
+            .insert([
+                { chat_id: group.id, user_id: currentUserId },
+                { chat_id: group.id, user_id: otherUserId }
+            ]);
+
+        if (partError) throw partError;
+
+        return group.id;
+    }
+
+    /**
      * Delete a message (only by sender)
      */
     static async deleteMessage(messageId: string): Promise<boolean> {

@@ -141,10 +141,43 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
 
 
-  const handleSuggestSubmit = (e: React.FormEvent) => {
+  // Suggest Form State
+  const [suggestForm, setSuggestForm] = useState({
+    business_name: '',
+    category: '',
+    location: '',
+    description: ''
+  });
+
+  const handleSuggestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSuggestOpen(false);
-    toast.success("Thanks! We'll verify and list this business soon.");
+    if (!user) {
+      toast.error("Please sign in to suggest a business!");
+      return;
+    }
+
+    try {
+      await BusinessService.createBusiness({
+        user_id: user.id,
+        business_name: suggestForm.business_name,
+        category: suggestForm.category,
+        location: suggestForm.location,
+        description: suggestForm.description,
+        contact_number: '0000000000', // Default for suggestions
+        price_range: 'moderate' // Default
+      });
+      setIsSuggestOpen(false);
+      toast.success("Thanks! We'll verify and list this business soon.");
+      setSuggestForm({
+        business_name: '',
+        category: '',
+        location: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit suggestion.");
+    }
   };
 
   const handlePartnerSubmit = async (e: React.FormEvent) => {
@@ -393,19 +426,42 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
                   <form onSubmit={handleSuggestSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Business Name</Label>
-                      <Input id="name" placeholder="e.g. Siva Cycles" required />
+                      <Input
+                        id="name"
+                        placeholder="e.g. Siva Cycles"
+                        required
+                        value={suggestForm.business_name}
+                        onChange={e => setSuggestForm({ ...suggestForm, business_name: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
-                      <Input id="category" placeholder="e.g. Repair" required />
+                      <Input
+                        id="category"
+                        placeholder="e.g. Repair"
+                        required
+                        value={suggestForm.category}
+                        onChange={e => setSuggestForm({ ...suggestForm, category: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="location">Location</Label>
-                      <Input id="location" placeholder="e.g. Anna Nagar" required />
+                      <Input
+                        id="location"
+                        placeholder="e.g. Anna Nagar"
+                        required
+                        value={suggestForm.location}
+                        onChange={e => setSuggestForm({ ...suggestForm, location: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="details">Why do you recommend them?</Label>
-                      <Textarea id="details" placeholder="Good service, cheap price..." />
+                      <Textarea
+                        id="details"
+                        placeholder="Good service, cheap price..."
+                        value={suggestForm.description}
+                        onChange={e => setSuggestForm({ ...suggestForm, description: e.target.value })}
+                      />
                     </div>
                     <DialogFooter>
                       <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white">Submit Suggestion</Button>
