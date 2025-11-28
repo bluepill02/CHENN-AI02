@@ -356,7 +356,7 @@ export function AnimatedIcon({
         },
         spin: {
             rotate: 360,
-            transition: { duration: 2, repeat: Infinity, ease: "linear" }
+            transition: { duration: 2, repeat: Infinity, ease: "linear" as any }
         },
         shake: {
             x: [0, -5, 5, -5, 5, 0],

@@ -218,12 +218,15 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   };
 
   return (
-    <Card className="p-4 border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg rounded-[1.5rem] overflow-hidden">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="font-bold text-lg flex items-center gap-2 text-[#4B1E1E]">
-          <CustomIcon icon="AutoRickshaw" className="w-6 h-6 text-green-600" />
+    <Card className="p-4 border-2 border-black bg-gradient-to-br from-green-50 to-emerald-50 shadow-[4px_4px_0px_0px_rgba(22,163,74,1)] rounded-[1.5rem] overflow-hidden relative group">
+      {/* Film Grain Overlay */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+
+      <div className="flex items-center justify-between mb-4 relative z-10">
+        <h4 className="font-display font-bold text-xl flex items-center gap-2 text-[#4B1E1E]">
+          <CustomIcon icon="AutoRickshaw" className="w-7 h-7 text-green-700 drop-shadow-sm" />
           Auto Share
-          <Badge variant="outline" className="text-xs border-green-200 bg-white/50">
+          <Badge variant="outline" className="text-xs border-2 border-black bg-white font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
             {pincode}
           </Badge>
         </h4>
@@ -235,7 +238,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               setFormOpen(!formOpen);
             }}
             variant={formOpen ? "ghost" : "default"}
-            className={`h-8 text-xs font-medium rounded-full ${formOpen ? "text-green-700 hover:bg-green-100" : "bg-green-600 hover:bg-green-700 text-white shadow-md"}`}
+            className={`h-8 text-xs font-medium rounded-full ${formOpen ? "text-green-700 hover:bg-green-100" : "bg-green-600 hover:bg-green-700 text-white shadow-md border border-black"}`}
           >
             {formOpen ? "Cancel" : "Post Ride"}
           </Button>
@@ -243,7 +246,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       </div>
 
       {/* Video */}
-      <div className="relative rounded-xl overflow-hidden mb-4 shadow-md border border-green-100">
+      <div className="relative rounded-xl overflow-hidden mb-4 shadow-md border-2 border-black relative z-10">
         <video
           src={rickshawVideo}
           autoPlay
@@ -252,15 +255,15 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
           playsInline
           className="w-full h-32 object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-3">
-          <p className="text-white text-xs font-medium">Find or share an auto ride instantly!</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+          <p className="text-white text-xs font-medium font-display tracking-wide">Find or share an auto ride instantly!</p>
         </div>
       </div>
 
       {/* Create/Edit Form */}
       {formOpen && (
-        <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/80 backdrop-blur-md rounded-xl border border-green-200 shadow-sm">
-          <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/90 backdrop-blur-md rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative z-10">
+          <div className="text-sm font-bold text-gray-900 flex items-center gap-2 font-display">
             <CustomIcon icon="Sparkles" className="w-4 h-4 text-green-500" />
             {editingPost ? "Edit Ride" : "Post New Ride"}
           </div>
@@ -271,7 +274,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="From (e.g., T. Nagar)"
               value={fromLocation}
               onChange={(e) => setFromLocation(e.target.value)}
-              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+              className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black bg-white transition-all"
               required
             />
 
@@ -280,7 +283,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="To (e.g., Anna Nagar)"
               value={toLocation}
               onChange={(e) => setToLocation(e.target.value)}
-              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+              className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black bg-white transition-all"
               required
             />
           </div>
@@ -293,7 +296,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               max="10"
               value={seatsAvailable}
               onChange={(e) => setSeatsAvailable(Number(e.target.value))}
-              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+              className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black bg-white transition-all"
               required
             />
           </div>
@@ -326,7 +329,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="Phone Number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+              className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black bg-white transition-all"
               required
             />
           )}
@@ -336,13 +339,13 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white"
+            className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black resize-none bg-white transition-all"
           />
 
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md"
+            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-black active:translate-y-[2px] active:shadow-none transition-all"
             size="sm"
           >
             {submitting ? (
@@ -360,14 +363,14 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       )}
 
       {/* Posts List */}
-      <div className="space-y-3">
+      <div className="space-y-3 relative z-10">
         {loading ? (
           <div className="text-center py-6 text-sm text-gray-500">
             <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-green-500" />
             Loading rides...
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-sm text-gray-600 text-center py-8 bg-white/50 rounded-xl border border-dashed border-green-300">
+          <div className="text-sm text-gray-600 text-center py-8 bg-white/50 rounded-xl border-2 border-dashed border-green-300">
             <CustomIcon icon="AutoRickshaw" className="w-8 h-8 text-green-300 mx-auto mb-2" />
             No active rides right now.
             {user && <div className="text-xs mt-1 font-medium text-green-700">Be the first to post!</div>}
@@ -381,16 +384,16 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             return (
               <div
                 key={post.id}
-                className="bg-white border border-green-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
+                className="bg-white border-2 border-green-100 rounded-xl p-4 shadow-sm hover:shadow-[4px_4px_0px_0px_rgba(22,163,74,0.2)] hover:border-green-300 transition-all duration-300"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm border border-black">
                       {post.profiles?.full_name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-sm truncate text-[#4B1E1E]">
+                      <div className="font-bold text-sm truncate text-[#4B1E1E] font-display">
                         {post.profiles?.full_name || "Anonymous"}
                       </div>
                       <div className="text-xs text-gray-500 flex items-center gap-1">
@@ -400,13 +403,13 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                     </div>
                   </div>
 
-                  <Badge className={`${getStatusColor(post.status)} text-xs px-2 py-0.5 rounded-full`}>
+                  <Badge className={`${getStatusColor(post.status)} text-xs px-2 py-0.5 rounded-full border border-black/10`}>
                     {post.status}
                   </Badge>
                 </div>
 
                 {/* Route */}
-                <div className="mb-3 bg-green-50/50 p-2 rounded-lg border border-green-50">
+                <div className="mb-3 bg-green-50/50 p-2 rounded-lg border border-green-100">
                   <div className="flex items-center gap-2 text-sm">
                     <CustomIcon icon="LocationPin" className="w-4 h-4 text-green-600 flex-shrink-0" />
                     <span className="font-semibold truncate text-gray-800">{post.from_location}</span>
@@ -505,7 +508,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       </div>
 
       {/* Info */}
-      <div className="mt-4 text-xs text-gray-500 flex items-start gap-2 bg-yellow-50/80 p-3 rounded-xl border border-yellow-100">
+      <div className="mt-4 text-xs text-gray-500 flex items-start gap-2 bg-yellow-50/80 p-3 rounded-xl border border-yellow-100 relative z-10">
         <span className="text-lg">⚠️</span>
         <span className="mt-0.5">Posts expire automatically after 30 minutes. {!user && "Sign in to post rides."}</span>
       </div>

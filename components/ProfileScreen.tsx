@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -332,31 +331,60 @@ export function ProfileScreen() {
 
       {/* Content */}
       <div className="relative z-10">
-        {/* Header with profile info */}
-        <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-8 rounded-b-[2rem]">
-          <div className="flex items-center gap-4 mb-6">
-            <Avatar className="w-20 h-20">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.full_name || 'User'} className="w-full h-full object-cover rounded-full" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-2xl">{getInitials(profile?.full_name)}</span>
+        {/* Header - Fan Club Card Style */}
+        <div className="px-4 pt-6 pb-8">
+          <div className="bg-gradient-to-br from-auto-yellow to-orange-500 rounded-3xl p-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-4 border-black transform rotate-1 hover:rotate-0 transition-transform duration-500">
+            <div className="bg-black rounded-[1.3rem] p-6 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+              {/* Holographic effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-50 pointer-events-none"></div>
+
+              <div className="flex items-start justify-between mb-6 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full animate-spin-slow opacity-75 blur-sm"></div>
+                    <Avatar className="w-24 h-24 border-4 border-black relative z-10">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt={profile.full_name || 'User'} className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-3xl font-display">{getInitials(profile?.full_name)}</span>
+                        </div>
+                      )}
+                    </Avatar>
+                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-black uppercase tracking-wider whitespace-nowrap shadow-sm">
+                      SUPER STAR
+                    </div>
+                  </div>
+
+                  <div>
+                    <h1 className="text-white text-3xl font-display font-bold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500">
+                      {profile?.full_name || 'User'}
+                    </h1>
+                    <div className="flex items-center gap-2 text-gray-400 text-sm font-mono mt-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>{profile?.area?.toUpperCase() || 'CHENNAI'}</span>
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <Badge className="bg-white/10 text-yellow-400 border-yellow-400/30 hover:bg-white/20">
+                        <span className="mr-1">⭐</span>
+                        VERIFIED FAN
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-white text-2xl font-bold">{profile?.full_name || 'User'}</h1>
+
                 <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
-                      size="sm"
+                      size="icon"
                       variant="ghost"
-                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                      className="text-gray-400 hover:text-white hover:bg-white/10"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-5 h-5" />
                     </Button>
                   </DialogTrigger>
+                  {/* ... Dialog Content ... */}
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Edit Profile</DialogTitle>
@@ -426,30 +454,24 @@ export function ProfileScreen() {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="flex items-center gap-2 text-orange-100 mb-2">
-                <MapPin className="w-4 h-4" />
-                <span>{profile?.area || 'Chennai'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-white/20 text-white border-white/30">
-                  <span className="mr-1">🛡️</span>
-                  Verified Neighbor
-                </Badge>
+
+              {/* Gethu Meter Stats */}
+              <div className="grid grid-cols-4 gap-2 mt-6 border-t border-white/10 pt-4">
+                {userStats.map((stat, index) => (
+                  <div key={index} className="flex flex-col items-center group">
+                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform group-hover:bg-white/10 group-hover:border-yellow-500/50">
+                      <span className="text-2xl filter drop-shadow-lg">{stat.iconEmoji}</span>
+                    </div>
+                    <div className="text-white font-display font-bold text-lg leading-none">
+                      {stat.value}
+                    </div>
+                    <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mt-1">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-
-          {/* Quick stats */}
-          <div className="grid grid-cols-4 gap-3">
-            {userStats.map((stat, index) => (
-              <div key={index} className="bg-white/20 rounded-xl p-3 text-center">
-                <div className="flex justify-center mb-1">
-                  <span className="text-white text-lg">{stat.iconEmoji}</span>
-                </div>
-                <div className="text-white font-bold text-lg">{stat.value}</div>
-                <div className="text-orange-100 text-xs">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -485,8 +507,9 @@ export function ProfileScreen() {
           <>
             {/* Community bio */}
             <div className="px-6 pb-4">
-              <Card className="p-4 bg-card backdrop-blur-sm border-orange-200 shadow-lg shadow-orange-100/50">
-                <div className="flex justify-between items-start mb-2">
+              <Card className="p-4 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                <div className="relative z-10 flex justify-between items-start mb-2">
                   <h3 className="font-medium">About</h3>
                   <Button
                     variant="ghost"
@@ -524,7 +547,7 @@ export function ProfileScreen() {
               <div className="grid grid-cols-3 gap-2">
                 {achievements.filter(a => a.earned).slice(0, 3).length > 0 ? (
                   achievements.filter(a => a.earned).slice(0, 3).map((achievement, index) => (
-                    <Card key={index} className="p-2 bg-card border-orange-200 text-center shadow-md shadow-orange-100/30">
+                    <Card key={index} className="p-2 bg-white border-2 border-black text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                       <div className="text-lg mb-1">{achievement.icon}</div>
                       <h4 className="text-xs font-medium text-gray-900 mb-1">{achievement.title}</h4>
                       <Badge className={`text-xs ${achievement.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-700' :
@@ -558,10 +581,11 @@ export function ProfileScreen() {
             {menuItems.map((item, index) => (
               <Card
                 key={index}
-                className="p-4 bg-card backdrop-blur-sm border-orange-200 hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] shadow-orange-100/50"
+                className="p-4 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] hover:shadow-[6px_6px_0px_0px_rgba(234,88,12,1)] transition-all cursor-pointer hover:scale-[1.02] relative overflow-hidden group"
                 onClick={item.action}
               >
-                <div className="flex items-center gap-3">
+                <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply z-0" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                <div className="relative z-10 flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.isDestructive
                     ? 'bg-red-100'
                     : 'bg-orange-100'

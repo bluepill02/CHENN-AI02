@@ -126,12 +126,15 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
     };
 
     return (
-        <Card className="p-4 border border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 shadow-lg rounded-[1.5rem] overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold text-lg flex items-center gap-2 text-[#4B1E1E]">
-                    <CustomIcon icon="Idli" className="w-6 h-6 text-orange-500" />
+        <Card className="p-4 border-2 border-black bg-gradient-to-br from-orange-50 to-red-50 shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] rounded-[1.5rem] overflow-hidden relative group">
+            {/* Film Grain Overlay */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+
+            <div className="flex items-center justify-between mb-4 relative z-10">
+                <h4 className="font-display font-bold text-xl flex items-center gap-2 text-[#4B1E1E]">
+                    <CustomIcon icon="Idli" className="w-7 h-7 text-orange-600 drop-shadow-sm" />
                     Food Hunt
-                    <Badge variant="outline" className="text-xs border-orange-200 text-orange-700 bg-white/50">
+                    <Badge variant="outline" className="text-xs border-2 border-black bg-white font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
                         {pincode}
                     </Badge>
                 </h4>
@@ -143,7 +146,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                             setFormOpen(!formOpen);
                         }}
                         variant={formOpen ? "ghost" : "default"}
-                        className={`h-8 text-xs font-medium rounded-full ${formOpen ? "text-orange-700 hover:bg-orange-100" : "bg-orange-500 hover:bg-orange-600 text-white shadow-md"}`}
+                        className={`h-8 text-xs font-medium rounded-full ${formOpen ? "text-orange-700 hover:bg-orange-100" : "bg-orange-500 hover:bg-orange-600 text-white shadow-md border border-black"}`}
                     >
                         {formOpen ? "Cancel" : "Post Review"}
                     </Button>
@@ -152,8 +155,8 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
 
             {/* Create Form */}
             {formOpen && (
-                <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/80 backdrop-blur-md rounded-xl border border-orange-200 shadow-sm">
-                    <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/90 backdrop-blur-md rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative z-10">
+                    <div className="text-sm font-bold text-gray-900 flex items-center gap-2 font-display">
                         <CustomIcon icon="FilterCoffee" className="w-4 h-4 text-orange-600" />
                         Share your food find!
                     </div>
@@ -164,7 +167,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                             placeholder="Restaurant Name (e.g., Murugan Idli Shop)"
                             value={restaurantName}
                             onChange={(e) => setRestaurantName(e.target.value)}
-                            className="border border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                            className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black bg-white transition-all"
                             required
                         />
 
@@ -173,7 +176,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                             placeholder="Dish Name (optional)"
                             value={dishName}
                             onChange={(e) => setDishName(e.target.value)}
-                            className="border border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                            className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black bg-white transition-all"
                         />
                     </div>
 
@@ -183,7 +186,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                             <select
                                 value={rating}
                                 onChange={(e) => setRating(Number(e.target.value))}
-                                className="border border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                                className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black bg-white transition-all"
                             >
                                 <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
                                 <option value={4}>⭐⭐⭐⭐ (4)</option>
@@ -197,7 +200,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                             <select
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(e.target.value as any)}
-                                className="border border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                                className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black bg-white transition-all"
                             >
                                 <option value="cheap">₹ Budget</option>
                                 <option value="moderate">₹₹ Moderate</option>
@@ -211,13 +214,13 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                         value={review}
                         onChange={(e) => setReview(e.target.value)}
                         rows={2}
-                        className="border border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none bg-white"
+                        className="border-2 border-orange-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-orange-500 focus:border-black resize-none bg-white transition-all"
                     />
 
                     <Button
                         type="submit"
                         disabled={submitting}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-md"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-black active:translate-y-[2px] active:shadow-none transition-all"
                         size="sm"
                     >
                         {submitting ? (
@@ -233,14 +236,14 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
             )}
 
             {/* Posts List */}
-            <div className="space-y-3">
+            <div className="space-y-3 relative z-10">
                 {loading ? (
                     <div className="text-center py-6 text-sm text-gray-500">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-orange-500" />
                         Loading reviews...
                     </div>
                 ) : posts.length === 0 ? (
-                    <div className="text-sm text-gray-600 text-center py-8 bg-white/50 rounded-xl border border-dashed border-orange-200">
+                    <div className="text-sm text-gray-600 text-center py-8 bg-white/50 rounded-xl border-2 border-dashed border-orange-200">
                         <CustomIcon icon="Idli" className="w-8 h-8 text-orange-300 mx-auto mb-2" />
                         No food reviews yet.
                         {user && <div className="text-xs mt-1 font-medium text-orange-700">Be the first to recommend!</div>}
@@ -252,16 +255,16 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                         return (
                             <div
                                 key={post.id}
-                                className="bg-white border border-orange-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
+                                className="bg-white border-2 border-orange-100 rounded-xl p-4 shadow-sm hover:shadow-[4px_4px_0px_0px_rgba(234,88,12,0.2)] hover:border-orange-300 transition-all duration-300"
                             >
                                 {/* Header */}
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm border border-black">
                                             {post.profiles?.full_name?.charAt(0).toUpperCase() || "U"}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-sm truncate text-[#4B1E1E]">
+                                            <div className="font-bold text-sm truncate text-[#4B1E1E] font-display">
                                                 {post.restaurant_name}
                                             </div>
                                             <div className="text-xs text-gray-500 flex items-center gap-1">
@@ -289,7 +292,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                                 {/* Dish Name */}
                                 {post.dish_name && (
                                     <div className="mb-3">
-                                        <Badge variant="secondary" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-100 text-xs font-medium px-2 py-1">
+                                        <Badge variant="secondary" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 text-xs font-medium px-2 py-1">
                                             <CustomIcon icon="Idli" className="w-3 h-3 mr-1" />
                                             {post.dish_name}
                                         </Badge>

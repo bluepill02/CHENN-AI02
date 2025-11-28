@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { ChennaiIcons, IllustratedIcon } from './IllustratedIcon';
+import { ChennaiIcons } from './IllustratedIcon';
 import { PremiumIcon } from './PremiumIcons';
 import { MapPin, Star, Phone, Navigation, Search, X, Plus, ShieldCheck, Briefcase, CheckCircle2 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -250,24 +250,33 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
       {/* Content */}
       <div className="relative z-10">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-6 rounded-b-[2rem] shadow-lg">
-          <div className="flex items-center justify-between">
+        {/* Header - Marketplace Style */}
+        <div className="bg-gradient-to-r from-auto-yellow to-orange-500 px-6 py-8 rounded-b-[2.5rem] shadow-xl relative overflow-hidden border-b-4 border-black">
+          {/* Pattern Overlay */}
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '10px 10px' }}></div>
+
+          <div className="flex items-center justify-between relative z-10">
             <div className="flex-1">
-              <h1 className="text-white text-2xl font-bold flex items-center gap-2">
-                நம்ம area சேவைகள் <span className="text-xl">🏪</span>
+              <div className="inline-block bg-black text-auto-yellow text-xs font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest transform -rotate-2">
+                CHENNAI MARKETPLACE
+              </div>
+              <h1 className="text-black text-3xl font-display font-bold flex items-center gap-2 drop-shadow-sm">
+                நம்ம Area கடை <span className="text-2xl animate-bounce">🏪</span>
               </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-orange-100 text-sm">
-                  {activeLocation ? `Services in ${activeLocation.area}` : 'Local services தமிழ் style-ல'}
-                </p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-1 flex items-center gap-2 border border-black/10">
+                  <MapPin className="w-4 h-4 text-black" />
+                  <p className="text-black font-medium text-sm">
+                    {activeLocation ? activeLocation.area : 'Chennai'}
+                  </p>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-orange-200 hover:text-white hover:bg-white/10"
+                  className="h-8 w-8 p-0 rounded-full bg-black text-auto-yellow hover:bg-black/80"
                   onClick={() => setLocationModalOpen(true)}
                 >
-                  <Navigation className="w-3 h-3" />
+                  <Navigation className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -462,9 +471,9 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
                 >
                   <Card
                     onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
-                    className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 ${selectedCategory === category.name
-                      ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
-                      : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
+                    className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 border-2 ${selectedCategory === category.name
+                      ? 'bg-orange-100 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                      : 'bg-white/80 border-orange-100 hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                       }`}
                   >
                     <motion.div className="flex items-center justify-center mb-3" whileHover={{ scale: 1.1 }}>
@@ -515,65 +524,73 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
               </div>
             ) : (
               filteredBusinesses.map((service) => (
-                <Card key={service.id} className="p-4 bg-white border-orange-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex gap-3">
-                    {/* Service image */}
-                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                      <ImageWithFallback
-                        src={service.image_url || 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400'}
-                        alt={service.business_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                <motion.div
+                  key={service.id}
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Card className="p-0 bg-[#fffdf5] border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] hover:shadow-[6px_6px_0px_0px_rgba(234,88,12,1)] transition-all overflow-hidden rounded-xl relative group">
+                    <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply z-10" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                    <div className="flex h-full relative z-20">
+                      {/* Service image */}
+                      <div className="w-24 relative">
+                        <ImageWithFallback
+                          src={service.image_url || 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400'}
+                          alt={service.business_name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
+                      </div>
 
-                    {/* Service details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-1">
-                        <div className="truncate pr-2">
-                          <h3 className="font-bold text-gray-900 truncate">{service.business_name}</h3>
-                          <p className="text-xs text-gray-600 truncate capitalize">{service.category}</p>
+                      {/* Service details */}
+                      <div className="flex-1 p-3 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between mb-1">
+                            <div className="truncate pr-2">
+                              <h3 className="font-display font-bold text-gray-900 truncate text-lg">{service.business_name}</h3>
+                              <p className="text-xs font-medium text-orange-600 truncate uppercase tracking-wide">{service.category}</p>
+                            </div>
+                            {getTrustBadge(service)}
+                          </div>
+
+                          <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
+                            <MapPin className="w-3 h-3 text-orange-400 shrink-0" />
+                            <span className="truncate">{service.location}</span>
+                          </div>
+
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center gap-1 bg-yellow-100 px-1.5 py-0.5 rounded border border-yellow-200">
+                              <Star className="w-3 h-3 text-yellow-600 fill-current" />
+                              <span className="text-xs font-bold text-yellow-700">{service.rating?.toFixed(1) || 'New'}</span>
+                              <span className="text-[10px] text-yellow-600">({service.review_count || 0})</span>
+                            </div>
+                            {service.price_range && <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">{service.price_range}</span>}
+                          </div>
                         </div>
-                        {getTrustBadge(service)}
-                      </div>
 
-                      <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
-                        <span className="text-xs text-gray-600 truncate">{service.location}</span>
-                      </div>
-
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-0.5 rounded">
-                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                          <span className="text-xs font-medium">{service.rating?.toFixed(1) || 'New'}</span>
-                          <span className="text-[10px] text-gray-400">({service.review_count || 0})</span>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-auto-black hover:bg-black text-white h-8 text-xs font-bold uppercase tracking-wide"
+                            onClick={() => handleCall(service.contact_number)}
+                          >
+                            <Phone className="w-3 h-3 mr-1.5" />
+                            Call
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-2 border-black text-black hover:bg-black hover:text-white h-8 text-xs font-bold uppercase tracking-wide transition-colors"
+                            onClick={() => openReviewModal(service)}
+                          >
+                            <Star className="w-3 h-3 mr-1.5" />
+                            Rate
+                          </Button>
                         </div>
-                        {service.price_range && <span className="text-xs text-gray-500">{service.price_range}</span>}
-                      </div>
-
-                      <p className="text-xs text-gray-500 mb-3 italic line-clamp-1">"{service.description}"</p>
-
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs"
-                          onClick={() => handleCall(service.contact_number)}
-                        >
-                          <Phone className="w-3 h-3 mr-1.5" />
-                          Call
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50 h-8 text-xs"
-                          onClick={() => openReviewModal(service)}
-                        >
-                          <Star className="w-3 h-3 mr-1.5" />
-                          Rate
-                        </Button>
                       </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </motion.div>
               ))
             )}
           </div>

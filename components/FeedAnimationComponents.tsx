@@ -26,9 +26,10 @@ interface LikeButtonProps {
     isLiked: boolean;
     count: number;
     onClick: () => void;
+    label?: string;
 }
 
-export function AnimatedLikeButton({ isLiked, count, onClick }: LikeButtonProps) {
+export function AnimatedLikeButton({ isLiked, count, onClick, label }: LikeButtonProps) {
     const [isAnimating, setIsAnimating] = React.useState(false);
 
     const handleClick = () => {
@@ -97,7 +98,7 @@ export function AnimatedLikeButton({ isLiked, count, onClick }: LikeButtonProps)
                 animate={{ scale: 1, color: isLiked ? '#ef4444' : '#6b7280' }}
                 transition={{ duration: 0.3 }}
             >
-                {count}
+                {label ? label : count}
             </motion.span>
         </motion.button>
     );

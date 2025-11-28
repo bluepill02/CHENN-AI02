@@ -234,8 +234,9 @@ export function ChennaiGethu() {
                 <div className="flex-1 overflow-y-auto min-h-0 mt-4 pr-1 scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
                     {/* --- Cinema Kottai --- */}
                     <TabsContent value="cinema" className="space-y-4 m-0">
-                        <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-                            <div className="flex justify-between items-center mb-4">
+                        <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(147,51,234,1)] relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                            <div className="relative z-10 flex justify-between items-center mb-4">
                                 <div>
                                     <h3 className="font-bold text-purple-900">Cinema Kottai</h3>
                                     <p className="text-xs text-purple-600">Latest reviews & updates</p>
@@ -292,7 +293,7 @@ export function ChennaiGethu() {
                                     <div className="text-center text-gray-500 py-8">No reviews yet. Be the first!</div>
                                 ) : (
                                     cinemaPosts.map((post) => (
-                                        <Card key={post.id} className="p-3 bg-white border-purple-100 shadow-sm">
+                                        <Card key={post.id} className="p-3 bg-white border-2 border-purple-100 hover:border-black shadow-sm hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <h4 className="font-bold text-gray-900">{post.movie_name}</h4>
@@ -326,8 +327,9 @@ export function ChennaiGethu() {
 
                     {/* --- Madras Meter --- */}
                     <TabsContent value="meter" className="space-y-4 m-0">
-                        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 text-center">
-                            <div className="mb-6">
+                        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] text-center relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                            <div className="relative z-10 mb-6">
                                 <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <Brain className="w-8 h-8 text-orange-600" />
                                 </div>
@@ -381,7 +383,8 @@ export function ChennaiGethu() {
 
                     {/* --- Auto Anna --- */}
                     <TabsContent value="auto" className="space-y-4 m-0">
-                        <Card className="p-6 bg-[#FFFBE6] border-yellow-400 border-2 shadow-[4px_4px_0px_0px_rgba(250,204,21,1)] relative overflow-hidden">
+                        <Card className="p-6 bg-[#FFFBE6] border-2 border-black shadow-[4px_4px_0px_0px_rgba(250,204,21,1)] relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
                             {/* Decorative Background */}
                             <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
                                 <img src={ChennaiIcons.mascot_auto} alt="Auto" className="w-32 h-32 object-contain" />
@@ -411,7 +414,8 @@ export function ChennaiGethu() {
                     {/* --- Kaapi Jobs --- */}
                     <TabsContent value="kaapi" className="space-y-4 m-0">
                         {/* Kaapi & Careers Card */}
-                        <Card className="p-6 bg-[#FFF8F0] border-orange-100 shadow-sm relative overflow-hidden">
+                        <Card className="p-6 bg-[#FFF8F0] border-2 border-black shadow-[4px_4px_0px_0px_rgba(217,119,6,1)] relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
                             <div className="absolute top-4 right-4 opacity-10">
                                 <Coffee className="w-12 h-12 text-orange-900" />
                             </div>
@@ -433,7 +437,7 @@ export function ChennaiGethu() {
 
                         {/* Hiring Action Card */}
                         <Card
-                            className="p-4 bg-white border-orange-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                            className="p-4 bg-white border-2 border-black shadow-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group"
                             onClick={() => setShowPostJob(!showPostJob)}
                         >
                             <div className="flex items-center justify-between">
@@ -480,7 +484,7 @@ export function ChennaiGethu() {
                                 <div className="text-center text-gray-500 py-8">No jobs available right now.</div>
                             ) : (
                                 jobs.map((job) => (
-                                    <Card key={job.id} className="p-3 bg-white border-amber-100 shadow-sm hover:shadow-md transition-shadow">
+                                    <Card key={job.id} className="p-3 bg-white border-2 border-amber-100 hover:border-black shadow-sm hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="font-bold text-gray-900">{job.job_title}</h4>

@@ -8,6 +8,7 @@ import { TamilKeyboard } from './TamilKeyboard';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
 import { Send, ArrowLeft, Keyboard, Loader2, Users, Megaphone, MessageCircle } from 'lucide-react';
+import { CustomIcon } from './CustomIcons';
 import { ChatService, type Message } from '../services/ChatService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { toast } from 'sonner';
@@ -182,26 +183,42 @@ export function ChatScreen() {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col min-h-screen">
-          {/* Chat Header */}
-          <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-4 py-4 flex items-center gap-3">
+          {/* Chat Header - Cinema Style */}
+          <div className="bg-gradient-to-r from-auto-black to-black px-4 py-4 flex items-center gap-3 border-b-4 border-auto-yellow shadow-lg relative overflow-hidden">
+            {/* Film Grain Overlay */}
+            <div className="absolute inset-0 film-grain opacity-20 pointer-events-none"></div>
+
             <Button
               onClick={() => setSelectedChat(null)}
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/20 p-2"
+              className="text-auto-yellow hover:text-white hover:bg-white/10 p-2 relative z-10"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-6 h-6" />
             </Button>
 
-            <div className="flex items-center gap-3 flex-1">
-              {getConversationIcon(selectedChat)}
-              <div>
-                <h1 className="text-white font-medium">{selectedChat.name}</h1>
-                <p className="text-orange-100 text-sm">
-                  {selectedChat.members ? `${selectedChat.members} members` : 'Group chat'}
-                  {selectedChat.isActive && ' • Active now'}
-                </p>
+            <div className="flex items-center gap-3 flex-1 relative z-10">
+              <div className="relative">
+                {getConversationIcon(selectedChat)}
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
               </div>
+              <div>
+                <h1 className="text-white font-display font-bold tracking-wide text-lg">{selectedChat.name}</h1>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-auto-yellow text-black text-[10px] font-bold px-1.5 py-0 border-none">
+                    LIVE
+                  </Badge>
+                  <p className="text-gray-400 text-xs font-mono">
+                    {selectedChat.members ? `${selectedChat.members} MEMBERS` : 'PRIVATE CHAT'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative z-10">
+              <Button variant="ghost" size="icon" className="text-auto-yellow hover:bg-white/10">
+                <CustomIcon icon="FilterCoffee" className="w-6 h-6" />
+              </Button>
             </div>
           </div>
 
@@ -223,20 +240,20 @@ export function ChatScreen() {
                 const isMe = user?.id === message.sender_id;
 
                 return (
-                  <div key={message.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${isMe
-                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-200'
-                      : 'bg-card backdrop-blur-sm border border-orange-200 shadow-md'
+                  <div key={message.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-4`}>
+                    <div className={`max-w-[80%] lg:max-w-md px-4 py-3 relative ${isMe
+                      ? 'bg-auto-yellow text-black rounded-l-2xl rounded-tr-2xl rounded-br-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
+                      : 'bg-white text-black rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
                       }`}>
                       {!isMe && (
-                        <p className="text-xs font-medium text-orange-600 mb-1">
+                        <p className="text-xs font-bold text-temple-red mb-1 uppercase tracking-wider">
                           {message.profiles?.full_name || 'User'}
                         </p>
                       )}
-                      <p className={`text-sm ${isMe ? 'text-white' : 'text-gray-800'}`}>
+                      <p className={`text-sm font-medium leading-relaxed ${isMe ? 'text-black' : 'text-gray-900'}`}>
                         {message.content}
                       </p>
-                      <p className={`text-xs mt-1 ${isMe ? 'text-orange-100' : 'text-gray-500'}`}>
+                      <p className={`text-[10px] mt-1 font-bold text-right ${isMe ? 'text-black/60' : 'text-gray-400'}`}>
                         {formatTime(message.created_at)}
                       </p>
                     </div>
@@ -311,7 +328,7 @@ export function ChatScreen() {
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-6 rounded-b-[2rem]">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-white text-2xl font-bold">{t('chat.title', 'Chat')}</h1>
+            <h1 className="text-white text-2xl font-display font-bold">{t('chat.title', 'Chat')}</h1>
             <LanguageToggle />
           </div>
           <p className="text-orange-100">{t('chat.subtitle', 'Stay connected with your community')}</p>
@@ -345,10 +362,11 @@ export function ChatScreen() {
             {conversations.map((conversation) => (
               <Card
                 key={conversation.id}
-                className="p-4 bg-card backdrop-blur-sm border-orange-200 hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] shadow-orange-100/50"
+                className="p-4 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] hover:shadow-[6px_6px_0px_0px_rgba(234,88,12,1)] transition-all cursor-pointer hover:scale-[1.02] relative overflow-hidden group"
                 onClick={() => setSelectedChat(conversation)}
               >
-                <div className="flex items-center gap-3">
+                <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply z-0" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
+                <div className="relative z-10 flex items-center gap-3">
                   {/* Avatar/Icon */}
                   <div className="relative">
                     {getConversationIcon(conversation)}
