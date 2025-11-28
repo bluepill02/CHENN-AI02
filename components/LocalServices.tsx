@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { ChennaiIcons, IllustratedIcon } from './IllustratedIcon';
+import { PremiumIcon } from './PremiumIcons';
 import { MapPin, Star, Phone, Navigation, Search, X, Plus, ShieldCheck, Briefcase, CheckCircle2 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useLocation } from '../services/LocationService';
@@ -14,6 +16,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
+import { ServicesScreenBackground } from './BackgroundAnimations';
 
 interface LocalServicesProps {
   userLocation?: any;
@@ -183,6 +186,18 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
     setReviewModalOpen(true);
   };
 
+  const getCategoryIconName = (categoryName: string): any => {
+    const lower = categoryName.toLowerCase();
+    if (lower.includes('food') || lower.includes('mess') || lower.includes('hotel')) return 'Food';
+    if (lower.includes('auto') || lower.includes('transport') || lower.includes('travel')) return 'Auto';
+    if (lower.includes('repair') || lower.includes('mechanic') || lower.includes('service')) return 'Repair';
+    if (lower.includes('medical') || lower.includes('doctor') || lower.includes('clinic')) return 'Medical';
+    if (lower.includes('education') || lower.includes('tuition') || lower.includes('school')) return 'Education';
+    if (lower.includes('shop') || lower.includes('grocery') || lower.includes('store')) return 'Shop';
+    if (lower.includes('cinema') || lower.includes('movie') || lower.includes('theater')) return 'Cinema';
+    return 'Services';
+  };
+
   const handleReviewSubmit = async () => {
     if (!user || !selectedBusinessForReview) {
       toast.error("Please sign in to review!");
@@ -228,13 +243,9 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
-      {/* Services marketplace background */}
-      <div className="fixed inset-0 opacity-15 md:opacity-10 pointer-events-none">
-        <img
-          src="/assets/bg_marketplace.png"
-          alt="Chennai Services Marketplace"
-          className="w-full h-full object-cover"
-        />
+      {/* Premium animated background */}
+      <div className="fixed inset-0 overflow-hidden">
+        <ServicesScreenBackground />
       </div>
 
       {/* Content */}
@@ -442,27 +453,32 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
           </div>
           {categories.length > 0 ? (
             <div className="grid grid-cols-2 gap-4">
-              {categories.map((category) => (
-                <Card
+              {categories.map((category, index) => (
+                <motion.div
                   key={category.name}
-                  onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
-                  className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 ${selectedCategory === category.name
-                    ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
-                    : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
-                    }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.4 }}
                 >
-                  <div className="flex items-center justify-center mb-3">
-                    <IllustratedIcon
-                      src={category.iconSrc}
-                      alt={category.name}
-                      size="md"
-                      fallbackEmoji={category.iconEmoji}
-                      style="rounded"
-                    />
-                  </div>
-                  <h3 className="text-sm font-bold text-center mb-1 text-gray-800 capitalize">{category.name}</h3>
-                  <p className="text-xs text-gray-500 text-center mb-1">{category.count}</p>
-                </Card>
+                  <Card
+                    onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
+                    className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 ${selectedCategory === category.name
+                      ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
+                      : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
+                      }`}
+                  >
+                    <motion.div className="flex items-center justify-center mb-3" whileHover={{ scale: 1.1 }}>
+                      <PremiumIcon
+                        icon={getCategoryIconName(category.name)}
+                        className="w-12 h-12"
+                        color="#FF6B35"
+                        animated={true}
+                      />
+                    </motion.div>
+                    <h3 className="text-sm font-bold text-center mb-1 text-gray-800 capitalize">{category.name}</h3>
+                    <p className="text-xs text-gray-500 text-center mb-1">{category.count}</p>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           ) : (

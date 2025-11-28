@@ -12,6 +12,8 @@ import {
     WaveAnimation
 } from './AnimationComponents';
 import { ChennaiCustomIcons } from '../CustomIcons';
+import { PremiumIcon } from '../PremiumIcons';
+import { AuthScreenBackground } from '../BackgroundAnimations';
 
 interface PincodeData {
     PostOffice: Array<{
@@ -195,7 +197,12 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
 
     return (
         <PageTransition>
-            <div className="min-h-screen bg-gradient-to-br from-orange-600 via-red-600 to-purple-800 flex items-center justify-center p-6 relative overflow-hidden font-sans">
+            <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden font-sans">
+                {/* Premium animated background */}
+                <div className="absolute inset-0 z-0">
+                    <AuthScreenBackground />
+                </div>
+
                 {/* Confetti */}
                 {showConfetti && (
                     <Confetti
@@ -207,43 +214,17 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
                     />
                 )}
 
-                {/* Kolam Pattern */}
-                <div className="absolute inset-0 opacity-10 mix-blend-overlay">
-                    <KolamPattern />
-                </div>
-
-                {/* Animated background */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <motion.div
-                        className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-yellow-400/20 rounded-full mix-blend-overlay filter blur-[120px]"
-                        animate={{
-                            scale: [1, 1.1, 1],
-                            opacity: [0.2, 0.4, 0.2],
-                        }}
-                        transition={{
-                            duration: 10,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                        }}
-                    />
-                </div>
-
-                {/* Wave Animation */}
-                <div className="absolute bottom-0 left-0 right-0 opacity-20">
-                    <WaveAnimation />
-                </div>
-
                 {/* Floating Elements */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <FloatingElement delay={0} duration={5} yOffset={25} xOffset={15}>
                         <div className="absolute top-32 left-[10%] opacity-20">
-                            <ChennaiCustomIcons.LocationPin className="w-24 h-24 text-white" />
+                            <PremiumIcon icon="Location" className="w-24 h-24" color="white" animated={false} />
                         </div>
                     </FloatingElement>
 
                     <FloatingElement delay={1.5} duration={6} yOffset={30} xOffset={-12}>
                         <div className="absolute top-48 right-[15%] opacity-20">
-                            <ChennaiCustomIcons.Sparkles className="w-20 h-20 text-yellow-300" />
+                            <PremiumIcon icon="Sparkles" className="w-20 h-20" color="#FFED4E" animated={false} />
                         </div>
                     </FloatingElement>
                 </div>
@@ -261,7 +242,7 @@ export function LocationSetupScreen({ onComplete }: { onComplete: () => void }) 
                             whileHover={{ scale: 1.1, rotate: 10 }}
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-purple-500/20" />
-                            <ChennaiCustomIcons.LocationPin className="w-14 h-14 text-orange-300 relative z-10 drop-shadow-lg" />
+                            <PremiumIcon icon="Location" className="w-14 h-14" color="#FFCC00" animated={true} />
 
                             {/* Pulse effect */}
                             <motion.div

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Avatar } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -15,6 +16,7 @@ import { useLocation } from '../services/LocationService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { ProfileService, type Profile, type ProfileStats } from '../services/ProfileService';
 import { toast } from 'sonner';
+import { ProfileScreenBackground } from './BackgroundAnimations';
 import {
   MapPin,
   ChevronRight,
@@ -322,14 +324,10 @@ export function ProfileScreen() {
   }
 
   return (
-    <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
-      {/* Profile community background */}
-      <div className="fixed inset-0 opacity-12 md:opacity-8 pointer-events-none">
-        <img
-          src="/assets/bg_community.png"
-          alt="Chennai Profile Community"
-          className="w-full h-full object-cover"
-        />
+    <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative overflow-hidden">
+      {/* Premium animated background */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <ProfileScreenBackground />
       </div>
 
       {/* Content */}

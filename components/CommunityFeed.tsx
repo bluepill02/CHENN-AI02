@@ -12,11 +12,14 @@ import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
 import { Star, Loader2, Sparkles } from 'lucide-react';
 import { ChennaiCustomIcons, CustomIcon } from './CustomIcons';
+import { PremiumIcon } from './PremiumIcons';
 import { useLocation, getLocationSpecificContent } from '../services/LocationService';
 import { useExternalData } from '../services/ExternalDataService';
 import { PostService, Post } from '../services/PostService';
 import { AiService } from '../services/AiService';
 import { useAuth } from './auth/SupabaseAuthProvider';
+import { FeedScreenBackground, StaggeredContainer, StaggeredItem } from './BackgroundAnimations';
+import { StaggeredContainer as AnimationStaggerContainer } from './AnimationSystem';
 
 import { toast } from 'sonner';
 import { PostSkeleton } from './SkeletonLoaders';
@@ -180,28 +183,28 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
       case 'food_recommendation':
         return (
           <Badge className="bg-orange-100 text-orange-700 border-orange-200 flex items-center gap-1 text-xs">
-            <CustomIcon icon="Idli" className="w-3 h-3" />
+            <PremiumIcon icon="Food" className="w-3 h-3" color="currentColor" />
             சாப்பாடு
           </Badge>
         );
       case 'community_event':
         return (
           <Badge className="bg-purple-100 text-purple-700 border-purple-200 flex items-center gap-1 text-xs">
-            <CustomIcon icon="Community" className="w-3 h-3" />
+            <PremiumIcon icon="Community" className="w-3 h-3" color="currentColor" />
             நிகழ்ச்சி
           </Badge>
         );
       case 'cultural_event':
         return (
           <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 flex items-center gap-1 text-xs">
-            <CustomIcon icon="Temple" className="w-3 h-3" />
+            <PremiumIcon icon="Celebration" className="w-3 h-3" color="currentColor" />
             பண்டிகை
           </Badge>
         );
       case 'help_request':
         return (
           <Badge className="bg-blue-100 text-blue-700 border-blue-200 flex items-center gap-1 text-xs">
-            <CustomIcon icon="AutoRickshaw" className="w-3 h-3" />
+            <PremiumIcon icon="Auto" className="w-3 h-3" color="currentColor" />
             உதவி
           </Badge>
         );
@@ -211,21 +214,10 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   };
 
   return (
-    <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
-      {/* Community scenes background */}
-      <div className="fixed inset-0 opacity-10 pointer-events-none overflow-hidden">
-        <img
-          src="/assets/bg_community.png"
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-        {/* Large decorative Kolams */}
-        <div className="absolute -top-20 -right-20 w-96 h-96 text-orange-500/10 animate-spin-slow">
-          <ChennaiCustomIcons.KolamPattern className="w-full h-full" />
-        </div>
-        <div className="absolute top-1/3 -left-20 w-64 h-64 text-red-500/5 animate-spin-reverse-slow">
-          <ChennaiCustomIcons.KolamPattern className="w-full h-full" />
-        </div>
+    <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative overflow-hidden">
+      {/* Premium animated background */}
+      <div className="fixed inset-0 overflow-hidden">
+        <FeedScreenBackground />
       </div>
 
       {/* Header */}
@@ -265,7 +257,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                 className="h-6 px-2 text-orange-200 hover:text-white hover:bg-white/10"
                 onClick={() => setLocationModalOpen(true)}
               >
-                <CustomIcon icon="LocationPin" className="w-4 h-4" />
+                <PremiumIcon icon="Location" className="w-4 h-4" color="currentColor" animated={false} />
               </Button>
             </motion.div>
             <motion.div
@@ -276,7 +268,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             >
               {activeLocation && (
                 <>
-                  <CustomIcon icon="CheckCircle" className="w-3 h-3 text-green-200" />
+                  <PremiumIcon icon="Verified" className="w-3 h-3" color="currentColor" animated={false} />
                   <span className="text-green-200 text-xs font-medium">Verified Area</span>
                   <span className="text-orange-200 text-xs">•</span>
                 </>
@@ -299,7 +291,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
             >
-              <CustomIcon icon="Community" className="w-8 h-8 text-white" />
+              <PremiumIcon icon="Community" className="w-8 h-8" color="white" />
             </motion.div>
           </div>
         </div>
@@ -322,7 +314,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             className="bg-white/20 rounded-xl px-3 py-2 flex items-center gap-2 backdrop-blur-sm border border-white/10"
             whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
           >
-            <CustomIcon icon="LocationPin" className="w-4 h-4 text-white" />
+            <PremiumIcon icon="Location" className="w-4 h-4" color="white" animated={false} />
             <span className="text-white text-sm font-medium">2.3km radius</span>
           </motion.div>
         </motion.div>

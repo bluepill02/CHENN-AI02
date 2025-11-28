@@ -14,6 +14,8 @@ import {
     WaveAnimation
 } from './AnimationComponents';
 import { ChennaiCustomIcons } from '../CustomIcons';
+import { PremiumIcon } from '../PremiumIcons';
+import { AuthScreenBackground } from '../BackgroundAnimations';
 
 type AuthMode = 'signin' | 'signup' | 'magic';
 
@@ -150,7 +152,12 @@ export function AuthScreen() {
 
     return (
         <PageTransition>
-            <div className="min-h-screen bg-gradient-to-br from-orange-600 via-red-600 to-purple-800 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+                {/* Premium animated background */}
+                <div className="absolute inset-0 z-0">
+                    <AuthScreenBackground />
+                </div>
+
                 {/* Confetti */}
                 {showConfetti && (
                     <Confetti
@@ -162,69 +169,17 @@ export function AuthScreen() {
                     />
                 )}
 
-                {/* Background Image */}
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src="/assets/auth_bg.png"
-                        alt="Background"
-                        className="w-full h-full object-cover opacity-20"
-                    />
-                </div>
-
-                {/* Kolam Pattern Overlay */}
-                <div className="absolute inset-0 opacity-10 mix-blend-overlay">
-                    <KolamPattern />
-                </div>
-
-                {/* Animated background elements */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <motion.div
-                        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-yellow-400/30 rounded-full mix-blend-overlay filter blur-[100px]"
-                        animate={{
-                            scale: [1, 1.2, 1],
-                            opacity: [0.3, 0.5, 0.3],
-                            x: [0, 50, 0],
-                            y: [0, 30, 0],
-                        }}
-                        transition={{
-                            duration: 15,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                        }}
-                    />
-                    <motion.div
-                        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-500/30 rounded-full mix-blend-overlay filter blur-[100px]"
-                        animate={{
-                            scale: [1, 1.1, 1],
-                            opacity: [0.3, 0.4, 0.3],
-                            x: [0, -40, 0],
-                            y: [0, -40, 0],
-                        }}
-                        transition={{
-                            duration: 18,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                            delay: 1,
-                        }}
-                    />
-                </div>
-
-                {/* Wave Animation */}
-                <div className="absolute bottom-0 left-0 right-0 opacity-20">
-                    <WaveAnimation />
-                </div>
-
                 {/* Floating Chennai Elements */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <FloatingElement delay={0} duration={6} yOffset={40} xOffset={20}>
                         <div className="absolute top-[15%] left-[5%] opacity-10 rotate-12">
-                            <ChennaiCustomIcons.AutoRickshaw className="w-32 h-32 text-yellow-300" />
+                            <PremiumIcon icon="Auto" className="w-32 h-32" color="#FFED4E" animated={false} />
                         </div>
                     </FloatingElement>
 
                     <FloatingElement delay={2} duration={7} yOffset={30} xOffset={-20}>
                         <div className="absolute bottom-[20%] right-[5%] opacity-10 -rotate-12">
-                            <ChennaiCustomIcons.FilterCoffee className="w-40 h-40 text-orange-200" />
+                            <PremiumIcon icon="Shop" className="w-40 h-40" color="#FECB81" animated={false} />
                         </div>
                     </FloatingElement>
                 </div>
@@ -245,7 +200,7 @@ export function AuthScreen() {
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-purple-500/20 rounded-[2rem]" />
                             <div className="relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)]">
-                                <ChennaiCustomIcons.Temple className="w-16 h-16 text-white" />
+                                <PremiumIcon icon="Community" className="w-16 h-16" color="white" animated={true} />
                             </div>
 
                             {/* Shine effect */}

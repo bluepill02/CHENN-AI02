@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { CustomIcon } from './CustomIcons';
+import { PremiumIcon } from './PremiumIcons';
 import { useLanguage } from '../services/LanguageService';
 import { motion } from 'framer-motion';
 
@@ -17,19 +17,19 @@ export function BottomNav() {
     {
       id: 'services',
       path: '/services',
-      icon: 'AutoRickshaw',
+      icon: 'Services',
       label: t('nav.services', 'Services'),
     },
     {
       id: 'chat',
       path: '/chat',
-      icon: 'Namaste',
+      icon: 'Chat',
       label: t('nav.chat', 'Chat'),
     },
     {
       id: 'profile',
       path: '/profile',
-      icon: 'FilterCoffee',
+      icon: 'Profile',
       label: t('nav.profile', 'Profile'),
     }
   ];
@@ -57,10 +57,11 @@ export function BottomNav() {
                 whileTap={{ scale: 0.9 }}
               >
                 <div className="relative">
-                  <CustomIcon
+                  <PremiumIcon
                     icon={item.icon as any}
                     className={`w-6 h-6 transition-all duration-300 ${isActive ? 'text-orange-600 scale-110' : 'text-gray-400'}`}
-                    filled={isActive}
+                    color={isActive ? '#ea580c' : '#9ca3af'}
+                    animated={true}
                   />
                   {isActive && (
                     <motion.div
