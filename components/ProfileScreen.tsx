@@ -11,7 +11,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from './ui/dialog';
 import { AchievementBadges } from './AchievementBadges';
 import { ChennaiIcons } from './IllustratedIcon';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useLocation } from '../services/LocationService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { ProfileService, type Profile, type ProfileStats } from '../services/ProfileService';
@@ -27,7 +26,6 @@ import {
   Mail,
   Globe
 } from 'lucide-react';
-import profileCommunity from 'figma:asset/39dd468cce8081c14f345796484cc8b182dc6bb6.png';
 
 export function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -327,8 +325,8 @@ export function ProfileScreen() {
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
       {/* Profile community background */}
       <div className="fixed inset-0 opacity-12 md:opacity-8 pointer-events-none">
-        <ImageWithFallback
-          src={profileCommunity}
+        <img
+          src="/assets/bg_community.png"
           alt="Chennai Profile Community"
           className="w-full h-full object-cover"
         />

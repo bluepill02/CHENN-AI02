@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
 import { MapPin, Shield, Users, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLocation } from '../services/LocationService';
-import chennaiWaterfront from 'figma:asset/8ee111ffe3789e0e3d9ea32a4a2b2a606ac32e8f.png';
 
 interface PincodeVerificationProps {
   onVerificationComplete: (pincodeData: any) => void;
@@ -22,25 +20,6 @@ export function PincodeVerification({ onVerificationComplete, onSkip }: PincodeV
   const { verifyLocation, isVerifying } = useLocation();
   const { t } = useLanguage();
 
-  // Chennai pincode database with local areas
-  const chennaiPincodes = {
-    '600001': { area: 'Fort St. George • ஃபோர்ட்', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600002': { area: 'Mount Road • மவுண்ட் ரோடு', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600003': { area: 'Broadway • பிராட்வே', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600004': { area: 'Mylapore • மயிலாப்பூர்', zone: 'South Chennai', tamil: 'தென் சென்னை' },
-    '600005': { area: 'Triplicane • திருவல்லிக்கேணி', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600006': { area: 'Chepauk • செப்பாக்கம்', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600014': { area: 'Vadapalani • வடபழனி', zone: 'West Chennai', tamil: 'மேற்கு சென்னை' },
-    '600017': { area: 'T. Nagar • டி. நகர்', zone: 'South Chennai', tamil: 'தென் சென்னை' },
-    '600020': { area: 'Adyar • அடையார்', zone: 'South Chennai', tamil: 'தென் சென்னை' },
-    '600024': { area: 'Anna Nagar • அண்ணா நகர்', zone: 'North Chennai', tamil: 'வட சென்னை' },
-    '600028': { area: 'Velachery • வேளச்சேரி', zone: 'South Chennai', tamil: 'தென் சென்னை' },
-    '600034': { area: 'Kodambakkam • கோடம்பாக்கம்', zone: 'West Chennai', tamil: 'மேற்கு சென்னை' },
-    '600041': { area: 'Royapettah • ராயப்பேட்டை', zone: 'Central Chennai', tamil: 'மத்திய சென்னை' },
-    '600090': { area: 'Besant Nagar • பெசன்ட் நகர்', zone: 'South Chennai', tamil: 'தென் சென்னை' },
-    '600119': { area: 'Sholinganallur • சோளிங்கநல்லூர்', zone: 'IT Corridor', tamil: 'IT காரிடார்' }
-  };
-
   const handleVerification = async () => {
     if (pincode.length !== 6) {
       setVerificationStatus('error');
@@ -51,7 +30,7 @@ export function PincodeVerification({ onVerificationComplete, onSkip }: PincodeV
       const locationData = await verifyLocation(pincode);
       setLocationData(locationData);
       setVerificationStatus('success');
-      
+
       setTimeout(() => {
         onVerificationComplete(locationData);
       }, 2000);
@@ -66,16 +45,16 @@ export function PincodeVerification({ onVerificationComplete, onSkip }: PincodeV
       <div className="absolute top-6 right-6 z-20">
         <LanguageToggle />
       </div>
-      
+
       {/* Beautiful Chennai waterfront background */}
       <div className="absolute inset-0 opacity-20">
-        <ImageWithFallback
-          src={chennaiWaterfront}
+        <img
+          src="/assets/hero_welcome.png"
           alt="Chennai Waterfront"
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {/* Overlay gradient for readability */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-400/80 via-orange-300/80 to-yellow-400/80"></div>
 
@@ -201,7 +180,7 @@ export function PincodeVerification({ onVerificationComplete, onSkip }: PincodeV
         </Card>
 
         {/* Chennai areas info */}
-        
+
       </div>
     </div>
   );

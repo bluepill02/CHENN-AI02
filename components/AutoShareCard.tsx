@@ -6,9 +6,10 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "./auth/SupabaseAuthProvider";
 import { AutoShareService, type AutoSharePost } from "../services/AutoShareService";
 import { toast } from "sonner";
-import { Clock, MapPin, Users, Loader2, Edit2, Trash2, CheckCircle2, Phone, MessageCircle } from "lucide-react";
+import { Clock, Users, Loader2, Edit2, Trash2, Phone, MessageCircle } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
+import { CustomIcon } from "./CustomIcons";
 
 interface AutoShareCardProps {
   pincode: string;
@@ -217,11 +218,12 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   };
 
   return (
-    <Card className="p-3 border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="font-medium flex items-center gap-2">
-          🚖 Auto Share
-          <Badge variant="outline" className="text-xs">
+    <Card className="p-4 border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg rounded-[1.5rem] overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-bold text-lg flex items-center gap-2 text-[#4B1E1E]">
+          <CustomIcon icon="AutoRickshaw" className="w-6 h-6 text-green-600" />
+          Auto Share
+          <Badge variant="outline" className="text-xs border-green-200 bg-white/50">
             {pincode}
           </Badge>
         </h4>
@@ -233,7 +235,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               setFormOpen(!formOpen);
             }}
             variant={formOpen ? "ghost" : "default"}
-            className="h-7 text-xs"
+            className={`h-8 text-xs font-medium rounded-full ${formOpen ? "text-green-700 hover:bg-green-100" : "bg-green-600 hover:bg-green-700 text-white shadow-md"}`}
           >
             {formOpen ? "Cancel" : "Post Ride"}
           </Button>
@@ -241,20 +243,25 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       </div>
 
       {/* Video */}
-      <video
-        src={rickshawVideo}
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full rounded-lg mb-2"
-        style={{ maxHeight: "120px", objectFit: "cover" }}
-      />
+      <div className="relative rounded-xl overflow-hidden mb-4 shadow-md border border-green-100">
+        <video
+          src={rickshawVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-32 object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-3">
+          <p className="text-white text-xs font-medium">Find or share an auto ride instantly!</p>
+        </div>
+      </div>
 
       {/* Create/Edit Form */}
       {formOpen && (
-        <form onSubmit={handleSubmit} className="mb-3 space-y-3 p-3 bg-white rounded-lg border border-green-200">
-          <div className="text-sm font-medium text-gray-900">
+        <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/80 backdrop-blur-md rounded-xl border border-green-200 shadow-sm">
+          <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <CustomIcon icon="Sparkles" className="w-4 h-4 text-green-500" />
             {editingPost ? "Edit Ride" : "Post New Ride"}
           </div>
 
@@ -264,7 +271,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="From (e.g., T. Nagar)"
               value={fromLocation}
               onChange={(e) => setFromLocation(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
               required
             />
 
@@ -273,41 +280,41 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="To (e.g., Anna Nagar)"
               value={toLocation}
               onChange={(e) => setToLocation(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
               required
             />
           </div>
 
           <div>
-            <label className="text-xs text-gray-600 block mb-1">Seats Available</label>
+            <label className="text-xs text-gray-600 block mb-1 font-medium">Seats Available</label>
             <input
               type="number"
               min="1"
               max="10"
               value={seatsAvailable}
               onChange={(e) => setSeatsAvailable(Number(e.target.value))}
-              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
               required
             />
           </div>
 
           <div>
-            <label className="text-xs text-gray-600 block mb-1">Contact Method</label>
+            <label className="text-xs text-gray-600 block mb-1 font-medium">Contact Method</label>
             <RadioGroup
               value={contactVia}
               onValueChange={(val: "chat" | "phone" | "both") => setContactVia(val)}
               className="flex gap-4"
             >
               <div className="flex items-center space-x-1">
-                <RadioGroupItem value="chat" id="chat" />
+                <RadioGroupItem value="chat" id="chat" className="text-green-600 border-green-600" />
                 <Label htmlFor="chat" className="text-xs">Chat</Label>
               </div>
               <div className="flex items-center space-x-1">
-                <RadioGroupItem value="phone" id="phone" />
+                <RadioGroupItem value="phone" id="phone" className="text-green-600 border-green-600" />
                 <Label htmlFor="phone" className="text-xs">Phone</Label>
               </div>
               <div className="flex items-center space-x-1">
-                <RadioGroupItem value="both" id="both" />
+                <RadioGroupItem value="both" id="both" className="text-green-600 border-green-600" />
                 <Label htmlFor="both" className="text-xs">Both</Label>
               </div>
             </RadioGroup>
@@ -319,7 +326,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               placeholder="Phone Number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
               required
             />
           )}
@@ -329,13 +336,13 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="border border-gray-300 rounded px-2 py-1.5 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+            className="border border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white"
           />
 
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md"
             size="sm"
           >
             {submitting ? (
@@ -353,16 +360,17 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       )}
 
       {/* Posts List */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-4 text-sm text-gray-500">
-            <Loader2 className="w-4 h-4 animate-spin mx-auto mb-1" />
+          <div className="text-center py-6 text-sm text-gray-500">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-green-500" />
             Loading rides...
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-sm text-gray-600 text-center py-4 bg-white rounded-lg border border-dashed border-gray-300">
+          <div className="text-sm text-gray-600 text-center py-8 bg-white/50 rounded-xl border border-dashed border-green-300">
+            <CustomIcon icon="AutoRickshaw" className="w-8 h-8 text-green-300 mx-auto mb-2" />
             No active rides right now.
-            {user && <div className="text-xs mt-1">Be the first to post!</div>}
+            {user && <div className="text-xs mt-1 font-medium text-green-700">Be the first to post!</div>}
           </div>
         ) : (
           posts.map((post) => {
@@ -373,58 +381,58 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             return (
               <div
                 key={post.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white border border-green-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
               >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                       {post.profiles?.full_name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
+                      <div className="font-bold text-sm truncate text-[#4B1E1E]">
                         {post.profiles?.full_name || "Anonymous"}
                       </div>
                       <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3 h-3 text-green-500" />
                         {timeRemaining}
                       </div>
                     </div>
                   </div>
 
-                  <Badge className={`${getStatusColor(post.status)} text-xs`}>
+                  <Badge className={`${getStatusColor(post.status)} text-xs px-2 py-0.5 rounded-full`}>
                     {post.status}
                   </Badge>
                 </div>
 
                 {/* Route */}
-                <div className="mb-2">
+                <div className="mb-3 bg-green-50/50 p-2 rounded-lg border border-green-50">
                   <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    <span className="font-medium truncate">{post.from_location}</span>
-                    <span className="text-gray-400">→</span>
-                    <span className="font-medium truncate">{post.to_location}</span>
+                    <CustomIcon icon="LocationPin" className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span className="font-semibold truncate text-gray-800">{post.from_location}</span>
+                    <span className="text-green-400 font-bold">→</span>
+                    <span className="font-semibold truncate text-gray-800">{post.to_location}</span>
                   </div>
                 </div>
 
                 {/* Seats */}
-                <div className="flex items-center gap-1 text-sm text-gray-700 mb-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
                   <Users className="w-4 h-4 text-blue-600" />
-                  <span>
+                  <span className="font-medium">
                     {post.seats_available} {post.seats_available === 1 ? "seat" : "seats"} available
                   </span>
                 </div>
 
                 {/* Notes */}
                 {cleanNotes && (
-                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 mb-2">
-                    {cleanNotes}
+                  <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 mb-3 italic">
+                    "{cleanNotes}"
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                  <div className="text-xs text-gray-500">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div className="text-xs text-gray-400 font-medium">
                     {post.views_count} {post.views_count === 1 ? "view" : "views"}
                   </div>
 
@@ -435,7 +443,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg"
                             onClick={() => handleEdit(post)}
                           >
                             <Edit2 className="w-3 h-3 mr-1" />
@@ -444,10 +452,10 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-6 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                            className="h-7 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg"
                             onClick={() => handleMarkFilled(post.id)}
                           >
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            <CustomIcon icon="CheckCircle" className="w-3 h-3 mr-1" />
                             Filled
                           </Button>
                         </>
@@ -455,7 +463,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
                         onClick={() => handleDelete(post.id)}
                       >
                         <Trash2 className="w-3 h-3 mr-1" />
@@ -469,7 +477,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-xs px-2"
+                            className="h-8 text-xs px-3 rounded-lg border-green-200 text-green-700 hover:bg-green-50"
                             onClick={() => toast.success(`Request sent to ${post.profiles?.full_name || 'user'}!`)}
                           >
                             <MessageCircle className="w-3 h-3 mr-1" />
@@ -479,7 +487,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                         {(post.contact_via === "phone" || post.contact_via === "both") && phone && (
                           <Button
                             size="sm"
-                            className="h-7 text-xs px-2 bg-green-600 hover:bg-green-700"
+                            className="h-8 text-xs px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm"
                             onClick={() => window.location.href = `tel:${phone}`}
                           >
                             <Phone className="w-3 h-3 mr-1" />
@@ -497,9 +505,9 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       </div>
 
       {/* Info */}
-      <div className="mt-3 text-xs text-gray-500 flex items-start gap-1 bg-yellow-50 p-2 rounded border border-yellow-100">
-        <span>⚠️</span>
-        <span>Posts expire automatically after 30 minutes. {!user && "Sign in to post rides."}</span>
+      <div className="mt-4 text-xs text-gray-500 flex items-start gap-2 bg-yellow-50/80 p-3 rounded-xl border border-yellow-100">
+        <span className="text-lg">⚠️</span>
+        <span className="mt-0.5">Posts expire automatically after 30 minutes. {!user && "Sign in to post rides."}</span>
       </div>
     </Card>
   );

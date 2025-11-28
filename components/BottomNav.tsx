@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Store, MessageCircle, User } from 'lucide-react';
-import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
+import { CustomIcon } from './CustomIcons';
 import { useLanguage } from '../services/LanguageService';
+import { motion } from 'framer-motion';
 
 export function BottomNav() {
   const { t } = useLanguage();
@@ -11,41 +11,33 @@ export function BottomNav() {
     {
       id: 'home',
       path: '/home',
-      icon: Home,
+      icon: 'Community',
       label: t('nav.home', 'Home'),
-      illustration: ChennaiIcons.community,
-      fallbackEmoji: '🏠'
     },
     {
       id: 'services',
       path: '/services',
-      icon: Store,
+      icon: 'AutoRickshaw',
       label: t('nav.services', 'Services'),
-      illustration: ChennaiIcons.market,
-      fallbackEmoji: '🏪'
     },
     {
       id: 'chat',
       path: '/chat',
-      icon: MessageCircle,
+      icon: 'Namaste',
       label: t('nav.chat', 'Chat'),
-      illustration: ChennaiIcons.community,
-      fallbackEmoji: '💬'
     },
     {
       id: 'profile',
       path: '/profile',
-      icon: User,
+      icon: 'FilterCoffee',
       label: t('nav.profile', 'Profile'),
-      illustration: ChennaiIcons.family,
-      fallbackEmoji: '👤'
     }
   ];
 
   return (
-    <div className="bg-white border-t border-orange-100 px-4 py-2 flex items-center justify-around relative">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-orange-200 px-4 py-2 flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[2rem]">
       {/* Traditional pattern border */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-red-500 to-purple-600"></div>
 
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
@@ -54,26 +46,37 @@ export function BottomNav() {
           <NavLink
             key={item.id}
             to={item.path}
-            className={`flex-1 flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-200 ${isActive
-              ? 'bg-gradient-to-br from-orange-100 to-yellow-100 text-orange-600'
-              : 'text-gray-500 hover:text-orange-500 hover:bg-orange-50'
-              }`}
+            className="relative flex-1 flex flex-col items-center justify-center"
           >
-            <div className="relative">
-              <IllustratedIcon
-                src={item.illustration}
-                alt={item.label}
-                size="sm"
-                className={`transition-all duration-200 ${isActive ? 'scale-110 border-2 border-orange-300' : ''}`}
-                fallbackEmoji={item.fallbackEmoji}
-              />
-              {isActive && (
-                <div className="absolute -inset-1 bg-orange-200 rounded-full opacity-20 animate-pulse"></div>
-              )}
-            </div>
-            <span className={`text-xs font-medium ${isActive ? 'text-orange-600' : 'text-gray-500'}`}>
-              {item.label}
-            </span>
+            {({ isActive }) => (
+              <motion.div
+                className={`flex flex-col items-center p-2 rounded-2xl transition-all duration-300 ${isActive
+                  ? 'bg-orange-100/50'
+                  : 'hover:bg-orange-50/50'
+                  }`}
+                whileTap={{ scale: 0.9 }}
+              >
+                <div className="relative">
+                  <CustomIcon
+                    icon={item.icon as any}
+                    className={`w-6 h-6 transition-all duration-300 ${isActive ? 'text-orange-600 scale-110' : 'text-gray-400'}`}
+                    filled={isActive}
+                  />
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute -inset-2 bg-orange-200/30 rounded-full -z-10"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    />
+                  )}
+                </div>
+                <span className={`text-[10px] font-bold mt-1 transition-colors duration-300 ${isActive ? 'text-orange-600' : 'text-gray-400'}`}>
+                  {item.label}
+                </span>
+              </motion.div>
+            )}
           </NavLink>
         );
       })}

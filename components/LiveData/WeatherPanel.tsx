@@ -1,4 +1,4 @@
-import { Cloud, CloudRain, Droplets, Sun, Wind, Loader2, AlertCircle } from 'lucide-react';
+import { Cloud, Droplets, Sun, Wind, Loader2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LiveDataService } from '../../services/LiveDataService';
 
@@ -71,13 +71,13 @@ export function WeatherPanel({ weatherData, userLocation, className = '' }: Weat
   const getWeatherIcon = (condition: WeatherData['condition']) => {
     switch (condition) {
       case 'sunny':
-        return <Sun className="w-8 h-8 text-yellow-500" />;
+        return <img src="/assets/weather_sunny.png" alt="Sunny" className="w-12 h-12" />;
       case 'cloudy':
-        return <Cloud className="w-8 h-8 text-gray-500" />;
+        return <Cloud className="w-12 h-12 text-gray-500" />;
       case 'rainy':
-        return <CloudRain className="w-8 h-8 text-blue-500" />;
+        return <img src="/assets/weather_rainy.png" alt="Rainy" className="w-12 h-12" />;
       case 'overcast':
-        return <Cloud className="w-8 h-8 text-gray-600" />;
+        return <Cloud className="w-12 h-12 text-gray-600" />;
     }
   };
 

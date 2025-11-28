@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { TamilKeyboard } from './TamilKeyboard';
-import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
-import { MapPin, Send, ArrowLeft, Keyboard, Loader2 } from 'lucide-react';
-import chatConversations from 'figma:asset/d802a9fc88d5797d4e698a0f07c361b2d87a1818.png';
+import { Send, ArrowLeft, Keyboard, Loader2, Users, Megaphone, MessageCircle } from 'lucide-react';
 import { ChatService, type Message } from '../services/ChatService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { toast } from 'sonner';
@@ -120,25 +117,17 @@ export function ChatScreen() {
   const getConversationIcon = (conversation: any) => {
     if (conversation.type === 'group') {
       return (
-        <IllustratedIcon
-          src={ChennaiIcons.group}
-          alt="Group Chat"
-          size="md"
-          fallbackEmoji="👥"
-          style="circular"
-        />
+        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+          <Users className="w-6 h-6 text-blue-600" />
+        </div>
       );
     }
 
     if (conversation.type === 'announcement') {
       return (
-        <IllustratedIcon
-          src={ChennaiIcons.announcement}
-          alt="Announcement"
-          size="md"
-          fallbackEmoji="📢"
-          style="circular"
-        />
+        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+          <Megaphone className="w-6 h-6 text-red-600" />
+        </div>
       );
     }
 
@@ -162,22 +151,19 @@ export function ChatScreen() {
 
   const quickActions = [
     {
-      iconSrc: ChennaiIcons.group,
-      iconEmoji: '👥',
+      icon: Users,
       label: 'Join Groups',
-      color: 'from-blue-400 to-purple-500'
+      color: 'text-blue-600 bg-blue-100'
     },
     {
-      iconSrc: ChennaiIcons.chat,
-      iconEmoji: '💬',
+      icon: MessageCircle,
       label: 'Start Chat',
-      color: 'from-green-400 to-teal-500'
+      color: 'text-green-600 bg-green-100'
     },
     {
-      iconSrc: ChennaiIcons.announcement,
-      iconEmoji: '📢',
+      icon: Megaphone,
       label: 'Announcements',
-      color: 'from-red-400 to-pink-500'
+      color: 'text-red-600 bg-red-100'
     }
   ];
 
@@ -187,8 +173,8 @@ export function ChatScreen() {
       <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen flex flex-col relative">
         {/* Chat conversations background */}
         <div className="fixed inset-0 opacity-12 md:opacity-8 pointer-events-none">
-          <ImageWithFallback
-            src={chatConversations}
+          <img
+            src="/assets/bg_community.png"
             alt="Chennai Chat Conversations"
             className="w-full h-full object-cover"
           />
@@ -313,8 +299,8 @@ export function ChatScreen() {
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
       {/* Chat conversations background */}
       <div className="fixed inset-0 opacity-15 md:opacity-10 pointer-events-none">
-        <ImageWithFallback
-          src={chatConversations}
+        <img
+          src="/assets/bg_community.png"
           alt="Chennai Chat Conversations"
           className="w-full h-full object-cover"
         />
@@ -346,13 +332,7 @@ export function ChatScreen() {
                   toast.info(`${action.label} feature coming soon!`);
                 }}
               >
-                <IllustratedIcon
-                  src={action.iconSrc}
-                  alt={action.label}
-                  size="sm"
-                  fallbackEmoji={action.iconEmoji}
-                  style="rounded"
-                />
+                <action.icon className={`w-6 h-6 ${action.color.split(' ')[0]}`} />
                 <span className="text-xs text-gray-600">{action.label}</span>
               </Button>
             ))}

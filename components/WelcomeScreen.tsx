@@ -1,12 +1,9 @@
-import image_b8fc04d1057e4c07909ad75c346def9f8f3687d7 from 'figma:asset/b8fc04d1057e4c07909ad75c346def9f8f3687d7.png';
 import React from 'react';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
-import chennaiCityscape from 'figma:asset/7d7500ada15d497a9fc07f7ca36038f07b9ff493.png';
-import appLogo from 'figma:asset/4ed21f9248d086a0323ac9f747f709b581f13e8e.png';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -14,31 +11,31 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
   const { t } = useLanguage();
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-yellow-400 flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Language Toggle */}
       <div className="absolute top-6 right-6 z-20">
         <LanguageToggle />
       </div>
-      
+
       {/* Beautiful Chennai cityscape background inspired by the uploaded illustration */}
       <div className="absolute inset-0 opacity-30">
-        <ImageWithFallback
-          src={image_b8fc04d1057e4c07909ad75c346def9f8f3687d7}
+        <img
+          src="/assets/hero_welcome.png"
           alt="Chennai Community Illustration"
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {/* Main content */}
       <div className="relative z-10 text-center max-w-sm">
         {/* App logo */}
         <div className="w-24 h-24 mx-auto mb-8">
-          <ImageWithFallback
-            src={appLogo}
+          <img
+            src="/assets/app_logo.png"
             alt="Namma Ooru App Logo"
-            className="w-24 h-24 rounded-full"
+            className="w-24 h-24 rounded-full shadow-xl"
           />
         </div>
 
@@ -47,7 +44,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           {t('welcome.title', 'நம்ம ஊர்')}
         </h1>
         <p className="text-white/90 text-lg mb-2">Chennai Community • சென்னை சமூகம்</p>
-        
+
         {/* Subtitle */}
         <p className="text-white/80 mb-8 leading-relaxed">
           {t('welcome.subtitle', 'Connect with your neighbors, discover local services, and build stronger communities')}
@@ -79,7 +76,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
             <IllustratedIcon src={ChennaiIcons.community} alt="Community" size="sm" />
             <p className="text-[20px] font-bold italic">Made with ❤️</p>
           </div>
-          
+
         </div>
       </div>
 

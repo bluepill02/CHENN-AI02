@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { ChennaiIcons, IllustratedIcon } from './IllustratedIcon';
+import { MapPin, Star, Phone, Navigation, Search, X, Plus, ShieldCheck, Briefcase, CheckCircle2 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { IllustratedIcon, ChennaiIcons } from './IllustratedIcon';
-import { MapPin, Star, Phone, Clock, Navigation, Search, X, Plus, Briefcase, CheckCircle2, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useLocation } from '../services/LocationService';
-import { BusinessService, type BusinessProfile, type ServiceReview } from '../services/BusinessService';
+import { BusinessService, type BusinessProfile } from '../services/BusinessService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from './ui/dialog';
 import { Input } from './ui/input';
@@ -14,8 +14,6 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
-import servicesMarketplace from 'figma:asset/4108c802b3e078fed252c2b3f591ce76fb2675b2.png';
-import { Avatar } from './ui/avatar';
 
 interface LocalServicesProps {
   userLocation?: any;
@@ -117,12 +115,20 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
   const filteredBusinesses = businesses.filter(b => {
     const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
+
+    // Filter by location if available
+    const matchesLocation = activeLocation?.area
+      ? b.location.toLowerCase().includes(activeLocation.area.toLowerCase()) ||
+      b.location.toLowerCase().includes('chennai') // Include general Chennai services
+      : true;
+
     const matchesSearch = searchQuery
       ? b.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.location.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    return matchesCategory && matchesSearch;
+
+    return matchesCategory && matchesSearch && matchesLocation;
   });
 
   const handleCall = (phoneNumber: string) => {
@@ -130,10 +136,7 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
     window.location.href = `tel:${phoneNumber}`;
   };
 
-  const handleDirection = (query: string) => {
-    const encodedQuery = encodeURIComponent(query);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedQuery}`, '_blank');
-  };
+
 
   const handleSuggestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,8 +230,8 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
       {/* Services marketplace background */}
       <div className="fixed inset-0 opacity-15 md:opacity-10 pointer-events-none">
-        <ImageWithFallback
-          src={servicesMarketplace}
+        <img
+          src="/assets/bg_marketplace.png"
           alt="Chennai Services Marketplace"
           className="w-full h-full object-cover"
         />
@@ -444,8 +447,8 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
                   key={category.name}
                   onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
                   className={`p-4 backdrop-blur-sm transition-all cursor-pointer hover:scale-105 ${selectedCategory === category.name
-                      ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
-                      : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
+                    ? 'bg-orange-100 border-orange-400 shadow-md ring-2 ring-orange-400 ring-offset-2'
+                    : 'bg-white/80 border-orange-100 hover:shadow-lg hover:border-orange-200'
                     }`}
                 >
                   <div className="flex items-center justify-center mb-3">
