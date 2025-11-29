@@ -40,15 +40,17 @@ export const GeminiService = {
         try {
             // 2. Try Fetching Data from SearXNG
             console.log(`Fetching fresh data for ${location} from SearXNG...`);
-            const [news, weather, traffic] = await Promise.allSettled([
-                SearXNGService.getChennaiNews(), // SearXNGService might need update to accept location, or we append it to query if possible. For now, assuming general Chennai news + location specific context in prompt.
+            const [news, weather, traffic, events] = await Promise.allSettled([
+                SearXNGService.getChennaiNews('general', location),
                 SearXNGService.getWeather(location),
-                SearXNGService.getTraffic(location)
+                SearXNGService.getTraffic(location),
+                SearXNGService.searchChennai(`events happening in ${location} today`, { timeRange: 'week' })
             ]);
 
             const newsText = news.status === 'fulfilled' ? news.value : '';
             const weatherText = weather.status === 'fulfilled' ? weather.value : '';
             const trafficText = traffic.status === 'fulfilled' ? traffic.value : '';
+            const eventsText = events.status === 'fulfilled' ? SearXNGService.formatResults(events.value) : '';
 
             // Check if we got meaningful data from SearXNG
             const hasData = newsText.length > 100 || weatherText.length > 50;
@@ -56,7 +58,7 @@ export const GeminiService = {
             if (hasData) {
                 // 3a. Summarize SearXNG Data using Gemini
                 console.log('Summarizing SearXNG data with Gemini...');
-                const summary = await this.summarizeWithGemini(newsText, weatherText, trafficText, location);
+                const summary = await this.summarizeWithGemini(newsText, weatherText, trafficText, eventsText, location);
 
                 const response: LiveUpdateResponse = {
                     text: summary,
@@ -94,7 +96,7 @@ export const GeminiService = {
     /**
      * Summarize raw text data using Gemini
      */
-    async summarizeWithGemini(news: string, weather: string, traffic: string, location: string): Promise<string> {
+    async summarizeWithGemini(news: string, weather: string, traffic: string, events: string, location: string): Promise<string> {
         if (!genAI) return '';
 
         const model = genAI.getGenerativeModel({ model: MODEL_NAME });
@@ -102,16 +104,18 @@ export const GeminiService = {
         You are a local Chennai news assistant. Summarize the following real-time data for **${location}** into a single, scrolling-ticker style update.
         
         Constraints:
-        - Max 2 sentences.
+        - Max 2-3 sentences.
         - Use "Tanglish" (Tamil + English) style.
         - Include emojis.
-        - Focus on: Weather, Traffic, and Major News specific to ${location} or Chennai in general.
-        - Format: "📢 [Weather] | [Traffic] | [News]"
+        - **CRITICAL**: Focus strictly on ${location} if data is available. If not, fallback to general Chennai news but mention it's general.
+        - Include: Weather, Traffic, Major News, and any Events.
+        - Format: "📢 [Weather] | [Traffic] | [News/Events]"
         
         Data:
         News: ${news.substring(0, 2000)}
         Weather: ${weather.substring(0, 500)}
         Traffic: ${traffic.substring(0, 500)}
+        Events: ${events.substring(0, 500)}
         `;
 
         const result = await model.generateContent(prompt);

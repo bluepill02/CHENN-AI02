@@ -60,6 +60,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const activeLocation = currentLocation || userLocation;
   const activePincode = activeLocation?.pincode || '600004';
 
+  const [activeView, setActiveView] = useState<'feed' | 'auto-share' | 'food-hunt'>('feed');
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(false);
 
@@ -86,6 +87,13 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
         setLiveUpdate(update);
         setLoadingInfo(false);
       }
+    } else if (title === 'Auto Share') {
+      setActiveView('auto-share');
+    } else if (title === 'Food Hunt') {
+      setActiveView('food-hunt');
+    } else if (title === 'Chennai Gethu') {
+      // Navigate to Chennai Gethu page
+      window.location.href = '/chennai-gethu'; // Using window.location for now as navigate hook usage might need verification or use existing router
     } else {
       toast.info(`${title} coming soon!`);
     }
@@ -295,132 +303,154 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
           </div>
         </div>
 
-        <PullToRefresh onRefresh={handleRefresh}>
-          <div className="px-4 space-y-6 min-h-[50vh]">
-            {loading ? (
-              <div className="space-y-4">
-                <PostSkeleton />
-                <PostSkeleton />
-              </div>
-            ) : (
-              <>
-                {/* Auto Share Card */}
-                <StaggerContainer>
-                  <StaggerItem>
-                    <AutoShareCard pincode={activePincode} />
-                  </StaggerItem>
-                  <StaggerItem>
-                    <FoodHuntCard pincode={activePincode} />
-                  </StaggerItem>
-                </StaggerContainer>
-
-                {/* Posts Feed */}
-                <StaggerContainer>
-                  <AnimatePresence>
-                    {posts.map((post) => (
-                      <StaggerItem key={post.id}>
-                        <AnimatedPostCard>
-                          <Card className="overflow-hidden border-none shadow-lg bg-white/90 backdrop-blur-sm">
-                            {/* Post Header */}
-                            <div className="p-4 flex items-center gap-3">
-                              <Avatar className="w-10 h-10 border-2 border-orange-100">
-                                {post.profiles?.avatar_url ? (
-                                  <img src={post.profiles.avatar_url} alt={post.profiles.full_name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-700 font-bold">
-                                    {post.profiles?.full_name?.[0] || 'U'}
-                                  </div>
-                                )}
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <h3 className="font-bold text-gray-900">{post.profiles?.full_name || 'Anonymous'}</h3>
-                                  <span className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="text-[10px] bg-orange-50 text-orange-700 hover:bg-orange-100">
-                                    {post.category}
-                                  </Badge>
-                                  {post.area && (
-                                    <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
-                                      <CustomIcon icon="LocationPin" className="w-3 h-3" />
-                                      {post.area}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Post Content */}
-                            <div className="px-4 pb-2">
-                              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{post.content}</p>
-
-                              {/* AI Summary */}
-                              {summaries[post.id] && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  className="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100 text-sm text-purple-800"
-                                >
-                                  <div className="flex items-center gap-2 mb-1 font-bold text-xs uppercase tracking-wider">
-                                    <CustomIcon icon="Sparkles" className="w-3 h-3" />
-                                    AI Summary
-                                  </div>
-                                  {summaries[post.id]}
-                                </motion.div>
-                              )}
-                            </div>
-
-                            {/* Post Image */}
-                            {post.image_url && (
-                              <div className="mt-2">
-                                <PostImageGallery images={[post.image_url]} />
-                              </div>
-                            )}
-
-                            {/* Post Actions */}
-                            <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-gray-50/50">
-                              <div className="flex items-center gap-4">
-                                <AnimatedLikeButton
-                                  isLiked={post.is_liked_by_user || false}
-                                  count={post.likes}
-                                  onClick={() => handleLike(post.id)}
-                                  label="Podu Macha"
-                                />
-                                <AnimatedCommentButton
-                                  count={post.comments_count}
-                                  onClick={() => openComments(post.id)}
-                                />
-                                <motion.button
-                                  className="flex items-center gap-2 text-gray-500 hover:text-purple-500 transition-colors"
-                                  onClick={() => handleSummarize(post.id, post.content)}
-                                  disabled={summarizing[post.id]}
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                >
-                                  {summarizing[post.id] ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
+        {activeView === 'feed' && (
+          <PullToRefresh onRefresh={handleRefresh}>
+            <div className="px-4 space-y-6 min-h-[50vh]">
+              {loading ? (
+                <div className="space-y-4">
+                  <PostSkeleton />
+                  <PostSkeleton />
+                </div>
+              ) : (
+                <>
+                  {/* Posts Feed */}
+                  <StaggerContainer>
+                    <AnimatePresence>
+                      {posts.map((post) => (
+                        <StaggerItem key={post.id}>
+                          <AnimatedPostCard>
+                            <Card className="overflow-hidden border-none shadow-lg bg-white/90 backdrop-blur-sm">
+                              {/* Post Header */}
+                              <div className="p-4 flex items-center gap-3">
+                                <Avatar className="w-10 h-10 border-2 border-orange-100">
+                                  {post.profiles?.avatar_url ? (
+                                    <img src={post.profiles.avatar_url} alt={post.profiles.full_name} className="w-full h-full object-cover" />
                                   ) : (
-                                    <Send className="w-4 h-4" />
+                                    <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-700 font-bold">
+                                      {post.profiles?.full_name?.[0] || 'U'}
+                                    </div>
                                   )}
-                                  <span className="text-sm hidden sm:inline font-medium">AI Summary</span>
-                                </motion.button>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <h3 className="font-bold text-gray-900">{post.profiles?.full_name || 'Anonymous'}</h3>
+                                    <span className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="text-[10px] bg-orange-50 text-orange-700 hover:bg-orange-100">
+                                      {post.category}
+                                    </Badge>
+                                    {post.area && (
+                                      <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                                        <CustomIcon icon="LocationPin" className="w-3 h-3" />
+                                        {post.area}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              <AnimatedShareButton onClick={() => handleShare(post)} />
-                            </div>
-                          </Card>
-                        </AnimatedPostCard>
-                      </StaggerItem>
-                    ))}
-                  </AnimatePresence>
-                </StaggerContainer>
-              </>
-            )}
-          </div>
-        </PullToRefresh>
 
-        {/* Floating Action Button */}
-        <FloatingActionButton onClick={() => setIsPostDialogOpen(true)} />
+                              {/* Post Content */}
+                              <div className="px-4 pb-2">
+                                <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+
+                                {/* AI Summary */}
+                                {summaries[post.id] && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100 text-sm text-purple-800"
+                                  >
+                                    <div className="flex items-center gap-2 mb-1 font-bold text-xs uppercase tracking-wider">
+                                      <CustomIcon icon="Sparkles" className="w-3 h-3" />
+                                      AI Summary
+                                    </div>
+                                    {summaries[post.id]}
+                                  </motion.div>
+                                )}
+                              </div>
+
+                              {/* Post Image */}
+                              {post.image_url && (
+                                <div className="mt-2">
+                                  <PostImageGallery images={[post.image_url]} />
+                                </div>
+                              )}
+
+                              {/* Post Actions */}
+                              <div className="flex items-center justify-between p-3 border-t border-gray-100 bg-gray-50/50">
+                                <div className="flex items-center gap-4">
+                                  <AnimatedLikeButton
+                                    isLiked={post.is_liked_by_user || false}
+                                    count={post.likes}
+                                    onClick={() => handleLike(post.id)}
+                                    label="Podu Macha"
+                                  />
+                                  <AnimatedCommentButton
+                                    count={post.comments_count}
+                                    onClick={() => openComments(post.id)}
+                                  />
+                                  <motion.button
+                                    className="flex items-center gap-2 text-gray-500 hover:text-purple-500 transition-colors"
+                                    onClick={() => handleSummarize(post.id, post.content)}
+                                    disabled={summarizing[post.id]}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    {summarizing[post.id] ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Send className="w-4 h-4" />
+                                    )}
+                                    <span className="text-sm hidden sm:inline font-medium">AI Summary</span>
+                                  </motion.button>
+                                </div>
+                                <AnimatedShareButton onClick={() => handleShare(post)} />
+                              </div>
+                            </Card>
+                          </AnimatedPostCard>
+                        </StaggerItem>
+                      ))}
+                    </AnimatePresence>
+                  </StaggerContainer>
+                </>
+              )}
+            </div>
+          </PullToRefresh>
+        )}
+
+        {activeView === 'auto-share' && (
+          <div className="px-4 mt-4 min-h-[50vh]">
+            <Button
+              variant="ghost"
+              onClick={() => setActiveView('feed')}
+              className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Feed
+            </Button>
+            <AutoShareCard pincode={activePincode} />
+          </div>
+        )}
+
+        {activeView === 'food-hunt' && (
+          <div className="px-4 mt-4 min-h-[50vh]">
+            <Button
+              variant="ghost"
+              onClick={() => setActiveView('feed')}
+              className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Feed
+            </Button>
+            <FoodHuntCard pincode={activePincode} />
+          </div>
+        )}
+
+        {/* Floating Action Button - Only show on feed view */}
+        {activeView === 'feed' && (
+          <FloatingActionButton onClick={() => setIsPostDialogOpen(true)} />
+        )}
 
         {/* Create Post Dialog */}
         <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>

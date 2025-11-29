@@ -281,10 +281,14 @@ export const SearXNGService = {
     },
 
     /**
-     * Get real-time news from Chennai
+     * Get real-time news from Chennai, optionally specific to an area
      */
-    async getChennaiNews(category: string = 'general'): Promise<string> {
-        const query = category === 'general' ? 'latest news' : `latest ${category} news`;
+    async getChennaiNews(category: string = 'general', location?: string): Promise<string> {
+        let query = category === 'general' ? 'latest news' : `latest ${category} news`;
+        if (location) {
+            query = `${query} ${location}`;
+        }
+
         const results = await this.searchChennai(query, {
             category: 'news',
             timeRange: 'day'
