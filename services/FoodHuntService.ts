@@ -23,6 +23,7 @@ export interface FoodHuntPost {
         avatar_url?: string;
         area?: string;
     };
+    is_liked_by_user?: boolean; // Virtual field
 }
 
 export interface CreateFoodHuntPostData {
@@ -97,6 +98,79 @@ export class FoodHuntService {
             return data;
         } catch (error) {
             console.error('Error creating food hunt post:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update a food hunt post
+     */
+    static async updatePost(
+        postId: string,
+        updates: Partial<CreateFoodHuntPostData>
+    ): Promise<FoodHuntPost | null> {
+        try {
+            const { data, error } = await supabase
+                .from('food_hunt_posts')
+                .update(updates)
+                .eq('id', postId)
+                .select(`
+          *,
+          profiles:user_id (
+            id,
+            full_name,
+            avatar_url,
+            area
+          )
+        `)
+                .single();
+
+            if (error) throw error;
+
+            return data;
+        } catch (error) {
+            console.error('Error updating food hunt post:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Toggle like on a food hunt post
+     */
+    static async likePost(postId: string, userId: string): Promise<void> {
+        try {
+            // Check if already liked
+            const { data: existingLike } = await supabase
+                .from('food_hunt_likes')
+                .select('*')
+                .eq('post_id', postId)
+                .eq('user_id', userId)
+                .single();
+
+            if (existingLike) {
+                // Unlike
+                await supabase
+                    .from('food_hunt_likes')
+                    .delete()
+                    .eq('post_id', postId)
+                    .eq('user_id', userId);
+
+                // Decrement count (optimistic update handled in UI, this is for consistency)
+                await supabase.rpc('decrement_food_hunt_likes', { post_id: postId });
+            } else {
+                // Like
+                await supabase
+                    .from('food_hunt_likes')
+                    .insert({
+                        post_id: postId,
+                        user_id: userId
+                    });
+
+                // Increment count
+                await supabase.rpc('increment_food_hunt_likes', { post_id: postId });
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
             throw error;
         }
     }

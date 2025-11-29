@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { supabase } from '../../services/supabaseClient';
-import { Button } from '../ui/button';
+
 import { Input } from '../ui/input';
 import { Mail, Loader2, MapPin, Users, Zap, Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from 'lucide-react';
 import {
@@ -10,8 +10,6 @@ import {
     AnimatedInput,
     RippleButton,
     PageTransition,
-    KolamPattern,
-    WaveAnimation
 } from './AnimationComponents';
 import { ChennaiCustomIcons } from '../CustomIcons';
 import { PremiumIcon } from '../PremiumIcons';
@@ -200,7 +198,7 @@ export function AuthScreen() {
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-purple-500/20 rounded-[2rem]" />
                             <div className="relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)]">
-                                <PremiumIcon icon="Community" className="w-16 h-16" color="white" animated={true} />
+                                <img src="/assets/app_logo.png" alt="App Logo" className="w-20 h-20 object-contain" />
                             </div>
 
                             {/* Shine effect */}

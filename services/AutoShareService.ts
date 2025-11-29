@@ -19,6 +19,7 @@ export interface AutoSharePost {
     status: 'active' | 'filled' | 'cancelled' | 'expired';
     views_count: number;
     contact_via: 'chat' | 'phone' | 'both';
+    phone_number?: string;
 
     // Joined profile data
     profiles?: {
@@ -40,6 +41,7 @@ export interface CreateAutoSharePostData {
     fare_sharing?: boolean;
     notes?: string;
     contact_via?: 'chat' | 'phone' | 'both';
+    phone_number?: string;
 }
 
 export interface UpdateAutoSharePostData {
@@ -51,6 +53,8 @@ export interface UpdateAutoSharePostData {
     status?: 'active' | 'filled' | 'cancelled';
     fare_sharing?: boolean;
     contact_via?: 'chat' | 'phone' | 'both';
+    phone_number?: string;
+    vehicle_type?: 'auto' | 'car' | 'bike';
 }
 
 export class AutoShareService {
@@ -134,6 +138,7 @@ export class AutoShareService {
                     vehicle_type: postData.vehicle_type || 'auto',
                     fare_sharing: postData.fare_sharing !== undefined ? postData.fare_sharing : true,
                     contact_via: postData.contact_via || 'chat',
+                    phone_number: postData.phone_number,
                     expires_at: expiresAt.toISOString(),
                     status: 'active',
                 })

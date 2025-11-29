@@ -73,19 +73,24 @@ export class ProfileService {
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', userId);
 
-            // Calculate a basic trust score (mock logic for now)
-            // Base 3.0 + 0.1 per post + 0.2 per ride share + 0.5 per verified status (if we had it)
-            // Cap at 5.0
-            let score = 3.0;
-            score += (postsCount || 0) * 0.1;
-            score += (ridesShared || 0) * 0.2;
-            score += (reviewsGiven || 0) * 0.1;
+            // Calculate trust score using Database Function
+            let trustScore = 3.0;
+            try {
+                const { data: scoreData, error: scoreError } = await supabase
+                    .rpc('calculate_trust_score', { target_user_id: userId });
+
+                if (!scoreError && scoreData !== null) {
+                    trustScore = scoreData;
+                }
+            } catch (e) {
+                console.error('Error fetching trust score:', e);
+            }
 
             return {
                 postsCount: postsCount || 0,
                 ridesShared: ridesShared || 0,
                 eventsJoined: reviewsGiven || 0, // Using reviews as a proxy for "Community Actions"
-                trustScore: Math.min(Math.round(score * 10) / 10, 5.0)
+                trustScore
             };
         } catch (error) {
             console.error('Error fetching stats:', error);

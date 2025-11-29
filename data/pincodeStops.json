@@ -4,7 +4,14 @@
       "Parry's Corner Bus Stand",
       "High Court Bus Stop",
       "Broadway Bus Terminus",
-      "NSC Bose Road"
+      "NSC Bose Road",
+      "Mannadi"
+    ],
+    "popularRoutes": [
+      "1A",
+      "11G",
+      "21",
+      "2A"
     ],
     "twitterQueries": [
       "Parry's Corner Chennai",
@@ -34,6 +41,11 @@
       "General Hospital",
       "Ripon Building"
     ],
+    "popularRoutes": [
+      "15B",
+      "120",
+      "71E"
+    ],
     "twitterQueries": [
       "Chennai Central Station Chennai",
       "Chennai Central Station traffic",
@@ -49,6 +61,11 @@
       "Luz Corner",
       "Santhome Church",
       "Mandaveli Bus Depot"
+    ],
+    "popularRoutes": [
+      "21G",
+      "12B",
+      "29C"
     ],
     "twitterQueries": [
       "Mylapore Tank Chennai",
@@ -113,6 +130,11 @@
       "Egmore Bus Stand",
       "Egmore Railway Station"
     ],
+    "popularRoutes": [
+      "23C",
+      "27B",
+      "40A"
+    ],
     "twitterQueries": [
       "Egmore Chennai",
       "Egmore traffic",
@@ -128,6 +150,11 @@
       "High Court",
       "Marina"
     ],
+    "popularRoutes": [
+      "21",
+      "21G",
+      "12G"
+    ],
     "twitterQueries": [
       "Fort St. George Chennai",
       "High Court Chennai",
@@ -140,7 +167,13 @@
     "busStops": [
       "Kilpauk",
       "Kilpauk Medical College (KMC)",
-      "New Avadi Road"
+      "New Avadi Road",
+      "Kellys"
+    ],
+    "popularRoutes": [
+      "29C",
+      "37D",
+      "59"
     ],
     "twitterQueries": [
       "Kilpauk Chennai",
@@ -156,6 +189,11 @@
       "Vyasarpadi Jeeva",
       "Perambur Railway Station",
       "Sembium"
+    ],
+    "popularRoutes": [
+      "29C",
+      "57",
+      "64C"
     ],
     "twitterQueries": [
       "Perambur Chennai",
@@ -187,6 +225,11 @@
       "Kalmandapam",
       "Royapuram Bridge"
     ],
+    "popularRoutes": [
+      "1",
+      "1A",
+      "6A"
+    ],
     "twitterQueries": [
       "Royapuram Chennai",
       "Royapuram traffic",
@@ -201,6 +244,11 @@
       "Royapettah Clock Tower",
       "Triplicane South"
     ],
+    "popularRoutes": [
+      "13",
+      "45B",
+      "21"
+    ],
     "twitterQueries": [
       "Royapettah Clock Tower Chennai",
       "Triplicane South Chennai",
@@ -213,7 +261,13 @@
       "Saidapet Bus Stand",
       "Saidapet Court",
       "Panagal Maligai",
-      "Little Mount"
+      "Little Mount",
+      "Saidapet Metro"
+    ],
+    "popularRoutes": [
+      "19B",
+      "54",
+      "519"
     ],
     "twitterQueries": [
       "Saidapet Chennai",
@@ -227,7 +281,14 @@
   "600016": {
     "busStops": [
       "Alandur",
-      "Butt Road"
+      "Butt Road",
+      "St. Thomas Mount",
+      "Alandur Metro"
+    ],
+    "popularRoutes": [
+      "18",
+      "54",
+      "M70"
     ],
     "twitterQueries": [
       "Alandur Chennai",
@@ -241,6 +302,11 @@
       "T. Nagar Bus Stand",
       "Panagal Park",
       "Pondy Bazaar"
+    ],
+    "popularRoutes": [
+      "11",
+      "12B",
+      "47"
     ],
     "twitterQueries": [
       "T. Nagar Chennai",
@@ -257,6 +323,11 @@
       "SIET",
       "Eldams Road"
     ],
+    "popularRoutes": [
+      "18A",
+      "41D",
+      "45A"
+    ],
     "twitterQueries": [
       "Teynampet Chennai",
       "SIET Chennai",
@@ -270,7 +341,15 @@
       "Tiruvottiyur",
       "Kaladipet",
       "Wimco Nagar",
-      "Tondiarpet Railway Colony"
+      "Tondiarpet Railway Colony",
+      "Wimco Nagar Metro",
+      "Tiruvottriyur Metro",
+      "Kaladipet Metro"
+    ],
+    "popularRoutes": [
+      "1A",
+      "1B",
+      "159"
     ],
     "twitterQueries": [
       "Tiruvottiyur Chennai",
@@ -288,6 +367,11 @@
       "L.B. Road",
       "Thiruvanmiyur Bus Depot"
     ],
+    "popularRoutes": [
+      "1",
+      "29C",
+      "41C"
+    ],
     "twitterQueries": [
       "Adyar Depot Chennai",
       "Adyar Depot traffic",
@@ -303,6 +387,11 @@
       "Korukkupet",
       "Tondiarpet"
     ],
+    "popularRoutes": [
+      "159",
+      "56C",
+      "101"
+    ],
     "twitterQueries": [
       "Washermanpet Chennai",
       "Korukkupet Chennai",
@@ -316,6 +405,11 @@
       "Raj Bhavan",
       "Guindy Estate",
       "Anna University"
+    ],
+    "popularRoutes": [
+      "21G",
+      "54",
+      "19B"
     ],
     "twitterQueries": [
       "Raj Bhavan Chennai",
@@ -331,6 +425,11 @@
       "Perambur",
       "Konnur High Road"
     ],
+    "popularRoutes": [
+      "23C",
+      "27D",
+      "46"
+    ],
     "twitterQueries": [
       "Ayanavaram Chennai",
       "Perambur Chennai",
@@ -344,6 +443,11 @@
       "Kodambakkam",
       "Rangarajapuram",
       "T. Nagar Depot"
+    ],
+    "popularRoutes": [
+      "11",
+      "12B",
+      "47"
     ],
     "twitterQueries": [
       "Kodambakkam Chennai",
@@ -360,6 +464,11 @@
       "Kasturibai Nagar",
       "Indira Nagar"
     ],
+    "popularRoutes": [
+      "29C",
+      "41C",
+      "109"
+    ],
     "twitterQueries": [
       "Adyar Depot Chennai",
       "Adyar Depot traffic",
@@ -373,7 +482,13 @@
     "busStops": [
       "Vadapalani",
       "Vadapalani Bus Depot",
-      "Vadapalani Andavar Temple"
+      "Vadapalani Andavar Temple",
+      "Vadapalani Metro"
+    ],
+    "popularRoutes": [
+      "17D",
+      "37E",
+      "12C"
     ],
     "twitterQueries": [
       "Vadapalani Chennai",
@@ -388,7 +503,13 @@
     "busStops": [
       "Meenambakkam Airport",
       "Pallavaram",
-      "Chromepet"
+      "Chromepet",
+      "Airport Metro"
+    ],
+    "popularRoutes": [
+      "18",
+      "70",
+      "114"
     ],
     "twitterQueries": [
       "Meenambakkam Airport Chennai",
@@ -406,6 +527,11 @@
       "Mylapore",
       "Santhome"
     ],
+    "popularRoutes": [
+      "21",
+      "21G",
+      "12B"
+    ],
     "twitterQueries": [
       "Mandaveli Chennai",
       "R.A. Puram Chennai",
@@ -420,6 +546,11 @@
       "Aminjikarai",
       "Nelson Manickam Road"
     ],
+    "popularRoutes": [
+      "15",
+      "27B",
+      "53"
+    ],
     "twitterQueries": [
       "Aminjikarai Chennai",
       "Nelson Manickam Road Chennai",
@@ -432,6 +563,11 @@
       "Santhome",
       "Luz",
       "Foreshore Estate"
+    ],
+    "popularRoutes": [
+      "6A",
+      "12B",
+      "21"
     ],
     "twitterQueries": [
       "Santhome Chennai",
@@ -447,6 +583,11 @@
       "Shanthi Colony",
       "Thirumangalam"
     ],
+    "popularRoutes": [
+      "7F",
+      "47",
+      "47A"
+    ],
     "twitterQueries": [
       "Anna Nagar Chennai",
       "Shanthi Colony Chennai",
@@ -460,7 +601,14 @@
     "busStops": [
       "Koyambedu",
       "CMBT",
-      "Arumbakkam"
+      "Arumbakkam",
+      "Ekkattuthangal Metro",
+      "Guindy Metro"
+    ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
     ],
     "twitterQueries": [
       "Koyambedu Chennai",
@@ -474,6 +622,11 @@
     "busStops": [
       "Mambalam Railway Station",
       "West Mambalam"
+    ],
+    "popularRoutes": [
+      "11",
+      "12B",
+      "47"
     ],
     "twitterQueries": [
       "Mambalam Railway Station Chennai",
@@ -490,6 +643,11 @@
       "Tambaram",
       "West Tambaram Bus Terminus"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Tambaram Sanatorium Chennai",
       "Tambaram Chennai",
@@ -503,6 +661,11 @@
       "Nanganallur",
       "Madipakkam"
     ],
+    "popularRoutes": [
+      "18D",
+      "M1",
+      "51"
+    ],
     "twitterQueries": [
       "Nanganallur Chennai",
       "Madipakkam Chennai",
@@ -515,6 +678,11 @@
       "Parrys Corner",
       "Broadway Bus Stand",
       "High Court"
+    ],
+    "popularRoutes": [
+      "1A",
+      "11G",
+      "21"
     ],
     "twitterQueries": [
       "Parrys Corner Chennai",
@@ -530,6 +698,11 @@
       "Tondiarpet",
       "Korukkupet"
     ],
+    "popularRoutes": [
+      "159",
+      "56C",
+      "101"
+    ],
     "twitterQueries": [
       "Tondiarpet Chennai",
       "Korukkupet Chennai",
@@ -541,6 +714,11 @@
     "busStops": [
       "Villivakkam",
       "Red Hills"
+    ],
+    "popularRoutes": [
+      "20",
+      "27D",
+      "47"
     ],
     "twitterQueries": [
       "Villivakkam Chennai",
@@ -555,6 +733,11 @@
       "Ambattur OT",
       "Padi"
     ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
+    ],
     "twitterQueries": [
       "Ambattur Chennai",
       "Ambattur OT Chennai",
@@ -566,7 +749,14 @@
   "600040": {
     "busStops": [
       "Mogappair",
-      "Nolambur"
+      "Nolambur",
+      "Thirumangalam Metro",
+      "Anna Nagar Tower Metro"
+    ],
+    "popularRoutes": [
+      "7F",
+      "47",
+      "47A"
     ],
     "twitterQueries": [
       "Mogappair Chennai",
@@ -580,6 +770,11 @@
       "Madhavaram",
       "Madhavaram Milk Colony"
     ],
+    "popularRoutes": [
+      "29D",
+      "56",
+      "64C"
+    ],
     "twitterQueries": [
       "Madhavaram Chennai",
       "Madhavaram Milk Colony Chennai",
@@ -591,6 +786,11 @@
     "busStops": [
       "Vyasarpadi",
       "Moolakadai"
+    ],
+    "popularRoutes": [
+      "29C",
+      "57",
+      "64C"
     ],
     "twitterQueries": [
       "Vyasarpadi Chennai",
@@ -616,6 +816,11 @@
       "Pattabiram",
       "Avadi"
     ],
+    "popularRoutes": [
+      "61",
+      "71E",
+      "206"
+    ],
     "twitterQueries": [
       "Pattabiram Chennai",
       "Avadi Chennai",
@@ -626,7 +831,13 @@
   "600045": {
     "busStops": [
       "Pammal",
-      "Pallavaram"
+      "Pallavaram",
+      "Tambaram Bus Terminus"
+    ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
     ],
     "twitterQueries": [
       "Pammal Chennai",
@@ -640,6 +851,11 @@
       "Perungalathur",
       "Irumbuliyur"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Perungalathur Chennai",
       "Irumbuliyur Chennai",
@@ -650,6 +866,11 @@
   "600047": {
     "busStops": [
       "Meenambakkam"
+    ],
+    "popularRoutes": [
+      "18",
+      "70",
+      "114"
     ],
     "twitterQueries": [
       "Meenambakkam Chennai",
@@ -663,6 +884,11 @@
       "Kundrathur",
       "Porur"
     ],
+    "popularRoutes": [
+      "54",
+      "88",
+      "188"
+    ],
     "twitterQueries": [
       "Kundrathur Chennai",
       "Porur Chennai",
@@ -675,6 +901,11 @@
       "Thoraipakkam",
       "Karapakkam"
     ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
+    ],
     "twitterQueries": [
       "Thoraipakkam Chennai",
       "Karapakkam Chennai",
@@ -686,6 +917,11 @@
     "busStops": [
       "Sholinganallur",
       "Perumbakkam"
+    ],
+    "popularRoutes": [
+      "95",
+      "99",
+      "570"
     ],
     "twitterQueries": [
       "Sholinganallur Chennai",
@@ -700,6 +936,11 @@
       "Vandalur",
       "Urapakkam"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Vandalur Chennai",
       "Urapakkam Chennai",
@@ -711,6 +952,11 @@
     "busStops": [
       "Medavakkam"
     ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
+    ],
     "twitterQueries": [
       "Medavakkam Chennai",
       "#ChennaiTraffic",
@@ -720,6 +966,11 @@
   "600053": {
     "busStops": [
       "Chromepet"
+    ],
+    "popularRoutes": [
+      "18",
+      "70",
+      "114"
     ],
     "twitterQueries": [
       "Chromepet Chennai",
@@ -731,6 +982,11 @@
     "busStops": [
       "Adambakkam"
     ],
+    "popularRoutes": [
+      "18",
+      "51",
+      "M1"
+    ],
     "twitterQueries": [
       "Adambakkam Chennai",
       "#ChennaiTraffic",
@@ -740,6 +996,11 @@
   "600055": {
     "busStops": [
       "Maduravoyal"
+    ],
+    "popularRoutes": [
+      "49",
+      "101",
+      "104"
     ],
     "twitterQueries": [
       "Maduravoyal Chennai",
@@ -751,6 +1012,11 @@
     "busStops": [
       "Perungudi"
     ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
+    ],
     "twitterQueries": [
       "Perungudi Chennai",
       "#ChennaiTraffic",
@@ -760,6 +1026,11 @@
   "600057": {
     "busStops": [
       "Kolathur"
+    ],
+    "popularRoutes": [
+      "29C",
+      "57",
+      "64C"
     ],
     "twitterQueries": [
       "Kolathur Chennai",
@@ -771,6 +1042,11 @@
     "busStops": [
       "Tondiarpet"
     ],
+    "popularRoutes": [
+      "159",
+      "56C",
+      "101"
+    ],
     "twitterQueries": [
       "Tondiarpet Chennai",
       "#ChennaiTraffic",
@@ -781,6 +1057,11 @@
     "busStops": [
       "Semmancheri"
     ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
+    ],
     "twitterQueries": [
       "Semmancheri Chennai",
       "#ChennaiTraffic",
@@ -790,6 +1071,11 @@
   "600060": {
     "busStops": [
       "Navalur"
+    ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
     ],
     "twitterQueries": [
       "Navalur Chennai",
@@ -802,6 +1088,11 @@
       "Poonamallee",
       "Avadi"
     ],
+    "popularRoutes": [
+      "61",
+      "71E",
+      "206"
+    ],
     "twitterQueries": [
       "Poonamallee Chennai",
       "Avadi Chennai",
@@ -813,6 +1104,11 @@
     "busStops": [
       "Thiruninravur"
     ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "206"
+    ],
     "twitterQueries": [
       "Thiruninravur Chennai",
       "#ChennaiTraffic",
@@ -822,6 +1118,11 @@
   "600063": {
     "busStops": [
       "Kadambathur"
+    ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "206"
     ],
     "twitterQueries": [
       "Kadambathur Chennai",
@@ -833,6 +1134,11 @@
     "busStops": [
       "Chitlapakkam"
     ],
+    "popularRoutes": [
+      "18",
+      "51",
+      "M1"
+    ],
     "twitterQueries": [
       "Chitlapakkam Chennai",
       "#ChennaiTraffic",
@@ -842,6 +1148,11 @@
   "600065": {
     "busStops": [
       "Chengalpattu"
+    ],
+    "popularRoutes": [
+      "500",
+      "579",
+      "583"
     ],
     "twitterQueries": [
       "Chengalpattu Chennai",
@@ -854,6 +1165,11 @@
       "Thiruverkadu",
       "Pattur"
     ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "101"
+    ],
     "twitterQueries": [
       "Thiruverkadu Chennai",
       "Pattur Chennai",
@@ -864,6 +1180,11 @@
   "600067": {
     "busStops": [
       "Poonamallee"
+    ],
+    "popularRoutes": [
+      "61",
+      "71E",
+      "206"
     ],
     "twitterQueries": [
       "Poonamallee Chennai",
@@ -876,6 +1197,11 @@
       "Manali",
       "Vadagarai"
     ],
+    "popularRoutes": [
+      "56",
+      "64C",
+      "121"
+    ],
     "twitterQueries": [
       "Manali Chennai",
       "Vadagarai Chennai",
@@ -887,6 +1213,11 @@
     "busStops": [
       "Kundrathur"
     ],
+    "popularRoutes": [
+      "54",
+      "88",
+      "188"
+    ],
     "twitterQueries": [
       "Kundrathur Chennai",
       "#ChennaiTraffic",
@@ -896,6 +1227,11 @@
   "600070": {
     "busStops": [
       "Anakaputhur"
+    ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
     ],
     "twitterQueries": [
       "Anakaputhur Chennai",
@@ -907,6 +1243,11 @@
     "busStops": [
       "Madambakkam"
     ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
+    ],
     "twitterQueries": [
       "Madambakkam Chennai",
       "#ChennaiTraffic",
@@ -916,6 +1257,11 @@
   "600072": {
     "busStops": [
       "Thirumudivakkam"
+    ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
     ],
     "twitterQueries": [
       "Thirumudivakkam Chennai",
@@ -927,6 +1273,11 @@
     "busStops": [
       "Manimangalam"
     ],
+    "popularRoutes": [
+      "55",
+      "579",
+      "583"
+    ],
     "twitterQueries": [
       "Manimangalam Chennai",
       "#ChennaiTraffic",
@@ -936,6 +1287,11 @@
   "600074": {
     "busStops": [
       "Oragadam"
+    ],
+    "popularRoutes": [
+      "55",
+      "579",
+      "583"
     ],
     "twitterQueries": [
       "Oragadam Chennai",
@@ -947,6 +1303,11 @@
     "busStops": [
       "Pammal"
     ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
+    ],
     "twitterQueries": [
       "Pammal Chennai",
       "#ChennaiTraffic",
@@ -957,6 +1318,11 @@
     "busStops": [
       "Korattur"
     ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
+    ],
     "twitterQueries": [
       "Korattur Chennai",
       "#ChennaiTraffic",
@@ -966,6 +1332,11 @@
   "600077": {
     "busStops": [
       "Koyambedu"
+    ],
+    "popularRoutes": [
+      "20",
+      "27D",
+      "47"
     ],
     "twitterQueries": [
       "Koyambedu Chennai",
@@ -978,6 +1349,11 @@
       "K.K. Nagar",
       "Ashok Nagar"
     ],
+    "popularRoutes": [
+      "18",
+      "27D",
+      "47"
+    ],
     "twitterQueries": [
       "K.K. Nagar Chennai",
       "Ashok Nagar Chennai",
@@ -989,6 +1365,11 @@
     "busStops": [
       "Kotturpuram"
     ],
+    "popularRoutes": [
+      "18",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Kotturpuram Chennai",
       "#ChennaiTraffic",
@@ -998,6 +1379,11 @@
   "600086": {
     "busStops": [
       "Gopalapuram"
+    ],
+    "popularRoutes": [
+      "12B",
+      "23C",
+      "45B"
     ],
     "twitterQueries": [
       "Gopalapuram Chennai",
@@ -1009,6 +1395,11 @@
     "busStops": [
       "Alwarthirunagar"
     ],
+    "popularRoutes": [
+      "27D",
+      "47",
+      "49"
+    ],
     "twitterQueries": [
       "Alwarthirunagar Chennai",
       "#ChennaiTraffic",
@@ -1018,6 +1409,11 @@
   "600088": {
     "busStops": [
       "Adambakkam"
+    ],
+    "popularRoutes": [
+      "18",
+      "51",
+      "M1"
     ],
     "twitterQueries": [
       "Adambakkam Chennai",
@@ -1029,6 +1425,11 @@
     "busStops": [
       "Ramapuram"
     ],
+    "popularRoutes": [
+      "27D",
+      "47",
+      "49"
+    ],
     "twitterQueries": [
       "Ramapuram Chennai",
       "#ChennaiTraffic",
@@ -1038,6 +1439,11 @@
   "600090": {
     "busStops": [
       "Besant Nagar"
+    ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
     ],
     "twitterQueries": [
       "Besant Nagar Chennai",
@@ -1050,6 +1456,11 @@
       "Saidapet",
       "Ganeshapuram"
     ],
+    "popularRoutes": [
+      "18",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Saidapet Chennai",
       "Ganeshapuram Chennai",
@@ -1061,6 +1472,11 @@
     "busStops": [
       "MGR Nagar"
     ],
+    "popularRoutes": [
+      "18",
+      "27D",
+      "47"
+    ],
     "twitterQueries": [
       "MGR Nagar Chennai",
       "#ChennaiTraffic",
@@ -1071,6 +1487,11 @@
     "busStops": [
       "Thiruvanmiyur",
       "Tiruvanmiyur Bus Depot"
+    ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
     ],
     "twitterQueries": [
       "Thiruvanmiyur Chennai",
@@ -1084,6 +1505,11 @@
     "busStops": [
       "Perungudi"
     ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
+    ],
     "twitterQueries": [
       "Perungudi Chennai",
       "#ChennaiTraffic",
@@ -1094,6 +1520,11 @@
     "busStops": [
       "Madipakkam"
     ],
+    "popularRoutes": [
+      "18D",
+      "M1",
+      "51"
+    ],
     "twitterQueries": [
       "Madipakkam Chennai",
       "#ChennaiTraffic",
@@ -1103,6 +1534,11 @@
   "600096": {
     "busStops": [
       "Pallikaranai"
+    ],
+    "popularRoutes": [
+      "95",
+      "99",
+      "570"
     ],
     "twitterQueries": [
       "Pallikaranai Chennai",
@@ -1115,6 +1551,11 @@
       "Injambakkam",
       "ECR Road"
     ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
+    ],
     "twitterQueries": [
       "Injambakkam Chennai",
       "ECR Road Chennai",
@@ -1125,6 +1566,11 @@
   "600098": {
     "busStops": [
       "Tondiarpet"
+    ],
+    "popularRoutes": [
+      "159",
+      "56C",
+      "101"
     ],
     "twitterQueries": [
       "Tondiarpet Chennai",
@@ -1137,6 +1583,11 @@
       "Pudur",
       "Ambattur"
     ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
+    ],
     "twitterQueries": [
       "Pudur Chennai",
       "Ambattur Chennai",
@@ -1148,6 +1599,11 @@
     "busStops": [
       "Puzhal"
     ],
+    "popularRoutes": [
+      "57",
+      "64C",
+      "114"
+    ],
     "twitterQueries": [
       "Puzhal Chennai",
       "#ChennaiTraffic",
@@ -1157,6 +1613,11 @@
   "600101": {
     "busStops": [
       "Kolathur"
+    ],
+    "popularRoutes": [
+      "29C",
+      "57",
+      "64C"
     ],
     "twitterQueries": [
       "Kolathur Chennai",
@@ -1169,6 +1630,11 @@
       "Ambattur",
       "Ambattur OT"
     ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
+    ],
     "twitterQueries": [
       "Ambattur Chennai",
       "Ambattur OT Chennai",
@@ -1180,6 +1646,11 @@
     "busStops": [
       "Red Hills"
     ],
+    "popularRoutes": [
+      "57",
+      "64C",
+      "114"
+    ],
     "twitterQueries": [
       "Red Hills Chennai",
       "#ChennaiTraffic",
@@ -1190,6 +1661,11 @@
     "busStops": [
       "Thirumullaivoyal"
     ],
+    "popularRoutes": [
+      "70",
+      "77",
+      "114"
+    ],
     "twitterQueries": [
       "Thirumullaivoyal Chennai",
       "#ChennaiTraffic",
@@ -1199,6 +1675,11 @@
   "600105": {
     "busStops": [
       "Ennore"
+    ],
+    "popularRoutes": [
+      "56",
+      "56C",
+      "159"
     ],
     "twitterQueries": [
       "Ennore Chennai",
@@ -1211,6 +1692,11 @@
       "Thiruvanmiyur",
       "Tiruvanmiyur Depot"
     ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Thiruvanmiyur Chennai",
       "Tiruvanmiyur Depot Chennai",
@@ -1221,7 +1707,13 @@
   },
   "600107": {
     "busStops": [
-      "Tirusulam"
+      "Tirusulam",
+      "Koyambedu Metro"
+    ],
+    "popularRoutes": [
+      "18",
+      "70",
+      "114"
     ],
     "twitterQueries": [
       "Tirusulam Chennai",
@@ -1233,6 +1725,11 @@
     "busStops": [
       "Sembakkam"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Sembakkam Chennai",
       "#ChennaiTraffic",
@@ -1242,6 +1739,11 @@
   "600109": {
     "busStops": [
       "Perumbakkam"
+    ],
+    "popularRoutes": [
+      "95",
+      "99",
+      "570"
     ],
     "twitterQueries": [
       "Perumbakkam Chennai",
@@ -1254,6 +1756,11 @@
       "Thiruneermalai",
       "Poonamallee"
     ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
+    ],
     "twitterQueries": [
       "Thiruneermalai Chennai",
       "Poonamallee Chennai",
@@ -1265,6 +1772,11 @@
     "busStops": [
       "Pallavaram"
     ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
+    ],
     "twitterQueries": [
       "Pallavaram Chennai",
       "#ChennaiTraffic",
@@ -1275,6 +1787,11 @@
     "busStops": [
       "Poonamallee",
       "Avadi"
+    ],
+    "popularRoutes": [
+      "61",
+      "71E",
+      "206"
     ],
     "twitterQueries": [
       "Poonamallee Chennai",
@@ -1288,6 +1805,11 @@
       "Vandalur",
       "Urapakkam"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Vandalur Chennai",
       "Urapakkam Chennai",
@@ -1300,6 +1822,11 @@
       "Tambaram",
       "West Tambaram"
     ],
+    "popularRoutes": [
+      "70",
+      "114",
+      "570"
+    ],
     "twitterQueries": [
       "Tambaram Chennai",
       "West Tambaram Chennai",
@@ -1311,6 +1838,11 @@
     "busStops": [
       "Madhavaram"
     ],
+    "popularRoutes": [
+      "29D",
+      "56",
+      "64C"
+    ],
     "twitterQueries": [
       "Madhavaram Chennai",
       "#ChennaiTraffic",
@@ -1320,6 +1852,11 @@
   "600116": {
     "busStops": [
       "Ponmar"
+    ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
     ],
     "twitterQueries": [
       "Ponmar Chennai",
@@ -1331,6 +1868,11 @@
     "busStops": [
       "Siruseri"
     ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
+    ],
     "twitterQueries": [
       "Siruseri Chennai",
       "#ChennaiTraffic",
@@ -1341,6 +1883,11 @@
     "busStops": [
       "Navalur"
     ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
+    ],
     "twitterQueries": [
       "Navalur Chennai",
       "#ChennaiTraffic",
@@ -1350,6 +1897,11 @@
   "600119": {
     "busStops": [
       "Sholinganallur"
+    ],
+    "popularRoutes": [
+      "95",
+      "99",
+      "570"
     ],
     "twitterQueries": [
       "Sholinganallur Chennai",
@@ -1362,6 +1914,11 @@
     "busStops": [
       "Thoraipakkam"
     ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
+    ],
     "twitterQueries": [
       "Thoraipakkam Chennai",
       "#ChennaiTraffic",
@@ -1371,6 +1928,11 @@
   "600121": {
     "busStops": [
       "Karapakkam"
+    ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
     ],
     "twitterQueries": [
       "Karapakkam Chennai",
@@ -1382,6 +1944,11 @@
     "busStops": [
       "Palavakkam"
     ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Palavakkam Chennai",
       "#ChennaiTraffic",
@@ -1391,6 +1958,11 @@
   "600123": {
     "busStops": [
       "Neelankarai"
+    ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
     ],
     "twitterQueries": [
       "Neelankarai Chennai",
@@ -1402,6 +1974,11 @@
     "busStops": [
       "Kottivakkam"
     ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Kottivakkam Chennai",
       "#ChennaiTraffic",
@@ -1411,6 +1988,11 @@
   "600125": {
     "busStops": [
       "Covelong"
+    ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
     ],
     "twitterQueries": [
       "Covelong Chennai",
@@ -1422,6 +2004,11 @@
     "busStops": [
       "ECR Road"
     ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
+    ],
     "twitterQueries": [
       "ECR Road Chennai",
       "#ChennaiTraffic",
@@ -1431,6 +2018,11 @@
   "600127": {
     "busStops": [
       "Injambakkam"
+    ],
+    "popularRoutes": [
+      "19B",
+      "515",
+      "570"
     ],
     "twitterQueries": [
       "Injambakkam Chennai",
@@ -1442,6 +2034,11 @@
     "busStops": [
       "Pallikaranai"
     ],
+    "popularRoutes": [
+      "95",
+      "99",
+      "570"
+    ],
     "twitterQueries": [
       "Pallikaranai Chennai",
       "#ChennaiTraffic",
@@ -1451,6 +2048,11 @@
   "600129": {
     "busStops": [
       "Medavakkam"
+    ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
     ],
     "twitterQueries": [
       "Medavakkam Chennai",
@@ -1462,6 +2064,11 @@
     "busStops": [
       "Vengaivasal"
     ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
+    ],
     "twitterQueries": [
       "Vengaivasal Chennai",
       "#ChennaiTraffic",
@@ -1471,6 +2078,11 @@
   "600131": {
     "busStops": [
       "Nanganallur"
+    ],
+    "popularRoutes": [
+      "18D",
+      "M1",
+      "51"
     ],
     "twitterQueries": [
       "Nanganallur Chennai",
@@ -1482,6 +2094,11 @@
     "busStops": [
       "Madambakkam"
     ],
+    "popularRoutes": [
+      "51",
+      "95",
+      "99"
+    ],
     "twitterQueries": [
       "Madambakkam Chennai",
       "#ChennaiTraffic",
@@ -1491,6 +2108,11 @@
   "600133": {
     "busStops": [
       "Thirumudivakkam"
+    ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
     ],
     "twitterQueries": [
       "Thirumudivakkam Chennai",
@@ -1502,6 +2124,11 @@
     "busStops": [
       "Manimangalam"
     ],
+    "popularRoutes": [
+      "55",
+      "579",
+      "583"
+    ],
     "twitterQueries": [
       "Manimangalam Chennai",
       "#ChennaiTraffic",
@@ -1511,6 +2138,11 @@
   "600135": {
     "busStops": [
       "Oragadam"
+    ],
+    "popularRoutes": [
+      "55",
+      "579",
+      "583"
     ],
     "twitterQueries": [
       "Oragadam Chennai",
@@ -1522,6 +2154,11 @@
     "busStops": [
       "Anakaputhur"
     ],
+    "popularRoutes": [
+      "66",
+      "70",
+      "166"
+    ],
     "twitterQueries": [
       "Anakaputhur Chennai",
       "#ChennaiTraffic",
@@ -1531,6 +2168,11 @@
   "600137": {
     "busStops": [
       "Puzhal"
+    ],
+    "popularRoutes": [
+      "57",
+      "64C",
+      "114"
     ],
     "twitterQueries": [
       "Puzhal Chennai",
@@ -1542,6 +2184,11 @@
     "busStops": [
       "Chitlapakkam"
     ],
+    "popularRoutes": [
+      "18",
+      "51",
+      "M1"
+    ],
     "twitterQueries": [
       "Chitlapakkam Chennai",
       "#ChennaiTraffic",
@@ -1551,6 +2198,11 @@
   "600139": {
     "busStops": [
       "Chengalpattu"
+    ],
+    "popularRoutes": [
+      "500",
+      "579",
+      "583"
     ],
     "twitterQueries": [
       "Chengalpattu Chennai",
@@ -1563,6 +2215,11 @@
       "Thiruverkadu",
       "Pattur"
     ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "101"
+    ],
     "twitterQueries": [
       "Thiruverkadu Chennai",
       "Pattur Chennai",
@@ -1574,6 +2231,11 @@
     "busStops": [
       "Kadambathur"
     ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "206"
+    ],
     "twitterQueries": [
       "Kadambathur Chennai",
       "#ChennaiTraffic",
@@ -1584,6 +2246,11 @@
     "busStops": [
       "Thiruninravur"
     ],
+    "popularRoutes": [
+      "54",
+      "66",
+      "206"
+    ],
     "twitterQueries": [
       "Thiruninravur Chennai",
       "#ChennaiTraffic",
@@ -1593,6 +2260,11 @@
   "600143": {
     "busStops": [
       "Poonamallee"
+    ],
+    "popularRoutes": [
+      "61",
+      "71E",
+      "206"
     ],
     "twitterQueries": [
       "Poonamallee Chennai",
@@ -1605,6 +2277,11 @@
       "Manali",
       "Vadagarai"
     ],
+    "popularRoutes": [
+      "56",
+      "64C",
+      "121"
+    ],
     "twitterQueries": [
       "Manali Chennai",
       "Vadagarai Chennai",
@@ -1616,6 +2293,11 @@
     "busStops": [
       "Kundrathur"
     ],
+    "popularRoutes": [
+      "54",
+      "88",
+      "188"
+    ],
     "twitterQueries": [
       "Kundrathur Chennai",
       "#ChennaiTraffic",
@@ -1626,6 +2308,11 @@
     "busStops": [
       "Korattur"
     ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
+    ],
     "twitterQueries": [
       "Korattur Chennai",
       "#ChennaiTraffic",
@@ -1635,6 +2322,11 @@
   "600147": {
     "busStops": [
       "Koyambedu"
+    ],
+    "popularRoutes": [
+      "20",
+      "27D",
+      "47"
     ],
     "twitterQueries": [
       "Koyambedu Chennai",
@@ -1647,6 +2339,11 @@
       "K.K. Nagar",
       "Ashok Nagar"
     ],
+    "popularRoutes": [
+      "18",
+      "27D",
+      "47"
+    ],
     "twitterQueries": [
       "K.K. Nagar Chennai",
       "Ashok Nagar Chennai",
@@ -1658,6 +2355,11 @@
     "busStops": [
       "Mint"
     ],
+    "popularRoutes": [
+      "1A",
+      "11G",
+      "21"
+    ],
     "twitterQueries": [
       "Mint Chennai",
       "#ChennaiTraffic",
@@ -1667,6 +2369,11 @@
   "600150": {
     "busStops": [
       "Ambattur O.T."
+    ],
+    "popularRoutes": [
+      "20",
+      "70",
+      "77"
     ],
     "twitterQueries": [
       "Ambattur O.T. Chennai",
@@ -1678,6 +2385,11 @@
     "busStops": [
       "Tondiarpet"
     ],
+    "popularRoutes": [
+      "159",
+      "56C",
+      "101"
+    ],
     "twitterQueries": [
       "Tondiarpet Chennai",
       "#ChennaiTraffic",
@@ -1688,6 +2400,11 @@
     "busStops": [
       "Perambur",
       "Jawahar Nagar"
+    ],
+    "popularRoutes": [
+      "29C",
+      "57",
+      "64C"
     ],
     "twitterQueries": [
       "Perambur Chennai",
@@ -1701,6 +2418,11 @@
       "Ashok Pillar",
       "Jafferkhanpet"
     ],
+    "popularRoutes": [
+      "18",
+      "27D",
+      "47"
+    ],
     "twitterQueries": [
       "Ashok Pillar Chennai",
       "Jafferkhanpet Chennai",
@@ -1712,6 +2434,11 @@
     "busStops": [
       "Purasawalkam"
     ],
+    "popularRoutes": [
+      "1A",
+      "11G",
+      "21"
+    ],
     "twitterQueries": [
       "Purasawalkam Chennai",
       "#ChennaiTraffic",
@@ -1721,6 +2448,11 @@
   "600155": {
     "busStops": [
       "Kotturpuram"
+    ],
+    "popularRoutes": [
+      "18",
+      "23C",
+      "45B"
     ],
     "twitterQueries": [
       "Kotturpuram Chennai",
@@ -1732,6 +2464,11 @@
     "busStops": [
       "Gopalapuram"
     ],
+    "popularRoutes": [
+      "12B",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Gopalapuram Chennai",
       "#ChennaiTraffic",
@@ -1741,6 +2478,11 @@
   "600157": {
     "busStops": [
       "Alwarthirunagar"
+    ],
+    "popularRoutes": [
+      "27D",
+      "47",
+      "49"
     ],
     "twitterQueries": [
       "Alwarthirunagar Chennai",
@@ -1752,6 +2494,11 @@
     "busStops": [
       "Adambakkam"
     ],
+    "popularRoutes": [
+      "18",
+      "51",
+      "M1"
+    ],
     "twitterQueries": [
       "Adambakkam Chennai",
       "#ChennaiTraffic",
@@ -1762,6 +2509,11 @@
     "busStops": [
       "Ramapuram"
     ],
+    "popularRoutes": [
+      "27D",
+      "47",
+      "49"
+    ],
     "twitterQueries": [
       "Ramapuram Chennai",
       "#ChennaiTraffic",
@@ -1771,6 +2523,11 @@
   "600160": {
     "busStops": [
       "Besant Nagar"
+    ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
     ],
     "twitterQueries": [
       "Besant Nagar Chennai",
@@ -1783,6 +2540,11 @@
       "Saidapet",
       "Ganeshapuram"
     ],
+    "popularRoutes": [
+      "18",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Saidapet Chennai",
       "Ganeshapuram Chennai",
@@ -1793,6 +2555,11 @@
   "600162": {
     "busStops": [
       "MGR Nagar"
+    ],
+    "popularRoutes": [
+      "18",
+      "27D",
+      "47"
     ],
     "twitterQueries": [
       "MGR Nagar Chennai",
@@ -1805,6 +2572,11 @@
       "Thiruvanmiyur",
       "Tiruvanmiyur Bus Depot"
     ],
+    "popularRoutes": [
+      "19B",
+      "23C",
+      "45B"
+    ],
     "twitterQueries": [
       "Thiruvanmiyur Chennai",
       "Tiruvanmiyur Chennai",
@@ -1816,6 +2588,11 @@
   "600164": {
     "busStops": [
       "Perungudi"
+    ],
+    "popularRoutes": [
+      "19B",
+      "102",
+      "570"
     ],
     "twitterQueries": [
       "Perungudi Chennai",
@@ -2395,6 +3172,46 @@
       "Mint Chennai",
       "#ChennaiTraffic",
       "Chennai 600219"
+    ]
+  },
+  "600081": {
+    "busStops": [
+      "Tondiarpet",
+      "Tollgate",
+      "New Washermanpet Metro"
+    ],
+    "twitterQueries": [
+      "Tondiarpet Chennai",
+      "Tollgate Chennai",
+      "New Washermanpet Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600081"
+    ]
+  },
+  "600083": {
+    "busStops": [
+      "Ashok Nagar",
+      "Ashok Pillar",
+      "Ashok Nagar Metro"
+    ],
+    "twitterQueries": [
+      "Ashok Nagar Chennai",
+      "Ashok Pillar Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600083"
+    ]
+  },
+  "603103": {
+    "busStops": [
+      "SIPCOT",
+      "Siruseri"
+    ],
+    "twitterQueries": [
+      "SIPCOT Chennai",
+      "Siruseri Chennai",
+      "#ChennaiTraffic",
+      "Chennai 603103",
+      "#ChennaiIT"
     ]
   }
 }

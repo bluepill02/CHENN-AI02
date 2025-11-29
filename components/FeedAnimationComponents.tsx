@@ -231,13 +231,14 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
 }
 
 interface StoryHighlightProps {
-    image: string;
+    image?: string;
+    icon?: keyof typeof ChennaiCustomIcons;
     title: string;
     isNew?: boolean;
     onClick: () => void;
 }
 
-export function StoryHighlight({ image, title, isNew, onClick }: StoryHighlightProps) {
+export function StoryHighlight({ image, icon, title, isNew, onClick }: StoryHighlightProps) {
     return (
         <motion.button
             className="flex flex-col items-center gap-2 min-w-[80px]"
@@ -253,12 +254,18 @@ export function StoryHighlight({ image, title, isNew, onClick }: StoryHighlightP
                     ? 'bg-gradient-to-tr from-orange-500 via-red-500 to-pink-500'
                     : 'bg-gray-300'
                     }`}>
-                    <div className="w-full h-full rounded-full bg-white p-[2px]">
-                        <img
-                            src={image}
-                            alt={title}
-                            className="w-full h-full rounded-full object-cover"
-                        />
+                    <div className="w-full h-full rounded-full bg-white p-[2px] flex items-center justify-center overflow-hidden">
+                        {icon ? (
+                            <div className="w-full h-full bg-orange-50 flex items-center justify-center">
+                                <CustomIcon icon={icon} className="w-8 h-8 text-orange-600" />
+                            </div>
+                        ) : (
+                            <img
+                                src={image}
+                                alt={title}
+                                className="w-full h-full rounded-full object-cover"
+                            />
+                        )}
                     </div>
                 </div>
 

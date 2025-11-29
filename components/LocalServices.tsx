@@ -66,13 +66,13 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedCategory, activeLocation?.area]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const [fetchedBusinesses, fetchedCategories] = await Promise.all([
-        BusinessService.getBusinesses(),
+        BusinessService.getBusinesses(selectedCategory || undefined, activeLocation?.area),
         BusinessService.getCategories()
       ]);
 
@@ -117,13 +117,14 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
   };
 
   const filteredBusinesses = businesses.filter(b => {
-    const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
+    // const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
 
     // Filter by location if available
-    const matchesLocation = activeLocation?.area
-      ? b.location.toLowerCase().includes(activeLocation.area.toLowerCase()) ||
-      b.location.toLowerCase().includes('chennai') // Include general Chennai services
-      : true;
+    // Server-side filtering handles the main location filter, but we keep this for search query refinement if needed
+    // const matchesLocation = activeLocation?.area
+    //   ? b.location.toLowerCase().includes(activeLocation.area.toLowerCase()) ||
+    //   b.location.toLowerCase().includes('chennai') // Include general Chennai services
+    //   : true;
 
     const matchesSearch = searchQuery
       ? b.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -131,7 +132,7 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
       b.location.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
 
-    return matchesCategory && matchesSearch && matchesLocation;
+    return matchesSearch; // matchesCategory and matchesLocation are handled by server/initial fetch context mostly, but search is client side
   });
 
   const handleCall = (phoneNumber: string) => {
@@ -286,7 +287,7 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
         {/* Header - Marketplace Style */}
         <div className="bg-gradient-to-r from-auto-yellow to-orange-500 px-6 py-8 rounded-b-[2.5rem] shadow-xl relative overflow-hidden border-b-4 border-black">
           {/* Pattern Overlay */}
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '10px 10px' }}></div>
+          <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: 'url("/assets/marketplace_bg.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
 
           <div className="flex items-center justify-between relative z-10">
             <div className="flex-1">

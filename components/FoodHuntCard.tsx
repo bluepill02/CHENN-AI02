@@ -5,9 +5,10 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "./auth/SupabaseAuthProvider";
 import { FoodHuntService, type FoodHuntPost } from "../services/FoodHuntService";
 import { toast } from "sonner";
-import { Loader2, Trash2, Image as ImageIcon, X } from "lucide-react";
+import { Loader2, Trash2, Image as ImageIcon, X, Heart, Edit2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { CustomIcon } from "./CustomIcons";
+import { motion } from "framer-motion";
 
 interface FoodHuntCardProps {
     pincode: string;
@@ -19,6 +20,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
     const [loading, setLoading] = useState(true);
     const [formOpen, setFormOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [editingPost, setEditingPost] = useState<FoodHuntPost | null>(null);
 
     // Form fields
     const [restaurantName, setRestaurantName] = useState("");
@@ -110,20 +112,31 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                 }
             }
 
-            await FoodHuntService.createPost(
-                {
+            if (editingPost) {
+                await FoodHuntService.updatePost(editingPost.id, {
                     restaurant_name: restaurantName,
                     dish_name: dishName || undefined,
                     rating,
                     review: review || undefined,
                     price_range: priceRange,
-                    pincode,
                     image_url: imageUrl,
-                },
-                user.id
-            );
-
-            toast.success("Review posted successfully!");
+                });
+                toast.success("Review updated successfully!");
+            } else {
+                await FoodHuntService.createPost(
+                    {
+                        restaurant_name: restaurantName,
+                        dish_name: dishName || undefined,
+                        rating,
+                        review: review || undefined,
+                        price_range: priceRange,
+                        pincode,
+                        image_url: imageUrl,
+                    },
+                    user.id
+                );
+                toast.success("Review posted successfully!");
+            }
             resetForm();
             setFormOpen(false);
         } catch (error) {
@@ -145,6 +158,40 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
         setImagePreview(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
+        }
+    };
+
+    const handleEdit = (post: FoodHuntPost) => {
+        setEditingPost(post);
+        setRestaurantName(post.restaurant_name);
+        setDishName(post.dish_name || "");
+        setRating(post.rating);
+        setReview(post.review || "");
+        setPriceRange(post.price_range || "moderate");
+        setImagePreview(post.image_url || null);
+        setFormOpen(true);
+    };
+
+    const handleLike = async (post: FoodHuntPost) => {
+        if (!user) {
+            toast.error("Please sign in to like reviews");
+            return;
+        }
+
+        // Optimistic update
+        const isLiked = post.is_liked_by_user;
+        setPosts(posts.map(p =>
+            p.id === post.id
+                ? { ...p, likes: p.likes + (isLiked ? -1 : 1), is_liked_by_user: !isLiked }
+                : p
+        ));
+
+        try {
+            await FoodHuntService.likePost(post.id, user.id);
+        } catch (error) {
+            console.error("Error liking post:", error);
+            // Revert on error
+            fetchPosts();
         }
     };
 
@@ -202,7 +249,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                 <form onSubmit={handleSubmit} className="mb-4 space-y-3 p-4 bg-white/90 backdrop-blur-md rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative z-10">
                     <div className="text-sm font-bold text-gray-900 flex items-center gap-2 font-display">
                         <CustomIcon icon="FilterCoffee" className="w-4 h-4 text-orange-600" />
-                        Share your food find!
+                        {editingPost ? "Edit your review" : "Share your food find!"}
                     </div>
 
                     <div className="space-y-2">
@@ -316,7 +363,7 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                                 Posting...
                             </>
                         ) : (
-                            "Post Review"
+                            editingPost ? "Update Review" : "Post Review"
                         )}
                     </Button>
                 </form>
@@ -365,14 +412,24 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                                     </div>
 
                                     {isOwner && (
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50"
-                                            onClick={() => handleDelete(post.id)}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-7 w-7 p-0 text-gray-400 hover:text-blue-500 rounded-full hover:bg-blue-50"
+                                                onClick={() => handleEdit(post)}
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50"
+                                                onClick={() => handleDelete(post.id)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
 
@@ -406,15 +463,20 @@ export default function FoodHuntCard({ pincode }: FoodHuntCardProps) {
                                         <CustomIcon icon="LocationPin" className="w-3 h-3 text-orange-400" />
                                         {pincode}
                                     </div>
-                                    <div>
-                                        by {post.profiles?.full_name || "Anonymous"}
-                                    </div>
                                 </div>
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleLike(post)}
+                                    className={`flex items-center gap-1 text-xs font-medium ${post.is_liked_by_user ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+                                >
+                                    <Heart className={`w-3 h-3 ${post.is_liked_by_user ? "fill-current" : ""}`} />
+                                    {post.likes || 0}
+                                </motion.button>
                             </div>
                         );
                     })
                 )}
             </div>
-        </Card>
+        </Card >
     );
 }

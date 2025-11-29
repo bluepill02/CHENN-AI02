@@ -4,33 +4,28 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ChennaiIcons } from './IllustratedIcon';
-import { Brain, Coffee, Sparkles, RefreshCw, CheckCircle2, XCircle, Loader2, MapPin, Plus, Briefcase, Phone, Star } from 'lucide-react';
+import { Coffee, Sparkles, RefreshCw, Loader2, MapPin, Plus, Briefcase, Phone, Star, Calendar, Users, Clock, Trash2, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { CinemaService, type CinemaPost } from '../services/CinemaService';
 import { KaapiJobService, type KaapiJob } from '../services/KaapiJobService';
-import { QuizService } from '../services/QuizService';
+import { EventService, type Event } from '../services/EventService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { Avatar } from './ui/avatar';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useLocation } from '../services/LocationService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Label } from './ui/label';
 
 export function ChennaiGethu() {
     const { user } = useAuth();
     const { currentLocation } = useLocation();
 
-    // --- State: Madras Meter ---
-    const [slangQuestions, setSlangQuestions] = useState<any[]>([]);
-    const [currentQIndex, setCurrentQIndex] = useState(0);
-    const [selectedOption, setSelectedOption] = useState<number | null>(null);
-    const [score, setScore] = useState(0);
-    const [loadingQuiz, setLoadingQuiz] = useState(true);
-
     // --- State: Auto Anna ---
-    const [autoQuotes, setAutoQuotes] = useState<string[]>([]);
+    const [autoQuotes, setAutoQuotes] = useState<string[]>([]); // Keep for now or remove if unused
     const [quoteIndex, setQuoteIndex] = useState(0);
-    const [loadingQuotes, setLoadingQuotes] = useState(true);
+    const [loadingQuotes, setLoadingQuotes] = useState(false);
 
     // --- State: Cinema Kottai ---
     const [cinemaPosts, setCinemaPosts] = useState<CinemaPost[]>([]);
@@ -56,38 +51,39 @@ export function ChennaiGethu() {
         contact_info: ''
     });
 
+    // --- State: Namma Events ---
+    const [events, setEvents] = useState<Event[]>([]);
+    const [myEvents, setMyEvents] = useState<Event[]>([]);
+    const [hostedEvents, setHostedEvents] = useState<Event[]>([]);
+    const [loadingEvents, setLoadingEvents] = useState(false);
+    const [eventTab, setEventTab] = useState<'discover' | 'my-plans' | 'hosting'>('discover');
+    const [showCreateEvent, setShowCreateEvent] = useState(false);
+    const [newEvent, setNewEvent] = useState({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        area: '',
+        category: 'Social'
+    });
+
     // --- Effects ---
     useEffect(() => {
         fetchCinemaPosts();
         fetchJobs();
-        fetchQuizData();
+        fetchEvents();
 
         const subCinema = CinemaService.subscribeToUpdates(() => fetchCinemaPosts());
         const subJobs = KaapiJobService.subscribeToUpdates(() => fetchJobs());
+        const subEvents = EventService.subscribeToUpdates(() => fetchEvents());
 
         return () => {
             CinemaService.unsubscribe(subCinema);
             KaapiJobService.unsubscribe(subJobs);
+            EventService.unsubscribe(subEvents);
         };
-    }, [currentLocation]);
-
-    const fetchQuizData = async () => {
-        setLoadingQuiz(true);
-        setLoadingQuotes(true);
-        try {
-            const [questions, quotes] = await Promise.all([
-                QuizService.getQuestions(),
-                QuizService.getQuotes()
-            ]);
-            setSlangQuestions(questions);
-            setAutoQuotes(quotes.map(q => q.content));
-        } catch (error) {
-            console.error('Failed to fetch quiz data', error);
-        } finally {
-            setLoadingQuiz(false);
-            setLoadingQuotes(false);
-        }
-    };
+    }, [currentLocation, user, eventTab]);
 
     const fetchCinemaPosts = async () => {
         setLoadingCinema(true);
@@ -120,27 +116,24 @@ export function ChennaiGethu() {
         }
     };
 
-    // --- Handlers: Madras Meter ---
-    const handleAnswer = (index: number) => {
-        if (selectedOption !== null) return;
-        setSelectedOption(index);
-        const correct = index === slangQuestions[currentQIndex].correct_option;
-        if (correct) {
-            setScore(s => s + 10);
-            toast.success("Semma! Correct Answer! 🎉");
-        } else {
-            toast.error("Aiyayo! Wrong Answer! 😅");
+    const fetchEvents = async () => {
+        setLoadingEvents(true);
+        try {
+            if (eventTab === 'discover') {
+                const data = await EventService.getEvents(currentLocation?.area);
+                setEvents(data);
+            } else if (eventTab === 'my-plans' && user) {
+                const data = await EventService.getMyEvents(user.id);
+                setMyEvents(data);
+            } else if (eventTab === 'hosting' && user) {
+                const data = await EventService.getOrganizedEvents(user.id);
+                setHostedEvents(data);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingEvents(false);
         }
-    };
-
-    const nextQuestion = () => {
-        setSelectedOption(null);
-        setCurrentQIndex((prev) => (prev + 1) % slangQuestions.length);
-    };
-
-    // --- Handlers: Auto Anna ---
-    const nextQuote = () => {
-        setQuoteIndex((prev) => (prev + 1) % autoQuotes.length);
     };
 
     // --- Handlers: Cinema Kottai ---
@@ -201,6 +194,79 @@ export function ChennaiGethu() {
         }
     };
 
+    // --- Handlers: Namma Events ---
+    const handleCreateEvent = async () => {
+        if (!user) {
+            toast.error("Please sign in to create an event!");
+            return;
+        }
+        if (!newEvent.title || !newEvent.date || !newEvent.location) {
+            toast.error("Please fill in Title, Date, and Location!");
+            return;
+        }
+
+        try {
+            const dateTime = new Date(`${newEvent.date}T${newEvent.time || '00:00'}`).toISOString();
+            await EventService.createEvent({
+                organizer_id: user.id,
+                title: newEvent.title,
+                description: newEvent.description,
+                date: dateTime,
+                location: newEvent.location,
+                area: newEvent.area || currentLocation?.area || 'Chennai',
+                category: newEvent.category
+            });
+            toast.success("Event created successfully! 🎉");
+            setShowCreateEvent(false);
+            setNewEvent({ title: '', description: '', date: '', time: '', location: '', area: '', category: 'Social' });
+            fetchEvents();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to create event");
+        }
+    };
+
+    const handleJoinEvent = async (eventId: string) => {
+        if (!user) {
+            toast.error("Please sign in to join events!");
+            return;
+        }
+        try {
+            await EventService.joinEvent(eventId, user.id);
+            toast.success("You're going! 🎉");
+            fetchEvents();
+        } catch (error) {
+            toast.error("Failed to join event");
+        }
+    };
+
+    const handleLeaveEvent = async (eventId: string) => {
+        if (!user) return;
+        try {
+            await EventService.leaveEvent(eventId, user.id);
+            toast.info("You've left the event.");
+            fetchEvents();
+        } catch (error) {
+            toast.error("Failed to leave event");
+        }
+    };
+
+    const handleCancelEvent = async (eventId: string) => {
+        if (!confirm("Are you sure you want to cancel this event?")) return;
+        try {
+            await EventService.cancelEvent(eventId);
+            toast.success("Event cancelled.");
+            fetchEvents();
+        } catch (error) {
+            toast.error("Failed to cancel event");
+        }
+    };
+
+    // --- Handlers: Auto Anna ---
+    const nextQuote = () => {
+        setQuoteIndex((prev) => (prev + 1) % autoQuotes.length);
+    };
+
     return (
         <div className="space-y-6 h-full flex flex-col">
 
@@ -214,13 +280,13 @@ export function ChennaiGethu() {
                 </Badge>
             </div>
 
-            <Tabs defaultValue="cinema" className="w-full flex-1 flex flex-col min-h-0">
+            <Tabs defaultValue="events" className="w-full flex-1 flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-4 bg-orange-100/50 p-1 rounded-xl shrink-0">
+                    <TabsTrigger value="events" className="data-[state=active]:bg-white data-[state=active]:text-orange-700 rounded-lg text-xs sm:text-sm">
+                        🎉 Events
+                    </TabsTrigger>
                     <TabsTrigger value="cinema" className="data-[state=active]:bg-white data-[state=active]:text-orange-700 rounded-lg text-xs sm:text-sm">
                         🎬 Cinema
-                    </TabsTrigger>
-                    <TabsTrigger value="meter" className="data-[state=active]:bg-white data-[state=active]:text-orange-700 rounded-lg text-xs sm:text-sm">
-                        🧠 Quiz
                     </TabsTrigger>
                     <TabsTrigger value="auto" className="data-[state=active]:bg-white data-[state=active]:text-orange-700 rounded-lg text-xs sm:text-sm">
                         🛺 Auto
@@ -231,6 +297,204 @@ export function ChennaiGethu() {
                 </TabsList>
 
                 <div className="flex-1 overflow-y-auto min-h-0 mt-4 pr-1 scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
+
+                    {/* --- Namma Events --- */}
+                    <TabsContent value="events" className="space-y-4 m-0">
+                        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                            <Button
+                                variant={eventTab === 'discover' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setEventTab('discover')}
+                                className={eventTab === 'discover' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                            >
+                                Discover
+                            </Button>
+                            <Button
+                                variant={eventTab === 'my-plans' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setEventTab('my-plans')}
+                                className={eventTab === 'my-plans' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                            >
+                                My Plans
+                            </Button>
+                            <Button
+                                variant={eventTab === 'hosting' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setEventTab('hosting')}
+                                className={eventTab === 'hosting' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                            >
+                                Hosting
+                            </Button>
+                            <div className="ml-auto">
+                                <Dialog open={showCreateEvent} onOpenChange={setShowCreateEvent}>
+                                    <DialogTrigger asChild>
+                                        <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+                                            <Plus className="w-4 h-4 mr-1" /> Create
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+                                        <DialogHeader>
+                                            <DialogTitle>Host an Event</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="space-y-4 py-4">
+                                            <div className="space-y-2">
+                                                <Label>Event Title</Label>
+                                                <Input
+                                                    placeholder="e.g. Weekend Cricket Match"
+                                                    value={newEvent.title}
+                                                    onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label>Date</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={newEvent.date}
+                                                        onChange={e => setNewEvent({ ...newEvent, date: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>Time</Label>
+                                                    <Input
+                                                        type="time"
+                                                        value={newEvent.time}
+                                                        onChange={e => setNewEvent({ ...newEvent, time: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Location</Label>
+                                                <Input
+                                                    placeholder="e.g. Marina Beach"
+                                                    value={newEvent.location}
+                                                    onChange={e => setNewEvent({ ...newEvent, location: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Category</Label>
+                                                <Select
+                                                    value={newEvent.category}
+                                                    onValueChange={v => setNewEvent({ ...newEvent, category: v })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select Category" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Sports">Sports 🏏</SelectItem>
+                                                        <SelectItem value="Cultural">Cultural 🎭</SelectItem>
+                                                        <SelectItem value="Social">Social 🤝</SelectItem>
+                                                        <SelectItem value="Food">Food 🍱</SelectItem>
+                                                        <SelectItem value="Other">Other ✨</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Description</Label>
+                                                <Textarea
+                                                    placeholder="Tell us more about the event..."
+                                                    value={newEvent.description}
+                                                    onChange={e => setNewEvent({ ...newEvent, description: e.target.value })}
+                                                />
+                                            </div>
+                                            <Button className="w-full bg-orange-600" onClick={handleCreateEvent}>
+                                                Create Event
+                                            </Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                        </div>
+
+                        {loadingEvents ? (
+                            <div className="flex justify-center p-8"><Loader2 className="animate-spin text-orange-500 w-8 h-8" /></div>
+                        ) : (eventTab === 'discover' ? events : eventTab === 'my-plans' ? myEvents : hostedEvents).length === 0 ? (
+                            <div className="text-center text-gray-500 py-12 bg-orange-50/50 rounded-xl border border-dashed border-orange-200">
+                                <Calendar className="w-12 h-12 mx-auto text-orange-300 mb-3" />
+                                <p>No events found. Why not create one?</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {(eventTab === 'discover' ? events : eventTab === 'my-plans' ? myEvents : hostedEvents).map((event) => (
+                                    <Card key={event.id} className="p-4 bg-white border-2 border-orange-100 hover:border-orange-500 shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Badge variant="secondary" className="bg-orange-100 text-orange-800 text-[10px] uppercase tracking-wider">
+                                                        {event.category}
+                                                    </Badge>
+                                                    {event.status === 'cancelled' && (
+                                                        <Badge variant="destructive" className="text-[10px]">Cancelled</Badge>
+                                                    )}
+                                                </div>
+                                                <h3 className="font-bold text-lg text-gray-900">{event.title}</h3>
+                                                <div className="flex items-center gap-3 text-sm text-gray-500 mt-2">
+                                                    <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {new Date(event.date).toLocaleDateString()}</span>
+                                                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                                    <MapPin className="w-4 h-4" /> {event.location}
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <div className="flex items-center gap-1 bg-orange-50 px-2 py-1 rounded-full text-xs font-medium text-orange-700">
+                                                    <Users className="w-3 h-3" /> {event.participants_count} Going
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-sm text-gray-700 mt-3 line-clamp-2">{event.description}</p>
+
+                                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="w-6 h-6 border border-orange-100">
+                                                    <div className="w-full h-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-700">
+                                                        {event.profiles?.full_name?.[0]?.toUpperCase() || 'U'}
+                                                    </div>
+                                                </Avatar>
+                                                <span className="text-xs text-gray-500">Hosted by {event.profiles?.full_name || 'User'}</span>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                {eventTab === 'hosting' ? (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="h-8 text-xs"
+                                                        onClick={() => handleCancelEvent(event.id)}
+                                                        disabled={event.status === 'cancelled'}
+                                                    >
+                                                        <Trash2 className="w-3 h-3 mr-1" /> Cancel
+                                                    </Button>
+                                                ) : (
+                                                    event.is_participating ? (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                            onClick={() => handleLeaveEvent(event.id)}
+                                                        >
+                                                            <LogOut className="w-3 h-3 mr-1" /> Leave
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            size="sm"
+                                                            className="h-8 text-xs bg-orange-600 hover:bg-orange-700 text-white"
+                                                            onClick={() => handleJoinEvent(event.id)}
+                                                            disabled={event.status === 'cancelled'}
+                                                        >
+                                                            <Plus className="w-3 h-3 mr-1" /> Join
+                                                        </Button>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </TabsContent>
+
                     {/* --- Cinema Kottai --- */}
                     <TabsContent value="cinema" className="space-y-4 m-0">
                         <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(147,51,234,1)] relative overflow-hidden">
@@ -324,76 +588,12 @@ export function ChennaiGethu() {
                         </Card>
                     </TabsContent>
 
-                    {/* --- Madras Meter --- */}
-                    <TabsContent value="meter" className="space-y-4 m-0">
-                        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-black shadow-[4px_4px_0px_0px_rgba(234,88,12,1)] text-center relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
-                            <div className="relative z-10 mb-6">
-                                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <Brain className="w-8 h-8 text-orange-600" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Madras Meter Quiz</h3>
-                                <div className="flex justify-center gap-2 mt-2">
-                                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                                        Score: {score}
-                                    </Badge>
-                                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                        Q: {slangQuestions.length > 0 ? currentQIndex + 1 : 0}/{slangQuestions.length}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            <div className="mb-6">
-                                {loadingQuiz ? (
-                                    <div className="flex justify-center p-8"><Loader2 className="animate-spin text-orange-500 w-8 h-8" /></div>
-                                ) : slangQuestions.length === 0 ? (
-                                    <div className="text-gray-500">No questions available.</div>
-                                ) : (
-                                    <>
-                                        <p className="text-sm text-gray-500 mb-2">What is the meaning of:</p>
-                                        <h2 className="text-3xl font-black text-orange-600 mb-6">"{slangQuestions[currentQIndex].question}"</h2>
-
-                                        <div className="grid gap-3">
-                                            {slangQuestions[currentQIndex].options.map((option: string, idx: number) => (
-                                                <Button
-                                                    key={idx}
-                                                    variant={selectedOption === idx ? (idx === slangQuestions[currentQIndex].correct_option ? "default" : "destructive") : "outline"}
-                                                    className={`w-full justify-start h-auto py-3 px-4 ${selectedOption === idx && idx === slangQuestions[currentQIndex].correct_option ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                                                    onClick={() => handleAnswer(idx)}
-                                                    disabled={selectedOption !== null}
-                                                >
-                                                    <span className="mr-3 flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-xs">
-                                                        {String.fromCharCode(65 + idx)}
-                                                    </span>
-                                                    {option}
-                                                    {selectedOption === idx && (
-                                                        <span className="ml-auto">
-                                                            {idx === slangQuestions[currentQIndex].correct_option ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                                                        </span>
-                                                    )}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {selectedOption !== null && (
-                                <div className="animate-in fade-in zoom-in duration-300">
-                                    <Button onClick={nextQuestion} className="w-full bg-orange-600 hover:bg-orange-700">
-                                        Next Question <RefreshCw className="w-4 h-4 ml-2" />
-                                    </Button>
-                                </div>
-                            )}
-                        </Card>
-                    </TabsContent>
-
                     {/* --- Auto Anna --- */}
                     <TabsContent value="auto" className="space-y-4 m-0">
                         <Card className="p-6 bg-[#FFFBE6] border-2 border-black shadow-[4px_4px_0px_0px_rgba(250,204,21,1)] relative overflow-hidden">
                             <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/assets/noise.png")', backgroundRepeat: 'repeat' }}></div>
                             {/* Decorative Background */}
-                            <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+                            <div className="absolute top-0 right-0 pointer-events-none">
                                 <img src={ChennaiIcons.mascot_auto} alt="Auto" className="w-32 h-32 object-contain" />
                             </div>
 

@@ -9,8 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { LanguageToggle } from './LanguageToggle';
 import { useLanguage } from '../services/LanguageService';
-import { Loader2, Send } from 'lucide-react';
-import { CustomIcon } from './CustomIcons';
+import { Loader2, Send, ArrowLeft } from 'lucide-react';
+import { CustomIcon, ChennaiCustomIcons } from './CustomIcons';
 import { useLocation } from '../services/LocationService';
 import { useExternalData } from '../services/ExternalDataService';
 import { PostService, Post } from '../services/PostService';
@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { PostSkeleton } from './SkeletonLoaders';
 import AutoShareCard from './AutoShareCard';
 import FoodHuntCard from './FoodHuntCard';
+import TransportCard from './TransportCard';
 import {
   AnimatedPostCard,
   AnimatedLikeButton,
@@ -60,17 +61,25 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const activeLocation = currentLocation || userLocation;
   const activePincode = activeLocation?.pincode || '600004';
 
-  const [activeView, setActiveView] = useState<'feed' | 'auto-share' | 'food-hunt'>('feed');
+  const [activeView, setActiveView] = useState<'feed' | 'auto-share' | 'food-hunt' | 'commute'>('feed');
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(false);
 
   // Story highlights data
-  const storyHighlights = [
-    { id: 1, image: '/assets/icon_auto.png', title: 'Auto Share', isNew: true },
-    { id: 2, image: '/assets/icon_food.png', title: 'Food Hunt', isNew: true },
-    { id: 3, image: '/assets/hero_welcome.png', title: 'Chennai Gethu', isNew: false },
-    { id: 4, image: '/assets/icon_info.png', title: 'Info', isNew: false },
-  ];
+  // Story highlights data
+  const storyHighlights: {
+    id: number;
+    image?: string;
+    icon?: keyof typeof ChennaiCustomIcons;
+    title: string;
+    isNew: boolean;
+  }[] = [
+      { id: 1, image: '/assets/icon_auto.png', title: 'Auto Share', isNew: true },
+      { id: 2, image: '/assets/icon_food.png', title: 'Food Hunt', isNew: true },
+      { id: 3, image: '/assets/icon_bus.png', title: 'Commute', isNew: true },
+      { id: 4, image: '/assets/hero_welcome.png', title: 'Chennai Gethu', isNew: false },
+      { id: 5, image: '/assets/icon_info.png', title: 'Info', isNew: false },
+    ];
 
   // Fetch posts and weather
   useEffect(() => {
@@ -91,6 +100,8 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
       setActiveView('auto-share');
     } else if (title === 'Food Hunt') {
       setActiveView('food-hunt');
+    } else if (title === 'Commute') {
+      setActiveView('commute');
     } else if (title === 'Chennai Gethu') {
       // Navigate to Chennai Gethu page
       window.location.href = '/chennai-gethu'; // Using window.location for now as navigate hook usage might need verification or use existing router
@@ -264,6 +275,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                 </span>
               </div>
               <h1 className="text-3xl font-display font-bold text-white drop-shadow-md flex items-center gap-2">
+                <img src="/assets/app_logo.png" alt="Logo" className="w-8 h-8 rounded-full border-2 border-white/20" />
                 Namma Ooru <span className="animate-pulse">🧡</span>
               </h1>
             </div>
@@ -444,6 +456,20 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               Back to Feed
             </Button>
             <FoodHuntCard pincode={activePincode} />
+          </div>
+        )}
+
+        {activeView === 'commute' && (
+          <div className="px-4 mt-4 min-h-[50vh]">
+            <Button
+              variant="ghost"
+              onClick={() => setActiveView('feed')}
+              className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Feed
+            </Button>
+            <TransportCard pincode={activePincode} />
           </div>
         )}
 

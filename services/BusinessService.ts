@@ -36,8 +36,8 @@ export interface ServiceReview {
 }
 
 export const BusinessService = {
-    async getBusinesses() {
-        const { data, error } = await supabase
+    async getBusinesses(category?: string, location?: string) {
+        let query = supabase
             .from('business_profiles')
             .select(`
         *,
@@ -49,6 +49,17 @@ export const BusinessService = {
             .order('is_verified', { ascending: false })
             .order('rating', { ascending: false })
             .order('created_at', { ascending: false });
+
+        if (category) {
+            query = query.eq('category', category);
+        }
+
+        if (location) {
+            // Simple partial match for location
+            query = query.ilike('location', `%${location}%`);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data as BusinessProfile[];

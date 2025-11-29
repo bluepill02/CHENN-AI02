@@ -6,7 +6,7 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "./auth/SupabaseAuthProvider";
 import { AutoShareService, type AutoSharePost } from "../services/AutoShareService";
 import { toast } from "sonner";
-import { Clock, Users, Loader2, Edit2, Trash2, Phone, MessageCircle } from "lucide-react";
+import { Clock, Users, Loader2, Edit2, Trash2, Phone, MessageCircle, Car, Bike } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { CustomIcon } from "./CustomIcons";
@@ -27,6 +27,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(2);
+  const [vehicleType, setVehicleType] = useState<"auto" | "car" | "bike">("auto");
   const [notes, setNotes] = useState("");
   const [contactVia, setContactVia] = useState<"chat" | "phone" | "both">("chat");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -83,10 +84,10 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
       setSubmitting(true);
 
       // Prepend phone number to notes if applicable
-      let finalNotes = notes;
-      if (phoneNumber.trim()) {
-        finalNotes = `[PHONE:${phoneNumber.trim()}] ${notes}`;
-      }
+      // let finalNotes = notes;
+      // if (phoneNumber.trim()) {
+      //   finalNotes = `[PHONE:${phoneNumber.trim()}] ${notes}`;
+      // }
 
       if (editingPost) {
         // Update existing post
@@ -94,8 +95,10 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
           from_location: fromLocation,
           to_location: toLocation,
           seats_available: seatsAvailable,
-          notes: finalNotes || undefined,
+          vehicle_type: vehicleType,
+          notes: notes || undefined,
           contact_via: contactVia,
+          phone_number: phoneNumber.trim() || undefined,
         });
         toast.success("Ride updated successfully!");
       } else {
@@ -105,9 +108,11 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
             from_location: fromLocation,
             to_location: toLocation,
             seats_available: seatsAvailable,
-            notes: finalNotes || undefined,
+            vehicle_type: vehicleType,
+            notes: notes || undefined,
             pincode,
             contact_via: contactVia,
+            phone_number: phoneNumber.trim() || undefined,
           },
           user.id
         );
@@ -130,6 +135,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
     setFromLocation("");
     setToLocation("");
     setSeatsAvailable(2);
+    setVehicleType("auto");
     setNotes("");
     setContactVia("chat");
     setPhoneNumber("");
@@ -142,18 +148,19 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
     setFromLocation(post.from_location);
     setToLocation(post.to_location);
     setSeatsAvailable(post.seats_available);
+    setVehicleType(post.vehicle_type);
 
     // Extract phone number from notes if present
-    let currentNotes = post.notes || "";
-    let currentPhone = "";
-    const phoneMatch = currentNotes.match(/\[PHONE:(.*?)\]/);
-    if (phoneMatch) {
-      currentPhone = phoneMatch[1];
-      currentNotes = currentNotes.replace(phoneMatch[0], "").trim();
-    }
+    // let currentNotes = post.notes || "";
+    // let currentPhone = "";
+    // const phoneMatch = currentNotes.match(/\[PHONE:(.*?)\]/);
+    // if (phoneMatch) {
+    //   currentPhone = phoneMatch[1];
+    //   currentNotes = currentNotes.replace(phoneMatch[0], "").trim();
+    // }
 
-    setNotes(currentNotes);
-    setPhoneNumber(currentPhone);
+    setNotes(post.notes || "");
+    setPhoneNumber(post.phone_number || "");
     setContactVia(post.contact_via);
     setFormOpen(true);
   };
@@ -209,12 +216,20 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   };
 
   // Helper to extract phone and clean notes for display
-  const parsePostContent = (notes?: string) => {
-    if (!notes) return { phone: null, cleanNotes: null };
-    const phoneMatch = notes.match(/\[PHONE:(.*?)\]/);
-    const phone = phoneMatch ? phoneMatch[1] : null;
-    const cleanNotes = notes.replace(/\[PHONE:.*?\]/, "").trim();
-    return { phone, cleanNotes };
+  // const parsePostContent = (notes?: string) => {
+  //   if (!notes) return { phone: null, cleanNotes: null };
+  //   const phoneMatch = notes.match(/\[PHONE:(.*?)\]/);
+  //   const phone = phoneMatch ? phoneMatch[1] : null;
+  //   const cleanNotes = notes.replace(/\[PHONE:.*?\]/, "").trim();
+  //   return { phone, cleanNotes };
+  // };
+
+  const getVehicleIcon = (type: string) => {
+    switch (type) {
+      case 'car': return <Car className="w-7 h-7 text-green-700 drop-shadow-sm" />;
+      case 'bike': return <Bike className="w-7 h-7 text-green-700 drop-shadow-sm" />;
+      default: return <CustomIcon icon="AutoRickshaw" className="w-7 h-7 text-green-700 drop-shadow-sm" />;
+    }
   };
 
   return (
@@ -224,7 +239,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
 
       <div className="flex items-center justify-between mb-4 relative z-10">
         <h4 className="font-display font-bold text-xl flex items-center gap-2 text-[#4B1E1E]">
-          <CustomIcon icon="AutoRickshaw" className="w-7 h-7 text-green-700 drop-shadow-sm" />
+          {getVehicleIcon(vehicleType)}
           Auto Share
           <Badge variant="outline" className="text-xs border-2 border-black bg-white font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
             {pincode}
@@ -299,6 +314,28 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
               className="border-2 border-green-200 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-green-500 focus:border-black bg-white transition-all"
               required
             />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-600 block mb-1 font-medium">Vehicle Type</label>
+            <RadioGroup
+              value={vehicleType}
+              onValueChange={(val: "auto" | "car" | "bike") => setVehicleType(val)}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="auto" id="auto" className="text-green-600 border-green-600" />
+                <Label htmlFor="auto" className="text-xs">Auto</Label>
+              </div>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="car" id="car" className="text-green-600 border-green-600" />
+                <Label htmlFor="car" className="text-xs">Car</Label>
+              </div>
+              <div className="flex items-center space-x-1">
+                <RadioGroupItem value="bike" id="bike" className="text-green-600 border-green-600" />
+                <Label htmlFor="bike" className="text-xs">Bike</Label>
+              </div>
+            </RadioGroup>
           </div>
 
           <div>
@@ -379,7 +416,9 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
           posts.map((post) => {
             const isOwner = user?.id === post.user_id;
             const timeRemaining = getTimeRemaining(post.expires_at);
-            const { phone, cleanNotes } = parsePostContent(post.notes);
+            // const { phone, cleanNotes } = parsePostContent(post.notes);
+            const phone = post.phone_number;
+            const cleanNotes = post.notes;
 
             return (
               <div
