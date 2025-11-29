@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -8,7 +8,7 @@ import { Coffee, Sparkles, RefreshCw, Loader2, MapPin, Plus, Briefcase, Phone, S
 import { toast } from 'sonner';
 import { CinemaService, type CinemaPost } from '../services/CinemaService';
 import { KaapiJobService, type KaapiJob } from '../services/KaapiJobService';
-import { EventService, type Event } from '../services/EventService';
+import { EventService, type Event as AppEvent } from '../services/EventService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { Avatar } from './ui/avatar';
 import { Input } from './ui/input';
@@ -17,15 +17,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useLocation } from '../services/LocationService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
+import SEO from './SEO';
 
 export function ChennaiGethu() {
     const { user } = useAuth();
     const { currentLocation } = useLocation();
 
+    // SEO Data
+
+
     // --- State: Auto Anna ---
-    const [autoQuotes, setAutoQuotes] = useState<string[]>([]); // Keep for now or remove if unused
+    const [autoQuotes] = useState<string[]>([
+        "Meter podu, aana manasu sutham!",
+        "Life is like a traffic jam, adjust pannitu poga vendiyadhu dhaan.",
+        "Chennai la auto otturathu easy illa thambi!",
+        "Vaa thala, enga poganum?"
+    ]);
     const [quoteIndex, setQuoteIndex] = useState(0);
-    const [loadingQuotes, setLoadingQuotes] = useState(false);
 
     // --- State: Cinema Kottai ---
     const [cinemaPosts, setCinemaPosts] = useState<CinemaPost[]>([]);
@@ -52,12 +60,49 @@ export function ChennaiGethu() {
     });
 
     // --- State: Namma Events ---
-    const [events, setEvents] = useState<Event[]>([]);
-    const [myEvents, setMyEvents] = useState<Event[]>([]);
-    const [hostedEvents, setHostedEvents] = useState<Event[]>([]);
+    const [events, setEvents] = useState<AppEvent[]>([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [eventTab, setEventTab] = useState<'discover' | 'my-plans' | 'hosting'>('discover');
     const [showCreateEvent, setShowCreateEvent] = useState(false);
+
+    // SEO Data (Dependent on events state)
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": events.map((event, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Event",
+                "name": event.title,
+                "startDate": event.date,
+                "location": {
+                    "@type": "Place",
+                    "name": event.location,
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": "Chennai",
+                        "addressRegion": "TN",
+                        "addressCountry": "IN"
+                    }
+                },
+                "description": event.description,
+                "organizer": {
+                    "@type": "Person",
+                    "name": event.profiles?.full_name || "Unknown"
+                }
+            }
+        }))
+    };
+
+    const seoData = {
+        title: "Chennai Gethu - Events, Cinema & Jobs",
+        description: "Discover upcoming events, latest movie reviews, and local job opportunities in Chennai. Celebrate the spirit of Chennai Gethu!",
+        canonical: "https://chennai-community.app/chennai-gethu",
+        ogType: "website" as const,
+        jsonLd
+    };
+
     const [newEvent, setNewEvent] = useState({
         title: '',
         description: '',
@@ -119,16 +164,15 @@ export function ChennaiGethu() {
     const fetchEvents = async () => {
         setLoadingEvents(true);
         try {
+            let data: AppEvent[] = [];
             if (eventTab === 'discover') {
-                const data = await EventService.getEvents(currentLocation?.area);
-                setEvents(data);
+                data = await EventService.getEvents(currentLocation?.area);
             } else if (eventTab === 'my-plans' && user) {
-                const data = await EventService.getMyEvents(user.id);
-                setMyEvents(data);
+                data = await EventService.getMyEvents(user.id);
             } else if (eventTab === 'hosting' && user) {
-                const data = await EventService.getOrganizedEvents(user.id);
-                setHostedEvents(data);
+                data = await EventService.getOrganizedEvents(user.id);
             }
+            setEvents(data);
         } catch (error) {
             console.error(error);
         } finally {
@@ -269,6 +313,7 @@ export function ChennaiGethu() {
 
     return (
         <div className="space-y-6 h-full flex flex-col">
+            <SEO {...seoData} />
 
             <div className="flex items-center justify-between mb-2 shrink-0">
                 <h3 className="text-xl font-bold text-[#4B1E1E] flex items-center gap-2">
@@ -407,15 +452,16 @@ export function ChennaiGethu() {
                         </div>
 
                         {loadingEvents ? (
-                            <div className="flex justify-center p-8"><Loader2 className="animate-spin text-orange-500 w-8 h-8" /></div>
-                        ) : (eventTab === 'discover' ? events : eventTab === 'my-plans' ? myEvents : hostedEvents).length === 0 ? (
-                            <div className="text-center text-gray-500 py-12 bg-orange-50/50 rounded-xl border border-dashed border-orange-200">
-                                <Calendar className="w-12 h-12 mx-auto text-orange-300 mb-3" />
-                                <p>No events found. Why not create one?</p>
+                            <div className="flex justify-center py-10">
+                                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                            </div>
+                        ) : events.length === 0 ? (
+                            <div className="text-center py-10 bg-white/50 rounded-xl border border-dashed border-orange-200">
+                                <p className="text-gray-500">No upcoming events. Host one!</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                {(eventTab === 'discover' ? events : eventTab === 'my-plans' ? myEvents : hostedEvents).map((event) => (
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {events.map((event) => (
                                     <Card key={event.id} className="p-4 bg-white border-2 border-orange-100 hover:border-orange-500 shadow-sm hover:shadow-md transition-all">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -604,9 +650,7 @@ export function ChennaiGethu() {
                                 <h3 className="text-xl font-black text-black mb-1">AUTO ANNA SAYS...</h3>
                                 <div className="h-1 w-20 bg-black mx-auto mb-6"></div>
 
-                                {loadingQuotes ? (
-                                    <div className="flex justify-center p-8"><Loader2 className="animate-spin text-yellow-600 w-8 h-8" /></div>
-                                ) : autoQuotes.length === 0 ? (
+                                {autoQuotes.length === 0 ? (
                                     <div className="text-gray-500 mb-6">Auto Anna is sleeping. Come back later!</div>
                                 ) : (
                                     <blockquote className="text-lg font-medium text-gray-800 italic mb-6 min-h-[80px] flex items-center justify-center">
@@ -651,17 +695,17 @@ export function ChennaiGethu() {
 
                         {/* Hiring Action Card */}
                         <Card
-                            className="p-4 bg-white border-2 border-black shadow-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group"
+                            className="p-4 bg-white border-2 border-dashed border-orange-300 hover:border-orange-500 cursor-pointer group transition-all"
                             onClick={() => setShowPostJob(!showPostJob)}
                         >
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-2 bg-white border-2 border-orange-900 rounded-lg">
-                                        <Briefcase className="w-5 h-5 text-orange-900" />
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                                        <Briefcase className="w-5 h-5 text-orange-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-gray-900 text-lg">Hiring? Need Help?</h3>
-                                        <p className="text-gray-500 text-sm">Post a job for the community</p>
+                                        <h4 className="font-bold text-gray-900">Hiring? Post a Job</h4>
+                                        <p className="text-xs text-gray-500">Find local talent quickly</p>
                                     </div>
                                 </div>
                                 <div className="text-orange-500 group-hover:scale-110 transition-transform">
@@ -682,6 +726,21 @@ export function ChennaiGethu() {
                                         placeholder="Contact Info (Phone/Email)"
                                         value={newJob.contact_info}
                                         onChange={(e) => setNewJob({ ...newJob, contact_info: e.target.value })}
+                                    />
+                                    <Textarea
+                                        placeholder="Job Description"
+                                        value={newJob.description}
+                                        onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Salary Range"
+                                        value={newJob.salary_range}
+                                        onChange={(e) => setNewJob({ ...newJob, salary_range: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Location"
+                                        value={newJob.location}
+                                        onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
                                     />
 
                                     <Button className="w-full bg-amber-700 hover:bg-amber-800" onClick={handlePostJob}>
@@ -730,6 +789,7 @@ export function ChennaiGethu() {
                             )}
                         </div>
                     </TabsContent>
+
                 </div>
             </Tabs>
         </div>

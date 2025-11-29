@@ -17,6 +17,7 @@ import { PostService, Post } from '../services/PostService';
 import { AiService } from '../services/AiService';
 import { useAuth } from './auth/SupabaseAuthProvider';
 import { FeedScreenBackground, StaggerContainer, StaggerItem } from './BackgroundAnimations';
+import SEO from './SEO';
 
 import { toast } from 'sonner';
 import { PostSkeleton } from './SkeletonLoaders';
@@ -45,6 +46,14 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const { } = useExternalData();
   const { } = useLanguage();
   const { user } = useAuth();
+
+  // SEO Data
+  const seoData = {
+    title: "Chennai Community Feed - Namma Ooru Updates",
+    description: "Stay updated with the latest happenings in Chennai. Connect with locals, share news, and explore the city's vibrant community.",
+    canonical: "https://chennai-community.app/home",
+    ogType: "website" as const,
+  };
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,6 +105,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
         setLiveUpdate(update);
         setLoadingInfo(false);
       }
+      return;
     } else if (title === 'Auto Share') {
       setActiveView('auto-share');
     } else if (title === 'Food Hunt') {
@@ -103,8 +113,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     } else if (title === 'Commute') {
       setActiveView('commute');
     } else if (title === 'Chennai Gethu') {
-      // Navigate to Chennai Gethu page
-      window.location.href = '/chennai-gethu'; // Using window.location for now as navigate hook usage might need verification or use existing router
+      window.location.href = '/chennai-gethu';
     } else {
       toast.info(`${title} coming soon!`);
     }
@@ -257,6 +266,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
 
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative overflow-hidden">
+      <SEO {...seoData} />
       {/* ... (existing background and header) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <FeedScreenBackground />

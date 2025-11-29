@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chennai-community.app/sitemap.xml

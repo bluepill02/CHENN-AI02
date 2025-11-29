@@ -14,6 +14,7 @@ import { ProfileScreen } from './components/ProfileScreen';
 import { LiveUpdatesScreen } from './components/LiveUpdatesScreen';
 import { ChennaiGethuScreen } from './components/ChennaiGethuScreen';
 import { useLocation as useLocationService } from './services/LocationService';
+import { HelmetProvider } from 'react-helmet-async';
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -88,19 +89,21 @@ function ChennaiGethuScreenWrapper() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <SupabaseAuthProvider>
-        <LanguageProvider>
-          <LocationProvider>
-            <BrowserRouter>
-              <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 relative overflow-hidden">
-                <div className="relative z-10">
-                  <ProtectedRoutes />
+      <HelmetProvider>
+        <SupabaseAuthProvider>
+          <LanguageProvider>
+            <LocationProvider>
+              <BrowserRouter>
+                <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 relative overflow-hidden">
+                  <div className="relative z-10">
+                    <ProtectedRoutes />
+                  </div>
                 </div>
-              </div>
-            </BrowserRouter>
-          </LocationProvider>
-        </LanguageProvider>
-      </SupabaseAuthProvider>
+              </BrowserRouter>
+            </LocationProvider>
+          </LanguageProvider>
+        </SupabaseAuthProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }

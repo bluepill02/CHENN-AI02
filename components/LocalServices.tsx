@@ -17,6 +17,7 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 import { ServicesScreenBackground } from './BackgroundAnimations';
+import SEO from './SEO';
 
 interface LocalServicesProps {
   userLocation?: any;
@@ -33,6 +34,7 @@ interface DynamicCategory {
 export function LocalServices({ userLocation }: LocalServicesProps) {
   const { user } = useAuth();
   const { currentLocation, setLocationModalOpen } = useLocation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [businesses, setBusinesses] = useState<BusinessProfile[]>([]);
@@ -63,6 +65,39 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
 
   // Use location from context if available, otherwise use prop
   const activeLocation = currentLocation || userLocation;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": businesses.map((biz, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "LocalBusiness",
+        "name": biz.business_name,
+        "description": biz.description,
+        "telephone": biz.contact_number,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": biz.location,
+          "addressLocality": "Chennai",
+          "addressRegion": "TN",
+          "addressCountry": "IN"
+        },
+        "priceRange": biz.price_range || "$$",
+        "image": biz.image_url
+      }
+    }))
+  };
+
+  // SEO Data
+  const seoData = {
+    title: "Local Services - Find Trusted Pros in Chennai",
+    description: "Connect with trusted local service providers in Chennai. From plumbers to electricians, find the best professionals near you.",
+    canonical: "https://chennai-community.app/services",
+    ogType: "website" as const,
+    jsonLd
+  };
 
   useEffect(() => {
     fetchData();
@@ -276,11 +311,9 @@ export function LocalServices({ userLocation }: LocalServicesProps) {
   };
 
   return (
-    <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
-      {/* Premium animated background */}
-      <div className="fixed inset-0 overflow-hidden">
-        <ServicesScreenBackground />
-      </div>
+    <div className="min-h-screen bg-gray-50 pb-20 relative overflow-hidden">
+      <SEO {...seoData} />
+      <ServicesScreenBackground />
 
       {/* Content */}
       <div className="relative z-10">
