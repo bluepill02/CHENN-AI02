@@ -341,6 +341,45 @@ export class ChatService {
     }
 
     /**
+     * Get all public groups
+     */
+    static async getPublicGroups(): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('chat_groups')
+            .select('*')
+            .eq('is_public', true)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Join a group
+     */
+    static async joinGroup(chatId: string, userId: string): Promise<void> {
+        // Check if already a member
+        const { data: existing } = await supabase
+            .from('chat_participants')
+            .select('*')
+            .eq('chat_id', chatId)
+            .eq('user_id', userId)
+            .single();
+
+        if (existing) return;
+
+        const { error } = await supabase
+            .from('chat_participants')
+            .insert({
+                chat_id: chatId,
+                user_id: userId,
+                role: 'member'
+            });
+
+        if (error) throw error;
+    }
+
+    /**
      * Delete a message (only by sender)
      */
     static async deleteMessage(messageId: string): Promise<boolean> {

@@ -3213,5 +3213,56 @@
       "Chennai 603103",
       "#ChennaiIT"
     ]
+  },
+  "600079": {
+    "busStops": [
+      "Sowcarpet",
+      "Elephant Gate",
+      "Mint Street"
+    ],
+    "twitterQueries": [
+      "Sowcarpet Chennai",
+      "Mint Street Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600079"
+    ]
+  },
+  "600080": {
+    "busStops": [
+      "Korattur Bus Stand",
+      "Korattur Railway Station",
+      "Padi"
+    ],
+    "twitterQueries": [
+      "Korattur Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600080"
+    ]
+  },
+  "600082": {
+    "busStops": [
+      "Paper Mills Road",
+      "Peravallur",
+      "Agaram"
+    ],
+    "twitterQueries": [
+      "Peravallur Chennai",
+      "Paper Mills Road Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600082"
+    ]
+  },
+  "600084": {
+    "busStops": [
+      "Kellys",
+      "Balfour Road",
+      "Kilpauk Garden"
+    ],
+    "twitterQueries": [
+      "Kellys Chennai",
+      "Kilpauk Garden Chennai",
+      "#ChennaiTraffic",
+      "Chennai 600084"
+    ]
   }
 }

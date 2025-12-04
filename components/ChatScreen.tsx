@@ -133,12 +133,52 @@ export function ChatScreen() {
     return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Join Group State
+  const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
+  const [publicGroups, setPublicGroups] = useState<any[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [groupSearchQuery, setGroupSearchQuery] = useState('');
+
+  const fetchPublicGroups = async () => {
+    setLoadingGroups(true);
+    try {
+      const groups = await ChatService.getPublicGroups();
+      setPublicGroups(groups);
+    } catch (error) {
+      console.error('Failed to load public groups', error);
+      toast.error('Failed to load groups');
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
+
+  const handleJoinGroup = async (group: any) => {
+    if (!user) return;
+    try {
+      await ChatService.joinGroup(group.id, user.id);
+      toast.success(`Joined ${group.name}!`);
+      setIsJoinGroupOpen(false);
+      loadConversations(); // Refresh chat list
+    } catch (error) {
+      console.error('Failed to join group', error);
+      toast.error('Failed to join group');
+    }
+  };
+
+  const filteredPublicGroups = publicGroups.filter(g =>
+    g.name.toLowerCase().includes(groupSearchQuery.toLowerCase()) ||
+    (g.description && g.description.toLowerCase().includes(groupSearchQuery.toLowerCase()))
+  );
+
   const quickActions = [
     {
       icon: Users,
       label: 'Join Groups',
       color: 'text-blue-600 bg-blue-100',
-      action: () => toast.info('Browse Groups coming soon!')
+      action: () => {
+        setIsJoinGroupOpen(true);
+        fetchPublicGroups();
+      }
     },
     {
       icon: MessageCircle,
@@ -154,105 +194,11 @@ export function ChatScreen() {
     }
   ];
 
-  // Chat Detail View (existing code)
-  if (selectedChat) {
-    // ... (existing chat detail view)
-    return (
-      <div className="bg-gradient-to-b from-orange-50 to-yellow-25 h-full flex flex-col relative">
-        {/* ... (existing chat detail content) */}
+  // ... (rest of the component)
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
-          {loading ? (
-            <>
-              <ChatMessageSkeleton />
-              <ChatMessageSkeleton />
-              <ChatMessageSkeleton />
-              <ChatMessageSkeleton />
-            </>
-          ) : messages.length === 0 ? (
-            <div className="flex items-center justify-center py-8 text-gray-500">
-              <p>No messages yet. Start the conversation!</p>
-            </div>
-          ) : (
-            messages.map((message) => {
-              const isMe = user?.id === message.sender_id;
-
-              return (
-                <div key={message.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-4`}>
-                  <div className={`max-w-[80%] lg:max-w-md px-4 py-3 relative ${isMe
-                    ? 'bg-auto-yellow text-black rounded-l-2xl rounded-tr-2xl rounded-br-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
-                    : 'bg-white text-black rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
-                    }`}>
-                    {!isMe && (
-                      <p className="text-xs font-bold text-temple-red mb-1 uppercase tracking-wider">
-                        {message.profiles?.full_name || 'User'}
-                      </p>
-                    )}
-                    <p className={`text-sm font-medium leading-relaxed ${isMe ? 'text-black' : 'text-gray-900'}`}>
-                      {message.content}
-                    </p>
-                    <p className={`text-[10px] mt-1 font-bold text-right ${isMe ? 'text-black/60' : 'text-gray-400'}`}>
-                      {formatTime(message.created_at)}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Message Input (existing code) */}
-        <div className="bg-white/95 backdrop-blur-sm border-t border-orange-100 p-4">
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setShowTamilKeyboard(!showTamilKeyboard)}
-              variant="outline"
-              size="sm"
-              className={`border-orange-200 ${showTamilKeyboard ? 'bg-orange-100 text-orange-700' : ''}`}
-            >
-              <Keyboard className="w-4 h-4" />
-            </Button>
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message... • உங்கள் message-ஐ type பண்ணுங்க..."
-              className="flex-1"
-              onKeyPress={(e) => e.key === 'Enter' && !sending && sendMessage()}
-              disabled={!user || sending}
-            />
-            <Button
-              onClick={sendMessage}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={!newMessage.trim() || !user || sending}
-            >
-              {sending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
-          {!user && (
-            <p className="text-xs text-gray-500 mt-2">Sign in to send messages</p>
-          )}
-        </div>
-
-        {/* Tamil Keyboard */}
-        <TamilKeyboard
-          onTextChange={setNewMessage}
-          currentText={newMessage}
-          isVisible={showTamilKeyboard}
-          onToggle={() => setShowTamilKeyboard(!showTamilKeyboard)}
-        />
-      </div>
-    );
-  }
-
-  // Conversations List View
   return (
     <div className="bg-gradient-to-b from-orange-50 to-yellow-25 min-h-screen relative">
-      {/* Chat conversations background */}
+      {/* ... (existing background) */}
       <div className="fixed inset-0 opacity-15 md:opacity-10 pointer-events-none">
         <img
           src="/assets/bg_community.png"
@@ -329,7 +275,7 @@ export function ChatScreen() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-medium text-gray-900 truncate">{conversation.name || 'Unnamed Chat'}</h3>
-                          {conversation.is_public && ( // Changed from isOfficial to is_public for now
+                          {conversation.is_public && (
                             <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
                               Public
                             </Badge>
@@ -361,6 +307,46 @@ export function ChatScreen() {
           </div>
         </div>
       </div>
+
+      {/* Join Group Dialog */}
+      <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Join Community Groups</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <Input
+              placeholder="Search groups (e.g. Anna Nagar)"
+              value={groupSearchQuery}
+              onChange={(e) => setGroupSearchQuery(e.target.value)}
+            />
+
+            {loadingGroups ? (
+              <div className="text-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin mx-auto text-orange-500" />
+              </div>
+            ) : filteredPublicGroups.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No public groups found.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredPublicGroups.map(group => (
+                  <div key={group.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div>
+                      <h4 className="font-bold text-sm">{group.name}</h4>
+                      <p className="text-xs text-gray-500">{group.description}</p>
+                    </div>
+                    <Button size="sm" onClick={() => handleJoinGroup(group)} className="bg-orange-500 text-white">
+                      Join
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Group Dialog */}
       <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>

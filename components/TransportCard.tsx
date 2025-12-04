@@ -53,6 +53,13 @@ export default function TransportCard({ pincode }: TransportCardProps) {
                         Bus Stops
                     </TabsTrigger>
                     <TabsTrigger
+                        value="metro"
+                        className="rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-green-600 font-bold border-r-2 border-black last:border-r-0"
+                    >
+                        <Train className="w-4 h-4 mr-2" />
+                        Metro
+                    </TabsTrigger>
+                    <TabsTrigger
                         value="train"
                         className="rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-orange-600 font-bold"
                     >

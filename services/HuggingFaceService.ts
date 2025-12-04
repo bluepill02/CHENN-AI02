@@ -1,4 +1,14 @@
-const HF_API_KEY = import.meta.env.VITE_HUGGING_FACE_API_KEY;
+const getEnv = (key: string) => {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+        return import.meta.env[key];
+    }
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env[key];
+    }
+    return '';
+};
+
+const HF_API_KEY = getEnv('VITE_HUGGING_FACE_API_KEY');
 
 // Tool-use optimized models (recommended)
 const HF_TOOL_USE_MODELS = {

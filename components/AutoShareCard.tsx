@@ -10,6 +10,8 @@ import { Clock, Users, Loader2, Edit2, Trash2, Phone, MessageCircle, Car, Bike }
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { CustomIcon } from "./CustomIcons";
+import { useLanguage } from "../services/LanguageService";
+import { AiService } from "../services/AiService";
 
 interface AutoShareCardProps {
   pincode: string;
@@ -17,11 +19,41 @@ interface AutoShareCardProps {
 
 export default function AutoShareCard({ pincode }: AutoShareCardProps) {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const [posts, setPosts] = useState<AutoSharePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<AutoSharePost | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [translatedContent, setTranslatedContent] = useState<Record<string, { from: string, to: string, notes: string }>>({});
+
+  useEffect(() => {
+    const translateContent = async () => {
+      if (language === 'en') {
+        setTranslatedContent({});
+        return;
+      }
+
+      const newTranslations: Record<string, { from: string, to: string, notes: string }> = {};
+
+      await Promise.all(posts.map(async (post) => {
+        try {
+          const [from, to, notes] = await Promise.all([
+            AiService.translate(post.from_location, language),
+            AiService.translate(post.to_location, language),
+            post.notes ? AiService.translate(post.notes, language) : Promise.resolve('')
+          ]);
+          newTranslations[post.id] = { from, to, notes };
+        } catch (error) {
+          console.error(`Failed to translate post ${post.id}:`, error);
+        }
+      }));
+
+      setTranslatedContent(newTranslations);
+    };
+
+    translateContent();
+  }, [language, posts]);
 
   // Form fields
   const [fromLocation, setFromLocation] = useState("");
@@ -451,9 +483,13 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                 <div className="mb-3 bg-green-50/50 p-2 rounded-lg border border-green-100">
                   <div className="flex items-center gap-2 text-sm">
                     <CustomIcon icon="LocationPin" className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    <span className="font-semibold truncate text-gray-800">{post.from_location}</span>
+                    <span className="font-semibold truncate text-gray-800">
+                      {translatedContent[post.id]?.from || post.from_location}
+                    </span>
                     <span className="text-green-400 font-bold">→</span>
-                    <span className="font-semibold truncate text-gray-800">{post.to_location}</span>
+                    <span className="font-semibold truncate text-gray-800">
+                      {translatedContent[post.id]?.to || post.to_location}
+                    </span>
                   </div>
                 </div>
 
@@ -468,7 +504,7 @@ export default function AutoShareCard({ pincode }: AutoShareCardProps) {
                 {/* Notes */}
                 {cleanNotes && (
                   <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 mb-3 italic">
-                    "{cleanNotes}"
+                    "{translatedContent[post.id]?.notes || cleanNotes}"
                   </div>
                 )}
 

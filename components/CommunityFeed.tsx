@@ -34,7 +34,8 @@ import {
   AnimatedShareButton,
   PostImageGallery,
 } from './FeedAnimationComponents';
-import { WeatherService, WeatherData } from '../services/WeatherService';
+import { WeatherData } from '../services/WeatherService';
+import { LiveDataService } from '../services/LiveDataService';
 
 interface CommunityFeedProps {
   userLocation?: any;
@@ -44,7 +45,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const { currentLocation } = useLocation();
   const { } = useExternalData();
-  const { } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
 
   // SEO Data
@@ -62,6 +63,13 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [liveUpdate, setLiveUpdate] = useState<string>('');
 
+  // Comments State
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+
   // AI Summarization State
   const [summaries, setSummaries] = useState<Record<string, string>>({});
   const [summarizing, setSummarizing] = useState<Record<string, boolean>>({});
@@ -71,33 +79,88 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   const activePincode = activeLocation?.pincode || '600004';
 
   const [activeView, setActiveView] = useState<'feed' | 'auto-share' | 'food-hunt' | 'commute'>('feed');
+  const [translatedPosts, setTranslatedPosts] = useState<Record<string, string>>({});
+
+  // Translate posts when language changes
+  useEffect(() => {
+    const translatePosts = async () => {
+      if (language === 'en') {
+        setTranslatedPosts({});
+        return;
+      }
+
+      const newTranslations: Record<string, string> = {};
+      // Translate visible posts
+      await Promise.all(posts.map(async (post) => {
+        try {
+          // Skip if already translated (optimization could be better but this is simple)
+          const translated = await AiService.translate(post.content, language);
+          newTranslations[post.id] = translated;
+        } catch (error) {
+          console.error(`Failed to translate post ${post.id}:`, error);
+        }
+      }));
+
+      setTranslatedPosts(newTranslations);
+    };
+
+    translatePosts();
+  }, [language, posts]);
+
+  const [translatedComments, setTranslatedComments] = useState<Record<string, string>>({});
+
+  // Translate comments when loaded or language changes
+  useEffect(() => {
+    const translateComments = async () => {
+      if (language === 'en' || comments.length === 0) {
+        setTranslatedComments({});
+        return;
+      }
+
+      const newTranslations: Record<string, string> = {};
+      await Promise.all(comments.map(async (comment) => {
+        try {
+          const translated = await AiService.translate(comment.content, language);
+          newTranslations[comment.id] = translated;
+        } catch (error) {
+          console.error(`Failed to translate comment ${comment.id}:`, error);
+        }
+      }));
+
+      setTranslatedComments(newTranslations);
+    };
+
+    translateComments();
+  }, [language, comments]);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(false);
 
-  // Story highlights data
   // Story highlights data
   const storyHighlights: {
     id: number;
     image?: string;
     icon?: keyof typeof ChennaiCustomIcons;
     title: string;
+    translationKey: string;
     isNew: boolean;
   }[] = [
-      { id: 1, image: '/assets/icon_auto.png', title: 'Auto Share', isNew: true },
-      { id: 2, image: '/assets/icon_food.png', title: 'Food Hunt', isNew: true },
-      { id: 3, image: '/assets/icon_bus.png', title: 'Commute', isNew: true },
-      { id: 4, image: '/assets/hero_welcome.png', title: 'Chennai Gethu', isNew: false },
-      { id: 5, image: '/assets/icon_info.png', title: 'Info', isNew: false },
+      { id: 1, image: '/assets/icon_auto.png', title: 'Auto Share', translationKey: 'story.auto', isNew: true },
+      { id: 2, image: '/assets/icon_food.png', title: 'Food Hunt', translationKey: 'story.food', isNew: true },
+      { id: 3, image: '/assets/icon_bus.png', title: 'Commute', translationKey: 'story.commute', isNew: true },
+      { id: 4, image: '/assets/hero_welcome.png', title: 'Chennai Gethu', translationKey: 'story.gethu', isNew: false },
+      { id: 5, image: '/assets/icon_info.png', title: 'Info', translationKey: 'story.info', isNew: false },
     ];
+
+  const [feedFilter, setFeedFilter] = useState<'all' | 'local'>('all');
 
   // Fetch posts and weather
   useEffect(() => {
     fetchPosts();
     fetchWeather();
-  }, [activeLocation]);
+  }, [activeLocation, feedFilter]); // Refetch when filter changes
 
-  const handleStoryClick = async (title: string) => {
-    if (title === 'Info') {
+  const handleStoryClick = async (story: typeof storyHighlights[0]) => {
+    if (story.title === 'Info') {
       setIsInfoDialogOpen(true);
       if (!liveUpdate) {
         setLoadingInfo(true);
@@ -106,31 +169,70 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
         setLoadingInfo(false);
       }
       return;
-    } else if (title === 'Auto Share') {
+    } else if (story.title === 'Auto Share') {
       setActiveView('auto-share');
-    } else if (title === 'Food Hunt') {
+    } else if (story.title === 'Food Hunt') {
       setActiveView('food-hunt');
-    } else if (title === 'Commute') {
+    } else if (story.title === 'Commute') {
       setActiveView('commute');
-    } else if (title === 'Chennai Gethu') {
+    } else if (story.title === 'Chennai Gethu') {
       window.location.href = '/chennai-gethu';
     } else {
-      toast.info(`${title} coming soon!`);
+      toast.info(`${t(story.translationKey)} coming soon!`);
     }
   };
 
   const fetchWeather = async () => {
-    if (activeLocation?.latitude && activeLocation?.longitude) {
-      const data = await WeatherService.getWeather(activeLocation.latitude, activeLocation.longitude);
-      setWeather(data);
+    const area = activeLocation?.area || 'Chennai';
+
+    // Timeout to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Weather fetch timeout')), 8000)
+    );
+
+    try {
+      // Race between fetch and timeout
+      const data = await Promise.race([
+        LiveDataService.getWeather(area),
+        timeoutPromise
+      ]) as any;
+
+      // Map condition to emoji
+      let icon = '☀️';
+      const condition = (data.condition || '').toLowerCase();
+      if (condition.includes('cloud')) icon = '☁️';
+      if (condition.includes('rain') || condition.includes('drizzle')) icon = '🌧️';
+      if (condition.includes('storm') || condition.includes('thunder')) icon = '⛈️';
+      if (condition.includes('snow')) icon = '❄️';
+      if (condition.includes('fog') || condition.includes('mist')) icon = '🌫️';
+      if (condition.includes('clear')) icon = '☀️';
+      if (condition.includes('night')) icon = '🌙';
+
+      setWeather({
+        temperature: data.temp || 30,
+        humidity: data.humidity || 70,
+        windSpeed: 0,
+        condition: data.condition || 'Sunny',
+        icon: icon
+      });
+    } catch (error) {
+      console.error('Failed to fetch weather:', error);
+      // Fallback to default weather on error/timeout
+      setWeather({
+        temperature: 30,
+        humidity: 75,
+        windSpeed: 0,
+        condition: 'Sunny',
+        icon: '☀️'
+      });
     }
   };
 
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      // Pass the area to filter posts by location
-      const area = activeLocation?.area;
+      // Pass the area to filter posts by location if 'local' is selected
+      const area = feedFilter === 'local' ? activeLocation?.area : undefined;
       const data = await PostService.getPosts(area);
       setPosts(data);
     } catch (error) {
@@ -141,6 +243,8 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     }
   };
 
+
+
   const handleRefresh = async () => {
     await fetchPosts();
     toast.success('Feed refreshed! 🎉');
@@ -148,23 +252,26 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
 
   const handleCreatePost = async () => {
     if (!user) {
-      toast.error('Please sign in to post');
+      toast.error('Please sign in to post!');
       return;
     }
+
     if (!newPostContent.trim()) return;
 
     setIsPosting(true);
     try {
-      const area = activeLocation?.area || 'Chennai';
-      const category = 'general';
-
-      const newPost = await PostService.createPost(newPostContent, category, area, user.id);
+      const newPost = await PostService.createPost(
+        newPostContent,
+        'General',
+        activeLocation?.area || 'Chennai',
+        user.id
+      );
 
       if (newPost) {
         setPosts([newPost, ...posts]);
         setNewPostContent('');
         setIsPostDialogOpen(false);
-        toast.success('Post created successfully! 🎉');
+        toast.success('Post created successfully!');
       }
     } catch (error) {
       console.error('Failed to create post', error);
@@ -174,32 +281,30 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     }
   };
 
-  // Comments State
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [comments, setComments] = useState<any[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [loadingComments, setLoadingComments] = useState(false);
-
   const handleLike = async (postId: string) => {
     if (!user) {
-      toast.error('Please sign in to like posts');
+      toast.error('Please sign in to like posts!');
       return;
     }
-    try {
-      // Optimistic update
-      setPosts(posts.map(p =>
-        p.id === postId ? {
+
+    // Optimistic update
+    setPosts(posts.map(p => {
+      if (p.id === postId) {
+        return {
           ...p,
           likes: (p.is_liked_by_user ? p.likes - 1 : p.likes + 1),
           is_liked_by_user: !p.is_liked_by_user
-        } : p
-      ));
+        };
+      }
+      return p;
+    }));
 
+    try {
       await PostService.likePost(postId, user.id);
     } catch (error) {
-      console.error('Failed to like post', error);
-      fetchPosts(); // Revert on error
+      console.error('Failed to toggle like', error);
+      // Revert on error
+      fetchPosts();
     }
   };
 
@@ -211,7 +316,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
       const data = await PostService.getComments(postId);
       setComments(data);
     } catch (error) {
-      console.error('Failed to load comments', error);
+      console.error('Failed to fetch comments', error);
       toast.error('Failed to load comments');
     } finally {
       setLoadingComments(false);
@@ -222,16 +327,18 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     if (!user || !selectedPostId || !newComment.trim()) return;
 
     try {
-      const comment = await PostService.addComment(selectedPostId, user.id, newComment.trim());
-      setComments([...comments, comment]);
-      setNewComment('');
+      const comment = await PostService.addComment(selectedPostId, user.id, newComment);
+      if (comment) {
+        setComments([...comments, comment]);
+        setNewComment('');
 
-      // Update comment count in post list
-      setPosts(posts.map(p =>
-        p.id === selectedPostId ? { ...p, comments_count: p.comments_count + 1 } : p
-      ));
-
-      toast.success('Comment added!');
+        // Update comment count in post list
+        setPosts(posts.map(p =>
+          p.id === selectedPostId
+            ? { ...p, comments_count: (p.comments_count || 0) + 1 }
+            : p
+        ));
+      }
     } catch (error) {
       console.error('Failed to add comment', error);
       toast.error('Failed to add comment');
@@ -239,6 +346,8 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
   };
 
   const handleSummarize = async (postId: string, content: string) => {
+    if (summaries[postId]) return; // Already summarized
+
     setSummarizing(prev => ({ ...prev, [postId]: true }));
     try {
       const summary = await AiService.summarizePost(content);
@@ -251,16 +360,17 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
     }
   };
 
-  const handleShare = (post: Post) => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Check out this post on Chennai Community App',
+  const handleShare = async (post: Post) => {
+    try {
+      await navigator.share({
+        title: `Post by ${post.profiles?.full_name}`,
         text: post.content,
         url: window.location.href
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(`${window.location.href}`);
-      toast.success('Link copied to clipboard!');
+      });
+    } catch (error) {
+      console.log('Share cancelled or not supported');
+      toast.info('Link copied to clipboard!');
+      navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
     }
   };
 
@@ -281,12 +391,12 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
-                  Chennai Community
+                  {t('app.name')}
                 </span>
               </div>
               <h1 className="text-3xl font-display font-bold text-white drop-shadow-md flex items-center gap-2">
                 <img src="/assets/app_logo.png" alt="Logo" className="w-8 h-8 rounded-full border-2 border-white/20" />
-                Namma Ooru <span className="animate-pulse">🧡</span>
+                {t('app.title')} <span className="animate-pulse">🧡</span>
               </h1>
             </div>
             <LanguageToggle />
@@ -306,8 +416,32 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                   <span className="font-medium text-sm">{weather.temperature}°C</span>
                 </>
               ) : (
-                <span className="text-xs opacity-70">Loading weather...</span>
+                <span className="text-xs opacity-70">{t('weather.loading')}</span>
               )}
+            </div>
+          </div>
+
+          {/* Feed Filter Toggle */}
+          <div className="flex justify-center mt-4 relative z-10">
+            <div className="bg-black/20 backdrop-blur-md p-1 rounded-full flex gap-1 border border-white/10">
+              <button
+                onClick={() => setFeedFilter('all')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${feedFilter === 'all'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-white/80 hover:bg-white/10'
+                  }`}
+              >
+                {t('feed.filter.all')}
+              </button>
+              <button
+                onClick={() => setFeedFilter('local')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${feedFilter === 'local'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-white/80 hover:bg-white/10'
+                  }`}
+              >
+                {t('feed.filter.local')}
+              </button>
             </div>
           </div>
         </div>
@@ -319,7 +453,8 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               <StoryHighlight
                 key={story.id}
                 {...story}
-                onClick={() => handleStoryClick(story.title)}
+                title={t(story.translationKey)}
+                onClick={() => handleStoryClick(story)}
               />
             ))}
           </div>
@@ -374,7 +509,9 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
 
                               {/* Post Content */}
                               <div className="px-4 pb-2">
-                                <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                                <p className="text-gray-800 leading-relaxed text-[15px]">
+                                  {translatedPosts[post.id] || post.content}
+                                </p>
 
                                 {/* AI Summary */}
                                 {summaries[post.id] && (
@@ -385,7 +522,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                                   >
                                     <div className="flex items-center gap-2 mb-1 font-bold text-xs uppercase tracking-wider">
                                       <CustomIcon icon="Sparkles" className="w-3 h-3" />
-                                      AI Summary
+                                      {t('ai.summary')}
                                     </div>
                                     {summaries[post.id]}
                                   </motion.div>
@@ -406,7 +543,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                                     isLiked={post.is_liked_by_user || false}
                                     count={post.likes}
                                     onClick={() => handleLike(post.id)}
-                                    label="Podu Macha"
+                                    label={t('feed.like_action')}
                                   />
                                   <AnimatedCommentButton
                                     count={post.comments_count}
@@ -424,7 +561,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                                     ) : (
                                       <Send className="w-4 h-4" />
                                     )}
-                                    <span className="text-sm hidden sm:inline font-medium">AI Summary</span>
+                                    <span className="text-sm hidden sm:inline font-medium">{t('ai.summarize')}</span>
                                   </motion.button>
                                 </div>
                                 <AnimatedShareButton onClick={() => handleShare(post)} />
@@ -449,7 +586,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Feed
+              {t('feed.back')}
             </Button>
             <AutoShareCard pincode={activePincode} />
           </div>
@@ -463,7 +600,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Feed
+              {t('feed.back')}
             </Button>
             <FoodHuntCard pincode={activePincode} />
           </div>
@@ -477,7 +614,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
               className="mb-4 text-orange-600 hover:text-orange-700 hover:bg-orange-50 -ml-2"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Feed
+              {t('feed.back')}
             </Button>
             <TransportCard pincode={activePincode} />
           </div>
@@ -495,12 +632,12 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             <DialogHeader>
               <DialogTitle className="text-[#4B1E1E] flex items-center gap-2 text-xl font-bold">
                 <CustomIcon icon="Sparkles" className="w-6 h-6 text-orange-500" />
-                Create New Post
+                {t('post.create.title')}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <Textarea
-                placeholder="Share what's happening in your neighborhood... 🏘️"
+                placeholder={t('post.create.placeholder')}
                 className="min-h-[120px] border-orange-200 focus-visible:ring-orange-400 bg-white rounded-xl resize-none"
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
@@ -511,7 +648,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                   onClick={() => setIsPostDialogOpen(false)}
                   className="border-orange-200 text-orange-700 hover:bg-orange-50 rounded-xl"
                 >
-                  Cancel
+                  {t('post.create.cancel')}
                 </Button>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
@@ -522,12 +659,12 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                     {isPosting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Posting...
+                        {t('post.create.posting')}
                       </>
                     ) : (
                       <>
                         <CustomIcon icon="Sparkles" className="w-4 h-4 mr-2 text-white" />
-                        Post 🚀
+                        {t('post.create.submit')}
                       </>
                     )}
                   </Button>
@@ -542,7 +679,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
           <DialogContent className="sm:max-w-[500px] h-[80vh] flex flex-col p-0 gap-0 bg-[#fffdf5] overflow-hidden rounded-2xl">
             <div className="p-4 border-b border-orange-100 bg-white/50 backdrop-blur-sm">
               <DialogTitle className="flex items-center gap-2">
-                <span className="text-xl">💬</span> Comments
+                <span className="text-xl">💬</span> {t('comments.title')}
               </DialogTitle>
             </div>
 
@@ -553,7 +690,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                 </div>
               ) : comments.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
-                  No comments yet. Be the first!
+                  {t('comments.empty')}
                 </div>
               ) : (
                 comments.map((comment) => (
@@ -568,11 +705,11 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
                       )}
                     </Avatar>
                     <div className="flex-1 bg-white p-3 rounded-2xl rounded-tl-none border border-orange-50 shadow-sm">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold text-gray-900">{comment.profiles?.full_name || 'User'}</span>
+                      <div className="flex justify-between items-start">
+                        <span className="font-bold text-sm text-[#4B1E1E]">{comment.profiles?.full_name || 'Anonymous'}</span>
                         <span className="text-[10px] text-gray-400">{new Date(comment.created_at).toLocaleDateString()}</span>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>
+                      <p className="text-sm text-gray-700 mt-1">{translatedComments[comment.id] || comment.content}</p>
                     </div>
                   </div>
                 ))
@@ -582,7 +719,7 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             <div className="p-3 bg-white border-t border-orange-100">
               <div className="flex gap-2">
                 <Textarea
-                  placeholder="Write a comment..."
+                  placeholder={t('comments.placeholder')}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="min-h-[40px] max-h-[100px] resize-none border-orange-200 focus-visible:ring-orange-400"
@@ -606,22 +743,22 @@ export function CommunityFeed({ userLocation }: CommunityFeedProps) {
             <DialogHeader>
               <DialogTitle className="text-[#4B1E1E] flex items-center gap-2 text-xl font-bold">
                 <CustomIcon icon="Sparkles" className="w-6 h-6 text-orange-500" />
-                Live Updates ({activeLocation?.area || 'Chennai'})
+                {t('live.title')} ({activeLocation?.area || 'Chennai'})
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
               {loadingInfo ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                  <p className="text-sm text-gray-500">Fetching latest updates...</p>
+                  <p className="text-sm text-gray-500">{t('live.loading')}</p>
                 </div>
               ) : (
                 <div className="bg-orange-50 p-4 rounded-xl border border-orange-100">
                   <p className="text-gray-800 leading-relaxed whitespace-pre-wrap font-medium">
-                    {liveUpdate || "No updates available at the moment. Stay safe! 🙏"}
+                    {liveUpdate || t('live.empty')}
                   </p>
                   <div className="mt-2 text-[10px] text-gray-400 text-right">
-                    Powered by Gemini ⚡
+                    {t('live.powered')}
                   </div>
                 </div>
               )}

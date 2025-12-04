@@ -1,6 +1,16 @@
-const AZURE_ENDPOINT = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
-const AZURE_API_KEY = import.meta.env.VITE_AZURE_OPENAI_KEY;
-const AZURE_DEPLOYMENT = import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT;
+const getEnv = (key: string) => {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+        return import.meta.env[key];
+    }
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env[key];
+    }
+    return '';
+};
+
+const AZURE_ENDPOINT = getEnv('VITE_AZURE_OPENAI_ENDPOINT');
+const AZURE_API_KEY = getEnv('VITE_AZURE_OPENAI_KEY');
+const AZURE_DEPLOYMENT = getEnv('VITE_AZURE_OPENAI_DEPLOYMENT');
 
 export const AzureOpenAIService = {
     async chat(message: string, systemPrompt: string, useWebSearch = false): Promise<string> {

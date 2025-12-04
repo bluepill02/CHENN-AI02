@@ -67,6 +67,7 @@
             "@vercel/node": "^5.5.12",
             "@vitejs/plugin-react-swc": "^3.10.2",
             "autoprefixer": "^10.4.22",
+            "dotenv": "^17.2.3",
             "jsdom": "^27.2.0",
             "postcss": "^8.5.6",
             "tailwindcss": "^3.4.18",

@@ -1,24 +1,9 @@
-import pincodeStops from '../data/pincodeStops.json';
-import cmrlTimetable from '../data/cmrlTimetable.json';
 
-export interface TransportData {
-    busStops: string[];
-    twitterQueries: string[];
-    popularRoutes?: string[];
-    metroStation?: {
-        name: string;
-        line: 'Blue Line' | 'Green Line' | 'Inter-Corridor';
-        distance?: string; // Approximate
-    };
-    trainStation?: {
-        name: string;
-        line: 'South Line' | 'North Line' | 'West Line' | 'MRTS';
-    };
-}
+import pincodeStops from './data/pincodeStops.json';
 
-// Mapping of Pincode to nearest Metro Station
-// Mapping of Pincode to nearest Metro Station
-const PINCODE_METRO_MAP: Record<string, { name: string; line: 'Blue Line' | 'Green Line' | 'Inter-Corridor' }> = {
+// Mock the maps from TransportService since we can't import TS directly in this simple script context easily without compilation
+// I will copy the maps from TransportService.ts manually for this check
+const PINCODE_METRO_MAP: Record<string, any> = {
     "600001": { "name": "Mannadi", "line": "Blue Line" },
     "600003": { "name": "Central", "line": "Blue Line" },
     "600005": { "name": "LIC", "line": "Blue Line" },
@@ -57,8 +42,7 @@ const PINCODE_METRO_MAP: Record<string, { name: string; line: 'Blue Line' | 'Gre
     "600218": { "name": "Ashok Nagar", "line": "Green Line" }
 };
 
-// Mapping of Pincode to nearest Suburban/MRTS Station
-const PINCODE_TRAIN_MAP: Record<string, { name: string; line: 'South Line' | 'North Line' | 'West Line' | 'MRTS' }> = {
+const PINCODE_TRAIN_MAP: Record<string, any> = {
     "600002": { "name": "Chintadripet", "line": "MRTS" },
     "600003": { "name": "Park", "line": "South Line" },
     "600004": { "name": "Mylapore", "line": "MRTS" },
@@ -135,33 +119,40 @@ const PINCODE_TRAIN_MAP: Record<string, { name: string; line: 'South Line' | 'No
     "600216": { "name": "Korattur", "line": "West Line" }
 };
 
-export const TransportService = {
-    getTransportData(pincode: string): TransportData | null {
-        const busData = (pincodeStops as any)[pincode];
-        const metroData = PINCODE_METRO_MAP[pincode];
-        const trainData = PINCODE_TRAIN_MAP[pincode];
+const busData = pincodeStops as Record<string, any>;
 
-        if (!busData && !metroData && !trainData) return null;
+const missingData: string[] = [];
+const partialData: string[] = [];
+const fullData: string[] = [];
 
-        return {
-            busStops: busData?.busStops || [],
-            twitterQueries: busData?.twitterQueries || [],
-            popularRoutes: busData?.popularRoutes || [],
-            metroStation: metroData,
-            trainStation: trainData
-        };
-    },
+// Check range 600001 to 600130 (common Chennai range)
+for (let i = 1; i <= 130; i++) {
+    const pincode = `600${i.toString().padStart(3, '0')}`;
 
-    getMetroTimetable(line: 'Blue Line' | 'Green Line' | 'Inter-Corridor', dayType: 'weekdays' | 'saturday' | 'sundayAndHolidays' = 'weekdays') {
-        const schedule = (cmrlTimetable as any)[dayType];
-        if (!schedule) return null;
+    const hasBus = !!busData[pincode];
+    const hasMetro = !!PINCODE_METRO_MAP[pincode];
+    const hasTrain = !!PINCODE_TRAIN_MAP[pincode];
 
-        // Normalize line key
-        let lineKey = '';
-        if (line === 'Blue Line') lineKey = 'blueLine';
-        else if (line === 'Green Line') lineKey = 'greenLine';
-        else if (line === 'Inter-Corridor') lineKey = 'interCorridor';
-
-        return schedule[lineKey] || null;
+    if (hasBus && hasMetro && hasTrain) {
+        fullData.push(pincode);
+    } else if (hasBus || hasMetro || hasTrain) {
+        partialData.push(pincode);
+    } else {
+        missingData.push(pincode);
     }
-};
+}
+
+import * as fs from 'fs';
+
+// ... (previous code)
+
+const report = `
+Total Pincodes Checked: 130
+Full Coverage (Bus + Metro + Train): ${fullData.length}
+Partial Coverage: ${partialData.length}
+Missing Data: ${missingData.length}
+Missing Pincodes: ${missingData.join(', ')}
+`;
+
+fs.writeFileSync('coverage_report.txt', report);
+console.log('Report written to coverage_report.txt');

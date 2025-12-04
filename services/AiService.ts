@@ -1,8 +1,19 @@
 import { AzureOpenAIService } from './AzureOpenAIService';
 import { HuggingFaceService } from './HuggingFaceService';
 import { GeminiService } from './GeminiService';
+import { AzureTranslationService } from './AzureTranslationService';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const getEnv = (key: string) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  return '';
+};
+
+const GROQ_API_KEY = getEnv('VITE_GROQ_API_KEY');
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export interface AiResponse {
@@ -143,5 +154,26 @@ export const AiService = {
       console.error('Failed to get live updates via Gemini:', error);
       return 'Live updates currently unavailable. Stay safe, Chennai! 🙏';
     }
+  },
+
+  /**
+   * Get Real-Time Data using Gemini Grounding
+   * Used by LiveDataService for Weather, Traffic, etc.
+   */
+  async getRealTimeData(prompt: string): Promise<AiResponse> {
+    try {
+      const content = await GeminiService.getRealTimeData(prompt);
+      return { content };
+    } catch (error) {
+      console.error('Failed to get real-time data via Gemini:', error);
+      return { content: '', error: 'Failed to fetch real-time data' };
+    }
+  },
+
+  /**
+   * Translate text using Azure AI Services
+   */
+  async translate(text: string, toLanguage: string): Promise<string> {
+    return AzureTranslationService.translate(text, toLanguage);
   }
 };

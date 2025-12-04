@@ -1,7 +1,16 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SearXNGService } from './SearXNGService';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const getEnv = (key: string) => {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+        return import.meta.env[key];
+    }
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env[key];
+    }
+    return '';
+};
+
+const GEMINI_API_KEY = getEnv('VITE_GEMINI_API_KEY');
 const CACHE_KEY = 'chennai_live_updates_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -17,7 +26,7 @@ export interface LiveUpdateResponse {
 
 export const GeminiService = {
     /**
-     * Get live updates for a specific location in Chennai
+     * Get live updates for a specific location in Chennai using Google Grounding
      */
     async getLiveUpdates(location: string = 'Chennai'): Promise<LiveUpdateResponse> {
         // 1. Check Cache
@@ -38,50 +47,30 @@ export const GeminiService = {
         }
 
         try {
-            // 2. Try Fetching Data from SearXNG
-            console.log(`Fetching fresh data for ${location} from SearXNG...`);
-            const [news, weather, traffic, events] = await Promise.allSettled([
-                SearXNGService.getChennaiNews('general', location),
-                SearXNGService.getWeather(location),
-                SearXNGService.getTraffic(location),
-                SearXNGService.searchChennai(`events happening in ${location} today`, { timeRange: 'week' })
-            ]);
+            console.log(`Fetching live updates for ${location} using Gemini Grounding...`);
 
-            const newsText = news.status === 'fulfilled' ? news.value : '';
-            const weatherText = weather.status === 'fulfilled' ? weather.value : '';
-            const trafficText = traffic.status === 'fulfilled' ? traffic.value : '';
-            const eventsText = events.status === 'fulfilled' ? SearXNGService.formatResults(events.value) : '';
+            const model = genAI.getGenerativeModel({
+                model: MODEL_NAME,
+                tools: [{ googleSearch: {} } as any]
+            });
 
-            // Check if we got meaningful data from SearXNG
-            const hasData = newsText.length > 100 || weatherText.length > 50;
+            const prompt = `Find the latest live updates for **${location}, Chennai**, regarding Weather, Traffic, and Breaking News right now. 
+            Summarize it into a single Tanglish (Tamil + English) ticker line with emojis. 
+            Format: "📢 [Weather] | [Traffic] | [News]"
+            Keep it concise and engaging.`;
 
-            if (hasData) {
-                // 3a. Summarize SearXNG Data using Gemini
-                console.log('Summarizing SearXNG data with Gemini...');
-                const summary = await this.summarizeWithGemini(newsText, weatherText, trafficText, eventsText, location);
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text().trim();
 
-                const response: LiveUpdateResponse = {
-                    text: summary,
-                    source: 'gemini-searxng',
-                    timestamp: Date.now()
-                };
+            const liveUpdateResponse: LiveUpdateResponse = {
+                text: text,
+                source: 'gemini-grounding',
+                timestamp: Date.now()
+            };
 
-                this.saveToCache(cacheKey, response);
-                return response;
-            } else {
-                // 3b. Fallback: Gemini Web Search (Grounding)
-                console.warn('SearXNG returned insufficient data. Falling back to Gemini Grounding...');
-                const groundingText = await this.fetchWithGeminiGrounding(location);
-
-                const response: LiveUpdateResponse = {
-                    text: groundingText,
-                    source: 'gemini-grounding',
-                    timestamp: Date.now()
-                };
-
-                this.saveToCache(cacheKey, response);
-                return response;
-            }
+            this.saveToCache(cacheKey, liveUpdateResponse);
+            return liveUpdateResponse;
 
         } catch (error) {
             console.error('GeminiService Error:', error);
@@ -94,51 +83,24 @@ export const GeminiService = {
     },
 
     /**
-     * Summarize raw text data using Gemini
+     * General purpose real-time data fetch using Google Grounding
      */
-    async summarizeWithGemini(news: string, weather: string, traffic: string, events: string, location: string): Promise<string> {
+    async getRealTimeData(prompt: string): Promise<string> {
         if (!genAI) return '';
 
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-        const prompt = `
-        You are a local Chennai news assistant. Summarize the following real-time data for **${location}** into a single, scrolling-ticker style update.
-        
-        Constraints:
-        - Max 2-3 sentences.
-        - Use "Tanglish" (Tamil + English) style.
-        - Include emojis.
-        - **CRITICAL**: Focus strictly on ${location} if data is available. If not, fallback to general Chennai news but mention it's general.
-        - Include: Weather, Traffic, Major News, and any Events.
-        - Format: "📢 [Weather] | [Traffic] | [News/Events]"
-        
-        Data:
-        News: ${news.substring(0, 2000)}
-        Weather: ${weather.substring(0, 500)}
-        Traffic: ${traffic.substring(0, 500)}
-        Events: ${events.substring(0, 500)}
-        `;
+        try {
+            const model = genAI.getGenerativeModel({
+                model: MODEL_NAME,
+                tools: [{ googleSearch: {} } as any]
+            });
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        return response.text().trim();
-    },
-
-    /**
-     * Fetch data using Gemini's built-in Google Search (Grounding)
-     */
-    async fetchWithGeminiGrounding(location: string): Promise<string> {
-        if (!genAI) return '';
-
-        const model = genAI.getGenerativeModel({
-            model: MODEL_NAME,
-            tools: [{ googleSearch: {} } as any]
-        });
-
-        const prompt = `Find the latest live updates for **${location}, Chennai**, regarding Weather, Traffic, and Breaking News right now. Summarize it into a single Tanglish ticker line with emojis. Format: "📢 [Weather] | [Traffic] | [News]"`;
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        return response.text().trim();
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error) {
+            console.error('Gemini Grounding Error:', error);
+            return '';
+        }
     },
 
     /**

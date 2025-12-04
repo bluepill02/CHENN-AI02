@@ -66,52 +66,59 @@ export const LiveDataService = {
     /**
      * Get real-time weather data for a location using AI web search
      */
+    /**
+     * Get real-time weather data for a location using OpenMeteo (Free, No API Key)
+     * This avoids using Gemini limits for constant weather updates.
+     */
     async getWeather(area: string): Promise<WeatherData> {
         const cacheKey = `weather_${area}`;
         const cached = cache.get<WeatherData>(cacheKey);
         if (cached) return cached;
 
         try {
-            const prompt = `Search the web for CURRENT weather in ${area}, Chennai, India RIGHT NOW. 
-        Return ONLY real-time data you find from weather websites.
-        Include: temperature in celsius, weather condition, humidity percentage, and AQI (Air Quality Index).
-        
-        You MUST respond with ONLY a valid JSON object in this exact format (no markdown, no code blocks):
-        {"temp": 32, "condition": "Partly Cloudy", "humidity": 75, "aqi": 85, "forecast": "Clear skies"}`;
+            // Default coordinates for Chennai (can be refined if we have lat/lon for the area)
+            // Ideally we should use the LocationService to get lat/lon for the specific area.
+            // For now, using generic Chennai coords: 13.0827, 80.2707
+            const lat = 13.0827;
+            const lon = 80.2707;
 
-            const response = await AiService.chat(prompt);
+            const response = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`
+            );
 
-            if (response.error || !response.content) {
-                throw new Error('Failed to fetch weather data');
+            if (!response.ok) {
+                throw new Error('OpenMeteo API failed');
             }
 
-            // Clean the response - remove markdown code blocks if present
-            let cleanContent = response.content.trim();
-            cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+            const data = await response.json();
+            const current = data.current;
 
-            // Try to parse JSON from the response
-            const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) {
-                console.error('No JSON found in response:', cleanContent);
-                throw new Error('No JSON data in response');
-            }
-
-            const weatherData = JSON.parse(jsonMatch[0]);
-
-            // Validate the data with defaults
-            const validatedData: WeatherData = {
-                temp: typeof weatherData.temp === 'number' ? weatherData.temp : 30,
-                condition: weatherData.condition || 'Unknown',
-                humidity: typeof weatherData.humidity === 'number' ? weatherData.humidity : 70,
-                aqi: typeof weatherData.aqi === 'number' ? weatherData.aqi : 50,
-                forecast: weatherData.forecast || ''
+            // Map WMO code to condition string
+            const getCondition = (c: number) => {
+                if (c === 0) return 'Clear Sky';
+                if (c <= 3) return 'Partly Cloudy';
+                if (c <= 48) return 'Foggy';
+                if (c <= 67) return 'Rainy';
+                if (c <= 77) return 'Snowy';
+                if (c <= 82) return 'Showers';
+                if (c <= 99) return 'Thunderstorm';
+                return 'Unknown';
             };
 
-            cache.set(cacheKey, validatedData);
-            return validatedData;
+            const weatherData: WeatherData = {
+                temp: Math.round(current.temperature_2m),
+                condition: getCondition(current.weather_code),
+                humidity: current.relative_humidity_2m,
+                aqi: 50, // OpenMeteo basic free tier might not have AQI easily, defaulting
+                forecast: `${getCondition(current.weather_code)} today`
+            };
+
+            cache.set(cacheKey, weatherData);
+            return weatherData;
+
         } catch (error) {
             console.error('Weather fetch error:', error);
-            // Return fallback data instead of throwing
+            // Return fallback data
             return {
                 temp: 30,
                 condition: 'Data unavailable',
@@ -140,7 +147,7 @@ export const LiveDataService = {
         
         Limit to top 3 roads. Status must be one of: heavy, moderate, light`;
 
-            const response = await AiService.chat(prompt);
+            const response = await AiService.getRealTimeData(prompt);
 
             if (response.error || !response.content) {
                 throw new Error('Failed to fetch traffic data');
@@ -200,7 +207,7 @@ export const LiveDataService = {
         Type must be one of: warning, info, success
         Limit to top 3 most relevant alerts.`;
 
-            const response = await AiService.chat(prompt);
+            const response = await AiService.getRealTimeData(prompt);
 
             if (response.error || !response.content) {
                 throw new Error('Failed to fetch alerts data');

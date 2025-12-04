@@ -67,9 +67,9 @@ export class ProfileService {
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', userId);
 
-            // Count reviews given (as a proxy for activity)
-            const { count: reviewsGiven } = await supabase
-                .from('service_reviews')
+            // Count events joined
+            const { count: eventsJoined } = await supabase
+                .from('event_participants')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', userId);
 
@@ -89,7 +89,7 @@ export class ProfileService {
             return {
                 postsCount: postsCount || 0,
                 ridesShared: ridesShared || 0,
-                eventsJoined: reviewsGiven || 0, // Using reviews as a proxy for "Community Actions"
+                eventsJoined: eventsJoined || 0,
                 trustScore
             };
         } catch (error) {
