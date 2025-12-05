@@ -14,6 +14,7 @@ import {
 import { ChennaiCustomIcons } from '../CustomIcons';
 import { PremiumIcon } from '../PremiumIcons';
 import { AuthScreenBackground } from '../BackgroundAnimations';
+import SEO from '../SEO';
 
 type AuthMode = 'signin' | 'signup' | 'magic';
 
@@ -150,6 +151,11 @@ export function AuthScreen() {
 
     return (
         <PageTransition>
+            <SEO
+                title="Connect with Chennai - Events, Jobs & Community"
+                description="Join the Chennai Community App to discover local events, find jobs, get live city updates, and connect with your neighbors. The soul of Chennai, online."
+                canonical="https://chenn-ai.vercel.app/"
+            />
             <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
                 {/* Premium animated background */}
                 <div className="absolute inset-0 z-0">

@@ -1,4 +1,4 @@
-import { ArrowLeft, Zap, MapPin } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { WeatherPanel } from './LiveData/WeatherPanel';
@@ -9,12 +9,19 @@ interface LiveUpdatesScreenProps {
     userLocation?: any;
 }
 
+import SEO from './SEO';
+
 export function LiveUpdatesScreen({ userLocation }: LiveUpdatesScreenProps) {
     const navigate = useNavigate();
     const locationName = userLocation?.area || userLocation?.pincode || 'Chennai';
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 pb-20">
+            <SEO
+                title="Live Chennai Updates - Weather, Traffic & Alerts"
+                description={`Real-time updates for ${locationName}. Weather, traffic status, and emergency alerts powered by Chenn-AI.`}
+                canonical="https://chenn-ai.vercel.app/live"
+            />
             {/* Header - Breaking News Style */}
             <div className="sticky top-0 z-20 bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg border-b-4 border-yellow-400">
                 <div className="p-4 flex items-center gap-3">
