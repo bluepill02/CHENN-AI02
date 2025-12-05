@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chennai-community.app/sitemap.xml
+Sitemap: https://chenn-ai.vercel.app/sitemap.xml
