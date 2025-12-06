@@ -7,7 +7,8 @@ const SITEMAP_PATH = path.join(OUT_DIR, 'sitemap.xml');
 
 // Define your static routes here
 const routes = [
-    { path: '/home', changefreq: 'daily', priority: '1.0' },
+    { path: '/', changefreq: 'daily', priority: '1.0' },
+    { path: '/home', changefreq: 'daily', priority: '0.9' },
     { path: '/services', changefreq: 'weekly', priority: '0.8' },
     { path: '/chennai-gethu', changefreq: 'daily', priority: '0.9' },
     { path: '/live', changefreq: 'always', priority: '0.7' },

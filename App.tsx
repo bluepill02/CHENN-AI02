@@ -86,7 +86,15 @@ function ChennaiGethuScreenWrapper() {
   return <ChennaiGethuScreen userLocation={currentLocation} />;
 }
 
+import { AnalyticsService } from './services/AnalyticsService.ts';
+import { AnalyticsTracker } from './components/AnalyticsTracker.tsx';
+
 export default function App() {
+  // Initialize GA4 on app load
+  useEffect(() => {
+    AnalyticsService.initialize();
+  }, []);
+
   return (
     <ErrorBoundary>
       <HelmetProvider>
@@ -94,6 +102,7 @@ export default function App() {
           <LanguageProvider>
             <LocationProvider>
               <BrowserRouter>
+                <AnalyticsTracker />
                 <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-25 relative overflow-hidden">
                   <div className="relative z-10">
                     <ProtectedRoutes />
